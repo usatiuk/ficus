@@ -1,0 +1,46 @@
+--- gcc-13.2.0/libstdc++-v3/configure	2023-08-21 20:42:16
++++ gcc-13.2.0/libstdc++-v3/configure	2023-08-21 20:42:20
+@@ -71180,21 +71180,7 @@
+ done
+
+
+-  # Check for the fcntl function.
+-  if test -n "${with_target_subdir}"; then
+-     case "${host}" in
+-     *-*-mingw*) have_fcntl=no ;;
+-     *) have_fcntl=yes ;;
+-     esac
+-  else
+-    ac_fn_c_check_func "$LINENO" "fcntl" "ac_cv_func_fcntl"
+-if test "x$ac_cv_func_fcntl" = xyes; then :
+-  have_fcntl=yes
+-else
+   have_fcntl=no
+-fi
+-
+-  fi
+   if test "$have_fcntl" = "yes"; then
+     BACKTRACE_CPPFLAGS="$BACKTRACE_CPPFLAGS -DHAVE_FCNTL=1"
+   fi
+@@ -71211,21 +71197,7 @@
+ _ACEOF
+
+
+-  # Check for getexecname function.
+-  if test -n "${with_target_subdir}"; then
+-     case "${host}" in
+-     *-*-solaris2*) have_getexecname=yes ;;
+-     *) have_getexecname=no ;;
+-     esac
+-  else
+-    ac_fn_c_check_func "$LINENO" "getexecname" "ac_cv_func_getexecname"
+-if test "x$ac_cv_func_getexecname" = xyes; then :
+-  have_getexecname=yes
+-else
+   have_getexecname=no
+-fi
+-
+-  fi
+   if test "$have_getexecname" = "yes"; then
+     BACKTRACE_CPPFLAGS="$BACKTRACE_CPPFLAGS -DHAVE_GETEXECNAME=1"
+   fi
