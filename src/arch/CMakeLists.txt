@@ -1,0 +1,7 @@
+if (CMAKE_CROSSCOMPILING)
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES x86_64)
+        add_subdirectory(./x86)
+    else ()
+        error("Unsupported architecture!")
+    endif ()
+endif ()
