@@ -1,7 +1,6 @@
 
-target_sources(kernel PRIVATE
+target_sources(kernel.elf PRIVATE
         limine_mm.c
-        mutex.c
         task.asm
         tty.c
         kmem.c
@@ -11,7 +10,6 @@ target_sources(kernel PRIVATE
         misc.asm
         limine_fb.c
         idt.c
-        cv.c
         serial.c
         idt.asm
         globals.c
@@ -25,8 +23,8 @@ target_sources(kernel PRIVATE
         gdt.c
         misc.c)
 
-target_include_directories(kernel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(kernel.elf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_options(kernel PRIVATE "SHELL:-T${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
-set_target_properties(kernel PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
+target_link_options(kernel.elf PRIVATE "SHELL:-T${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
+set_target_properties(kernel.elf PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
 
