@@ -28,7 +28,7 @@ fi
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-patch -u -i "$SCRIPT_DIR/gcc-libstdcpp.patch"
+patch -p0 -u -i "$SCRIPT_DIR/gcc-libstdcpp.patch"
 
 export PREFIX="$OS2_ROOT/toolchain/gcc-x86_64-elf-prefix/"
 export TARGET=x86_64-elf
