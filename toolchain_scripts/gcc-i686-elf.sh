@@ -35,7 +35,7 @@ HOMEBREW_LIBS="--with-gmp=/opt/homebrew --with-mpc=/opt/homebrew --with-mpfr=/op
 
 ADDONS=""
 
-if [ ! -z "$USE_BREW_LIBS" ]; then
+if [ ! -z ${USE_BREW_LIBS+x} ]; then
     ADDONS="$HOMEBREW_LIBS $ADDONS"
 fi
 
