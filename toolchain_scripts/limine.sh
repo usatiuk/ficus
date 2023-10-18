@@ -37,7 +37,7 @@ export PREFIX="$OS2_ROOT/toolchain/limine/prefix"
 export PATH="$PREFIX/bin:$PATH"
 
 # fix for old make
-grep -rl "define DEFAULT_VAR =" ../limine-5.20230830.0 | xargs sed -i "" -e 's/define DEFAULT_VAR =/define DEFAULT_VAR/g'
+grep -rl "define DEFAULT_VAR =" ../limine-5.20230830.0 | xargs sed -i.bak -e 's/define DEFAULT_VAR =/define DEFAULT_VAR/g'
 
 ../limine-5.20230830.0/configure --disable-werror --enable-bios-cd --enable-bios --enable-uefi-ia32 --enable-uefi-x86-64 --enable-uefi-cd \
     --prefix="$PREFIX"

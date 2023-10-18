@@ -46,7 +46,7 @@ MULTILIB_OPTIONS += mno-red-zone
 MULTILIB_DIRNAMES += no-red-zone
 EOF
 
-sed -i .bak 's/x86_64-\*-elf\*)/x86_64-\*-elf\*)\n\ttmake_file="\${tmake_file} i386\/t-x86_64-elf"/g' "../gcc-13.2.0/gcc/config.gcc"
+sed -i.bak 's/x86_64-\*-elf\*)/x86_64-\*-elf\*)\n\ttmake_file="\${tmake_file} i386\/t-x86_64-elf"/g' "../gcc-13.2.0/gcc/config.gcc"
 
 ../gcc-13.2.0/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --with-newlib --without-headers --enable-version-specific-runtime-libs $ADDONS
 make -j$(nproc) all-gcc
