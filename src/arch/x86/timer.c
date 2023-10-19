@@ -9,7 +9,6 @@
 
 volatile uint64_t ticks;
 volatile uint64_t micros;
-volatile uint64_t millis;
 
 unsigned read_pit_count(void) {
     unsigned count = 0;
@@ -37,9 +36,10 @@ void set_pit_count(unsigned count) {
 }
 
 // Very rough but I don't care right now
-#define RELOAD_VAL 2
-#define FREQ = (1193182 / (RELOAD_VAL))
-#define MICROS_PER_TICK 1
+// About 1000 HZ freq
+#define RELOAD_VAL 1193
+#define FREQ (1193182 / (RELOAD_VAL))
+#define MICROS_PER_TICK (1000000 / (FREQ))
 
 void init_timer() {
     outb(0x43, 0b00110100);
@@ -50,6 +50,4 @@ void init_timer() {
 void timer_tick() {
     ticks++;
     micros += MICROS_PER_TICK;
-    if (micros % 1000 == 0)
-        millis++;
 }

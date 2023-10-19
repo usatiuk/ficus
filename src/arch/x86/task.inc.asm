@@ -1,5 +1,10 @@
 [BITS 64]
 
+; =!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
+; FIXME: CMake doesn't detect changes to this file!
+; OBJECT_DEPENDS also doesn't seem to work...
+; =!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
+
 ; TODO: This is probably not enough
 %macro pushaq 0
     push rax
@@ -25,8 +30,8 @@
     add rsi, 32
     mov rdi, 0xFFFFFFFFFFFFFFF0
     and rsi, rdi
-
-    fxsave [rsi]
+; TODO: Fix!!
+;    fxsave [rsi]
 
 %endmacro
 %macro popaq 0
@@ -38,7 +43,7 @@
     mov rdi, 0xFFFFFFFFFFFFFFF0
     and rsi, rdi
 
-    fxrstor [rsi]
+;    fxrstor [rsi]
     add rsp, 512
 
     pop r15

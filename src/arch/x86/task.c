@@ -294,28 +294,22 @@ void switch_task(struct task_frame *cur_frame) {
 }
 
 void switch_task_int(struct task_frame *cur_frame) {
-    static uint64_t lastSwitchMicros = 0;
-    uint64_t curMicros = micros;
-
     assert2(!are_interrupts_enabled(), "Switching tasks with enabled interrupts!");
-    if ((curMicros - lastSwitchMicros) > 1) {
-        struct TaskListNode *node = WaitingTasks.cur;
+    struct TaskListNode *node = WaitingTasks.cur;
 
-        while (node) {
-            if (node->task->sleep_until <= curMicros && node->task->state == TS_TO_SLEEP) {
-                assert2(node->task->sleep_until, "Sleeping until 0?");
-                node->task->sleep_until = 0;
-                node->task->state = TS_RUNNING;
-                append_task_node(&NextTasks, pop_front_node(&WaitingTasks));
-                node = WaitingTasks.cur;
-            } else {
-                break;
-            }
+    while (node) {
+        if (node->task->sleep_until <= micros && node->task->state == TS_TO_SLEEP) {
+            assert2(node->task->sleep_until, "Sleeping until 0?");
+            node->task->sleep_until = 0;
+            node->task->state = TS_RUNNING;
+            append_task_node(&NextTasks, pop_front_node(&WaitingTasks));
+            node = WaitingTasks.cur;
+        } else {
+            break;
         }
-
-        switch_task(cur_frame);
-        lastSwitchMicros = curMicros;
     }
+
+    switch_task(cur_frame);
 }
 
 void wait_m_on_self(struct Mutex *m) {

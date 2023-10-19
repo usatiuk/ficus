@@ -9,7 +9,6 @@
 
 extern volatile uint64_t ticks;
 extern volatile uint64_t micros;
-extern volatile uint64_t millis;
 
 void init_timer();
 void timer_tick();
