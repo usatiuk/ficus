@@ -25,13 +25,16 @@
 
     ; Ensure 16-byte alignment
     ; This works as last bunch of bits in fxsave state aren't used
-    sub rsp, 512
+    ; Fxsaved memory needs to be zeroed before!
+    mov rsi, 0x0000000000000000
+    times 64 push rsi
+
     mov rsi, rsp
     add rsi, 32
     mov rdi, 0xFFFFFFFFFFFFFFF0
     and rsi, rdi
-; TODO: Fix!!
-;    fxsave [rsi]
+
+    fxsave64 [rsi]
 
 %endmacro
 %macro popaq 0
@@ -43,7 +46,7 @@
     mov rdi, 0xFFFFFFFFFFFFFFF0
     and rsi, rdi
 
-;    fxrstor [rsi]
+    fxrstor64 [rsi]
     add rsp, 512
 
     pop r15

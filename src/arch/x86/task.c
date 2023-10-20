@@ -175,12 +175,14 @@ struct Task *new_ktask(void(*fn), char *name) {
     new->frame.ip = (uint64_t) fn;
     new->frame.cs = GDTSEL(gdt_code);
     new->frame.ss = GDTSEL(gdt_data);
-    __builtin_ia32_fxsave64((void *) (((uintptr_t) (new->frame.ssestate) + 32) & 0xFFFFFFFFFFFFFFF0));
+    for (int i = 0; i < 512; i++) new->frame.ssestate[i] = 0;
     new->frame.flags = flags();
     new->frame.guard = IDT_GUARD;
     new->addressSpace = KERN_AddressSpace;
     new->state = TS_RUNNING;
     new->mode = TASKMODE_KERN;
+
+    sanity_check_frame(&new->frame);
 
     m_lock(&NewTasks_lock);
     append_task(&NewTasks, new);
