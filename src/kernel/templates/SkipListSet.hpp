@@ -4,7 +4,6 @@
 template<typename K>
 class SkipListSet {
     static constexpr size_t maxL{31};
-    friend SkipListSetTester;
 
 public:
     struct Node {
@@ -56,10 +55,12 @@ private:
     };
 
     static int randomL() {
-        return ffs(rand()) - 1;// NOLINT
+        int ret = __builtin_ffs(rand());
+        assert(ret >= 0);
+        return ret;// NOLINT
     }
 
-    static inline NodeAllocator nodeAllocator;
+    NodeAllocator nodeAllocator;
 
     Node *root;
     Node *endnode;
@@ -301,20 +302,20 @@ public:
         return true;
     }
 
-    void print() const {
-        std::cout << "LIST STATUS" << std::endl;
-
-        for (size_t i = 0; i <= curL; i++) {
-            Node *n = root->next[i];
-            std::cout << "L " << i << ": ";
-            while (n != nullptr && n->next[0]) {
-                std::cout << "GUARD: " << n->end << " KEY: " << n->key << " RANGE: " << n->data
-                          << " <<<<<";
-                n = n->next[i];
-            }
-            std::cout << std::endl;
-        }
-    };
+    //    void print() const {
+    //        std::cout << "LIST STATUS" << std::endl;
+    //
+    //        for (size_t i = 0; i <= curL; i++) {
+    //            Node *n = root->next[i];
+    //            std::cout << "L " << i << ": ";
+    //            while (n != nullptr && n->next[0]) {
+    //                std::cout << "GUARD: " << n->end << " KEY: " << n->key << " RANGE: " << n->data
+    //                          << " <<<<<";
+    //                n = n->next[i];
+    //            }
+    //            std::cout << std::endl;
+    //        }
+    //    };
 };
 
 

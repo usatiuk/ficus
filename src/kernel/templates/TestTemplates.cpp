@@ -6,9 +6,12 @@
 
 
 #include "SkipList.hpp"
+#include "SkipListSet.hpp"
 #include "String.hpp"
 #include "Vector.hpp"
 #include "serial.hpp"
+
+#include "tty.hpp"
 
 //#include "String.hpp"
 //#include "String.hpp"
@@ -122,6 +125,7 @@ public:
         assert(testv1[2] == "H6");
         assert(testv2[2] == "H5");
 
+        all_tty_putstr("Vector tests ok!\n");
         return true;
     }
 };
@@ -141,6 +145,7 @@ public:
         str2 = "abcd";
         assert(str1 <= str2);
 
+        all_tty_putstr("String tests ok!\n");
         return true;
     }
 };
@@ -170,6 +175,37 @@ public:
         test1.add(78, "test78", true);
         assert(test1.find(78)->data == "test78");
 
+        all_tty_putstr("SkipList tests ok!\n");
+        return true;
+    }
+};
+
+class SkipListSetTester {
+public:
+    bool test() {
+        SkipListSet<int> test1;
+
+        test1.add(5, false);
+        test1.add(999, false);
+        test1.add(5, false);
+        test1.add(1, false);
+        test1.add(999, false);
+
+        assert(test1.find(5)->key == 5);
+        assert(test1.find(1)->key == 1);
+        assert(test1.find(999)->key == 999);
+
+        test1.erase(1);
+        assert(test1.find(1)->key != 1);
+        test1.add(87, false);
+        assert(test1.find(87)->key == 87);
+
+        auto p2 = test1.lower_bound_update(78);
+        assert(p2->key == 87);
+        test1.add(78, true);
+        assert(test1.find(78)->key == 78);
+
+        all_tty_putstr("SkipListSet tests ok!\n");
         return true;
     }
 };
@@ -178,6 +214,8 @@ int test_templates() {
 
     SkipListTester SLTester;
     SLTester.test();
+    SkipListSetTester SLSTester;
+    SLSTester.test();
     StringTester stringTester;
     stringTester.test();
     VectorTester vectorTester;
