@@ -130,14 +130,14 @@ void dummy_task() {
     }
 }
 
-extern void (*ctors_begin)();
-extern void (*ctors_end)();
+extern void (*ctors_begin[])();
+extern void (*ctors_end[])();
 
 void kmain() {
     struct tty_funcs serial_tty = {.putchar = write_serial};
     add_tty(serial_tty);
 
-    for (void (*ctor)() = ctors_begin; ctor < ctors_end; ctor++)
+    for (void (**ctor)() = ctors_begin; ctor < ctors_end; ctor++)
         (*ctor)();
 
     init_timer();
