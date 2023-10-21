@@ -5,6 +5,7 @@
 #include "TestTemplates.hpp"
 
 
+#include "PointersCollection.hpp"
 #include "SkipList.hpp"
 #include "SkipListSet.hpp"
 #include "String.hpp"
@@ -13,82 +14,75 @@
 
 #include "tty.hpp"
 
-//#include "String.hpp"
-//#include "String.hpp"
+class SharedPtrTester {
+private:
+    auto getThingy() {
+        return SharedPtr<Vector<String>>(
+                new Vector<String>{"Thingy1", "Thingy2", "Thingy3"});
+    }
 
-//template<typename T>
-//std::string toString(const T &x) {
-//    std::ostringstream oss;
-//    oss << x;
-//    return oss.str();
-//}
-//
-//class SharedPtrTester {
-//private:
-//    auto getThingy() {
-//        return SharedPtr<Vector<String>>(
-//                new Vector<String>{"Thingy1", "Thingy2", "Thingy3"});
-//    }
-//
-//public:
-//    bool test() {
-//        SharedPtr<Vector<String>> test1(
-//                new Vector<String>{"hello1", "hello2", "hello3"});
-//        SharedPtr<Vector<String>> test2(getThingy());
-//        assert((*test2 == Vector<String>{"Thingy1", "Thingy2", "Thingy3"}));
-//        auto test22 = test2;
-//        auto test12 = test1;
-//        test12->emplace_back("hello4");
-//        assert((*test1)[3] == "hello4");
-//        test22->erase(2);
-//        assert(test2->size() == 2);
-//        assert((*test2)[1] == "Thingy2");
-//        return true;
-//    }
-//};
-//
-//class COWTester {
-//private:
-//    auto getThingy() const {
-//        return COWPointer<Vector<String>>(
-//                new Vector<String>{"Thingy1", "Thingy2", "Thingy3"});
-//    }
-//
-//public:
-//    bool test() const {
-//        COWPointer<Vector<String>> test1(
-//                new Vector<String>{"hello1", "hello2", "hello3"});
-//        COWPointer<Vector<String>> test2(getThingy());
-//        assert((*test2.get() == Vector<String>{"Thingy1", "Thingy2", "Thingy3"}));
-//
-//        auto test22 = test2;
-//        auto test12 = test1;
-//
-//        assert(test12.ptr.get() == test1.ptr.get());
-//        assert(test22.ptr.get() == test2.ptr.get());
-//        assert((*test2.get() == Vector<String>{"Thingy1", "Thingy2", "Thingy3"}));
-//        assert((*test22.get() == Vector<String>{"Thingy1", "Thingy2", "Thingy3"}));
-//        assert((*test1.get() == Vector<String>{"hello1", "hello2", "hello3"}));
-//        assert((*test12.get() == Vector<String>{"hello1", "hello2", "hello3"}));
-//        assert(test12.ptr.get() == test1.ptr.get());
-//        assert(test22.ptr.get() == test2.ptr.get());
-//
-//        test12.getRW()->emplace_back("hello4");
-//        assert(test1.get()->size() == 3);
-//        assert(test12.get()->size() == 4);
-//        assert((*test12.get())[3] == "hello4");
-//        test22.getRW()->erase(2);
-//        assert(test2.get()->size() == 3);
-//        assert(test22.get()->size() == 2);
-//        assert((*test22.get())[1] == "Thingy2");
-//        assert((*test2.get())[1] == "Thingy2");
-//
-//        assert(test12.ptr.get() != test1.ptr.get());
-//        assert(test22.ptr.get() != test2.ptr.get());
-//
-//        return true;
-//    }
-//};
+public:
+    bool test() {
+        SharedPtr<Vector<String>> test1(
+                new Vector<String>{"hello1", "hello2", "hello3"});
+        SharedPtr<Vector<String>> test2(getThingy());
+        assert((*test2 == Vector<String>{"Thingy1", "Thingy2", "Thingy3"}));
+        auto test22 = test2;
+        auto test12 = test1;
+        test12->emplace_back("hello4");
+        assert((*test1)[3] == "hello4");
+        test22->erase(2);
+        assert(test2->size() == 2);
+        assert((*test2)[1] == "Thingy2");
+
+        all_tty_putstr("SharedPtr tests ok!\n");
+        return true;
+    }
+};
+
+class COWTester {
+private:
+    auto getThingy() const {
+        return COWPointer<Vector<String>>(
+                new Vector<String>{"Thingy1", "Thingy2", "Thingy3"});
+    }
+
+public:
+    bool test() const {
+        COWPointer<Vector<String>> test1(
+                new Vector<String>{"hello1", "hello2", "hello3"});
+        COWPointer<Vector<String>> test2(getThingy());
+        assert((*test2.get() == Vector<String>{"Thingy1", "Thingy2", "Thingy3"}));
+
+        auto test22 = test2;
+        auto test12 = test1;
+
+        assert(test12.ptr.get() == test1.ptr.get());
+        assert(test22.ptr.get() == test2.ptr.get());
+        assert((*test2.get() == Vector<String>{"Thingy1", "Thingy2", "Thingy3"}));
+        assert((*test22.get() == Vector<String>{"Thingy1", "Thingy2", "Thingy3"}));
+        assert((*test1.get() == Vector<String>{"hello1", "hello2", "hello3"}));
+        assert((*test12.get() == Vector<String>{"hello1", "hello2", "hello3"}));
+        assert(test12.ptr.get() == test1.ptr.get());
+        assert(test22.ptr.get() == test2.ptr.get());
+
+        test12.getRW()->emplace_back("hello4");
+        assert(test1.get()->size() == 3);
+        assert(test12.get()->size() == 4);
+        assert((*test12.get())[3] == "hello4");
+        test22.getRW()->erase(2);
+        assert(test2.get()->size() == 3);
+        assert(test22.get()->size() == 2);
+        assert((*test22.get())[1] == "Thingy2");
+        assert((*test2.get())[1] == "Thingy2");
+
+        assert(test12.ptr.get() != test1.ptr.get());
+        assert(test22.ptr.get() != test2.ptr.get());
+
+        all_tty_putstr("COWPointer tests ok!\n");
+        return true;
+    }
+};
 
 class VectorTester {
 public:
@@ -220,9 +214,9 @@ int test_templates() {
     stringTester.test();
     VectorTester vectorTester;
     vectorTester.test();
-    //    SharedPtrTester sharedPtrTester;
-    //    sharedPtrTester.test();
-    //    COWTester cowTester;
-    //    cowTester.test();
+    SharedPtrTester sharedPtrTester;
+    sharedPtrTester.test();
+    COWTester cowTester;
+    cowTester.test();
     return 0;
 }
