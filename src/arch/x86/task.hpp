@@ -39,7 +39,7 @@ struct Task {
 struct Task *cur_task();
 
 void init_tasks();
-struct Task *new_ktask(void (*fn)(), char *name);
+struct Task *new_ktask(void (*fn)(), const char *name);
 void remove_self();
 void sleep_self(uint64_t diff);
 extern "C" void switch_task(struct task_frame *cur_frame);

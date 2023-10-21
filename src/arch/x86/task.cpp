@@ -171,7 +171,7 @@ static void task_freer() {
     }
 }
 
-struct Task *new_ktask(void (*fn)(), char *name) {
+struct Task *new_ktask(void (*fn)(), const char *name) {
     struct Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
     newt->stack = static_cast<uint64_t *>(kmalloc(TASK_SS));
     newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
