@@ -26,6 +26,7 @@ uint64_t get_heap_used() {
 static Spinlock kmem_lock;
 
 void init_kern_heap() {
+    LockGuard l(kmem_lock);
     KERN_HeapBegin = static_cast<HeapEntry *>(get4k());
     allocated.fetch_add(4096);
     KERN_HeapBegin->magic = KERN_HeapMagicFree;
