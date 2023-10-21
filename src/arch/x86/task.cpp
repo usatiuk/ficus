@@ -3,6 +3,8 @@
 //
 
 #include "task.hpp"
+#include "LockGuard.hpp"
+#include "Spinlock.hpp"
 #include "cv.hpp"
 #include "gdt.hpp"
 #include "kmem.hpp"
@@ -36,11 +38,11 @@ struct TaskListNode *RunningTask;
 struct TaskList NextTasks;
 
 // New tasks
-struct Mutex NewTasks_lock;
+struct Spinlock NewTasks_lock;
 struct TaskList NewTasks;
 
 // Unblocked tasks
-struct Mutex UnblockedTasks_lock;
+struct Spinlock UnblockedTasks_lock;
 struct TaskList UnblockedTasks;
 
 // Task freer
@@ -184,9 +186,10 @@ struct Task *new_ktask(void (*fn)(), char *name) {
 
     sanity_check_frame(&newt->frame);
 
-    m_lock(&NewTasks_lock);
-    append_task(&NewTasks, newt);
-    m_unlock(&NewTasks_lock);
+    {
+        LockGuard l(NewTasks_lock);
+        append_task(&NewTasks, newt);
+    }
     return newt;
 }
 
@@ -259,7 +262,7 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
         }
     }
 
-    if (TasksToFreeTemp.cur && !m_test(&UnblockedTasks_lock) && m_try_lock(&TasksToFree_lock)) {
+    if (TasksToFreeTemp.cur && !UnblockedTasks_lock.test() && m_try_lock(&TasksToFree_lock)) {
         TasksToFree.cur = TasksToFreeTemp.cur;
         TasksToFree.last = TasksToFreeTemp.last;
         TasksToFreeTemp.cur = NULL;
@@ -270,18 +273,18 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
 
     RunningTask = NULL;
 
-    if (m_try_lock(&NewTasks_lock)) {
+    if (NewTasks_lock.try_lock()) {
         while (peek_front(&NewTasks)) {
             append_task_node(&NextTasks, pop_front_node(&NewTasks));
         }
-        m_unlock(&NewTasks_lock);
+        NewTasks_lock.unlock();
     }
 
-    if (m_try_lock(&UnblockedTasks_lock)) {
+    if (UnblockedTasks_lock.try_lock()) {
         while (peek_front(&UnblockedTasks)) {
             append_task_node(&NextTasks, pop_front_node(&UnblockedTasks));
         }
-        m_unlock(&UnblockedTasks_lock);
+        UnblockedTasks_lock.unlock();
     }
 
     struct TaskListNode *next = pop_front_node(&NextTasks);
@@ -335,9 +338,10 @@ void m_unlock_sched_hook(struct Mutex *m) {
 
     if (newt) {
         newt->task->state = TS_RUNNING;
-        m_spin_lock(&UnblockedTasks_lock);
-        append_task_node(&UnblockedTasks, newt);
-        m_unlock(&UnblockedTasks_lock);
+        {
+            LockGuard l(UnblockedTasks_lock);
+            append_task_node(&UnblockedTasks, newt);
+        }
     }
 }
 
@@ -363,9 +367,10 @@ void cv_unlock_sched_hook(struct CV *cv, int who) {
 
         if (newt) {
             newt->task->state = TS_RUNNING;
-            m_spin_lock(&UnblockedTasks_lock);
-            append_task_node(&UnblockedTasks, newt);
-            m_unlock(&UnblockedTasks_lock);
+            {
+                LockGuard l(UnblockedTasks_lock);
+                append_task_node(&UnblockedTasks, newt);
+            }
         }
     } while (newt && (who == CV_NOTIFY_ALL));
 }
