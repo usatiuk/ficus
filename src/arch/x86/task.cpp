@@ -12,6 +12,7 @@
 #include "mutex.hpp"
 #include "paging.hpp"
 #include "serial.hpp"
+#include "string.hpp"
 #include "timer.hpp"
 #include "tty.hpp"
 

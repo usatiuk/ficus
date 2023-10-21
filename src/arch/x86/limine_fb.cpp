@@ -6,7 +6,7 @@
 
 #include <stddef.h>
 
-#include "kmem.hpp"
+#include "string.hpp"
 
 static volatile struct limine_framebuffer_request framebuffer_request = {
         .id = LIMINE_FRAMEBUFFER_REQUEST,
