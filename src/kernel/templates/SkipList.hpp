@@ -34,14 +34,13 @@ private:
 
         ~NodeAllocator() noexcept {
             for (int i = top; i >= 0; i--) {
-                //                delete nodes[i];
+                delete nodes[i];
             }
         }
 
         void push(Node *&e) {
             if (top >= size - 1) {
-                // TODO: ????
-                //                delete e;
+                delete e;
                 return;
             }
             nodes[++top] = e;

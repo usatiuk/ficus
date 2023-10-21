@@ -64,3 +64,11 @@ void operator delete(void *p) {
 void operator delete[](void *p) {
     kfree(p);
 }
+
+void operator delete(void *p, size_t n) {
+    kfree(p);
+}
+
+void operator delete[](void *p, size_t n) {
+    kfree(p);
+}

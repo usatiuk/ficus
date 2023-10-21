@@ -166,7 +166,7 @@ void kmain() {
         (*ctor)();
 
     init_timer();
-    
+
     srand(micros);// NOLINT
 
     new_ktask(ktask_main, "ktask_main");
