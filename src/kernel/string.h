@@ -5,8 +5,12 @@
 #ifndef OS2_STRING_H
 #define OS2_STRING_H
 
-#include <cstddef>
-#include <cstdint>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stddef.h>
+#include <stdint.h>
 
 inline void *memcpy(void *dest, const void *src, size_t n) {
     uint8_t *pdest = (uint8_t *) dest;
@@ -97,5 +101,9 @@ inline void strcpy(const char *src, char *dst) {
     }
     dst[i] = '\0';
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif//OS2_STRING_H

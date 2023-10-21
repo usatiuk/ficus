@@ -5,6 +5,7 @@
 #include "TestTemplates.hpp"
 
 
+#include "SkipList.hpp"
 #include "String.hpp"
 #include "Vector.hpp"
 #include "serial.hpp"
@@ -144,41 +145,39 @@ public:
     }
 };
 
-//class SkipListTester {
-//public:
-//    bool test() {
-//        SkipList<int, std::string> test1;
-//
-//        test1.add(5, "test5", false);
-//        test1.add(999, "test999", false);
-//        test1.add(5, "test5", false);
-//        test1.add(1, "test1", false);
-//        test1.add(999, "test999", false);
-//
-//        assert(test1.find(5)->data == "test5");
-//        assert(test1.find(1)->data == "test1");
-//        assert(test1.find(999)->data == "test999");
-//
-//        test1.erase(1);
-//        assert(test1.find(1)->data != "test1");
-//        test1.add(87, "test87", false);
-//        assert(test1.find(87)->data == "test87");
-//
-//        auto p2 = test1.lower_bound_update(78);
-//        assert(p2->data == "test87");
-//        test1.add(78, "test78", true);
-//        assert(test1.find(78)->data == "test78");
-//
-//        assert(IT::test());
-//
-//        return true;
-//    }
-//};
-//
+class SkipListTester {
+public:
+    bool test() {
+        SkipList<int, String> test1;
+
+        test1.add(5, "test5", false);
+        test1.add(999, "test999", false);
+        test1.add(5, "test5", false);
+        test1.add(1, "test1", false);
+        test1.add(999, "test999", false);
+
+        assert(test1.find(5)->data == "test5");
+        assert(test1.find(1)->data == "test1");
+        assert(test1.find(999)->data == "test999");
+
+        test1.erase(1);
+        assert(test1.find(1)->data != "test1");
+        test1.add(87, "test87", false);
+        assert(test1.find(87)->data == "test87");
+
+        auto p2 = test1.lower_bound_update(78);
+        assert(p2->data == "test87");
+        test1.add(78, "test78", true);
+        assert(test1.find(78)->data == "test78");
+
+        return true;
+    }
+};
+
 int test_templates() {
 
-    //    SkipListTester SLTester;
-    //    SLTester.test();
+    SkipListTester SLTester;
+    SLTester.test();
     StringTester stringTester;
     stringTester.test();
     VectorTester vectorTester;

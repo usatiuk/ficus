@@ -1,24 +1,17 @@
 #ifndef SKIPLIST_H
 #define SKIPLIST_H
-static bool seedSet = false;
 
-class SeedSetter {
-public:
-    SeedSetter() noexcept {
-        if (!seedSet) {
-            std::cout << "seed set!" << std::endl;
-            srand(time(nullptr));// NOLINT
-            seedSet = true;
-        }
-    }
-};
+#include <cstddef>
+#include <cstdint>
+#include <type_traits>
+#include <utility>
 
-[[maybe_unused]] static SeedSetter seedSetter;
+#include "rand.h"
+#include "serial.hpp"
 
 template<typename K, typename V>
 class SkipList {
     static constexpr size_t maxL{31};
-    friend SkipListTester;
 
 public:
     struct Node {
@@ -41,13 +34,14 @@ private:
 
         ~NodeAllocator() noexcept {
             for (int i = top; i >= 0; i--) {
-                delete nodes[i];
+                //                delete nodes[i];
             }
         }
 
         void push(Node *&e) {
             if (top >= size - 1) {
-                delete e;
+                // TODO: ????
+                //                delete e;
                 return;
             }
             nodes[++top] = e;
@@ -72,10 +66,13 @@ private:
     };
 
     static int randomL() {
-        return ffs(rand()) - 1;// NOLINT
+        int ret = __builtin_ffs(rand());
+        assert(ret >= 0);
+        return ret;// NOLINT
     }
 
-    static inline NodeAllocator nodeAllocator;
+    //    static inline NodeAllocator nodeAllocator;
+    NodeAllocator nodeAllocator;
 
     Node *root;
     Node *endnode;
@@ -355,7 +352,7 @@ public:
 
 
     struct SkipListIterator {
-        using iterator_category = std::forward_iterator_tag;
+        //        using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = const V;
         using pointer = value_type *;
@@ -400,20 +397,20 @@ public:
 
     const_iterator end() const { return SkipListIterator(endnode); }
 
-    void print() const {
-        std::cout << "LIST STATUS" << std::endl;
-
-        for (size_t i = 0; i <= curL; i++) {
-            Node *n = root->next[i];
-            std::cout << "L " << i << ": ";
-            while (n != nullptr && n->next[0]) {
-                std::cout << "GUARD: " << n->end << " KEY: " << n->key << " RANGE: " << n->data
-                          << " <<<<<";
-                n = n->next[i];
-            }
-            std::cout << std::endl;
-        }
-    };
+    //    void print() const {
+    //        std::cout << "LIST STATUS" << std::endl;
+    //
+    //        for (size_t i = 0; i <= curL; i++) {
+    //            Node *n = root->next[i];
+    //            std::cout << "L " << i << ": ";
+    //            while (n != nullptr && n->next[0]) {
+    //                std::cout << "GUARD: " << n->end << " KEY: " << n->key << " RANGE: " << n->data
+    //                          << " <<<<<";
+    //                n = n->next[i];
+    //            }
+    //            std::cout << std::endl;
+    //        }
+    //    };
 };
 
 

@@ -10,6 +10,7 @@
 #include "memman.hpp"
 #include "misc.hpp"
 #include "mutex.hpp"
+#include "rand.h"
 #include "serial.hpp"
 #include "task.hpp"
 #include "timer.hpp"
@@ -165,6 +166,9 @@ void kmain() {
         (*ctor)();
 
     init_timer();
+    
+    srand(micros);// NOLINT
+
     new_ktask(ktask_main, "ktask_main");
     new_ktask(dummy_task, "dummy");
     init_tasks();
