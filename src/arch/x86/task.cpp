@@ -46,8 +46,7 @@ struct Spinlock UnblockedTasks_lock;
 struct TaskList UnblockedTasks;
 
 // Task freer
-struct Mutex TasksToFree_lock;
-struct CV TasksToFree_cv;
+Spinlock TasksToFree_lock;
 struct TaskList TasksToFree;
 struct TaskList TasksToFreeTemp;
 
@@ -157,13 +156,15 @@ static struct TaskListNode *pop_front_node(struct TaskList *list) {
 
 static void task_freer() {
     while (true) {
-        m_lock(&TasksToFree_lock);
-        cv_wait(&TasksToFree_lock, &TasksToFree_cv);
+        LockGuard l(TasksToFree_lock);
+        if (!peek_front(&TasksToFree)) {
+            yield_self();
+            continue;
+        }
         assert2(peek_front(&TasksToFree) != NULL, "Sanity check");
         while (peek_front(&TasksToFree) && peek_front(&TasksToFree)->state == TS_TO_REMOVE) {
             free_task(pop_front(&TasksToFree));
         }
-        m_unlock(&TasksToFree_lock);
     }
 }
 
@@ -262,13 +263,14 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
         }
     }
 
-    if (TasksToFreeTemp.cur && !UnblockedTasks_lock.test() && m_try_lock(&TasksToFree_lock)) {
-        TasksToFree.cur = TasksToFreeTemp.cur;
-        TasksToFree.last = TasksToFreeTemp.last;
-        TasksToFreeTemp.cur = NULL;
-        TasksToFreeTemp.last = NULL;
-        cv_notify_one(&TasksToFree_cv);
-        m_unlock(&TasksToFree_lock);
+    if (TasksToFreeTemp.cur && !UnblockedTasks_lock.test() && TasksToFree_lock.try_lock()) {
+        if (!TasksToFree.cur) {
+            TasksToFree.cur = TasksToFreeTemp.cur;
+            TasksToFree.last = TasksToFreeTemp.last;
+            TasksToFreeTemp.cur = NULL;
+            TasksToFreeTemp.last = NULL;
+        }
+        TasksToFree_lock.unlock();
     }
 
     RunningTask = NULL;
