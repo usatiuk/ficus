@@ -48,8 +48,10 @@ static inline void irqrestore(unsigned long flags) {
 #define NO_INT(x)                            \
     {                                        \
         unsigned long f = save_irqdisable(); \
+        barrier();                           \
         x                                    \
-                irqrestore(f);               \
+        barrier();                           \
+        irqrestore(f);                       \
     }
 
 
