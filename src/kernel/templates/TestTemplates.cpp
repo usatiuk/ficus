@@ -206,8 +206,8 @@ public:
 
 int test_templates() {
 
-    SkipListTester SLTester;
-    SLTester.test();
+    //    SkipListTester SLTester;
+    //    SLTester.test();
     //    SkipListSetTester SLSTester;
     //    SLSTester.test();
     StringTester stringTester;

@@ -117,9 +117,9 @@ void stress() {
 
     char buf[69];
     itoa(curi, buf, 10);
-    all_tty_putstr("stress ");
-    all_tty_putstr(buf);
-    all_tty_putstr("\n");
+    //    all_tty_putstr("stress ");
+    //    all_tty_putstr(buf);
+    //    all_tty_putstr("\n");
     remove_self();
 }
 
@@ -133,7 +133,7 @@ void templates_tester() {
 }
 
 void stress_tester() {
-    for (int i = 0; i < 2000; i++)
+    for (int i = 0; i < 200000; i++)
         new_ktask(stress, "stress");
 
     all_tty_putstr("Finished stress\n");
@@ -150,6 +150,50 @@ void ktask_main() {
     new_ktask(templates_tester, "templates_tester");
     new_ktask(templates_tester, "templates_tester2");
     new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(templates_tester, "templates_tester3");
+    new_ktask(stress_tester, "stress_tester");
+    new_ktask(stress_tester, "stress_tester");
+    new_ktask(stress_tester, "stress_tester");
+    new_ktask(stress_tester, "stress_tester");
+    new_ktask(stress_tester, "stress_tester");
+    new_ktask(stress_tester, "stress_tester");
+    new_ktask(stress_tester, "stress_tester");
+    new_ktask(stress_tester, "stress_tester");
+    new_ktask(stress_tester, "stress_tester");
+    new_ktask(stress_tester, "stress_tester");
     new_ktask(stress_tester, "stress_tester");
 
     remove_self();
