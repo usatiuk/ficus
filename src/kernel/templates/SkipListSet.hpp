@@ -131,7 +131,7 @@ public:
         return *this;
     }
 
-    bool erase(Node *begin, Node *end, bool reuseUpdate) {
+    bool erase(Node *begin, Node *end, bool reuseUpdate = false) {
         if (begin == end) return false;
 
         if (!reuseUpdate) {
@@ -168,7 +168,7 @@ public:
         return true;
     }
 
-    Node *add(K const &k, bool reuseUpdate) {
+    Node *add(K const &k, bool reuseUpdate = false) {
         if (!reuseUpdate) {
             Node *cur = root;
 
