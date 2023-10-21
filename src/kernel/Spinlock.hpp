@@ -37,7 +37,6 @@ public:
 
 private:
     std::atomic<bool> locked = false;
-    struct TaskList *waiters = nullptr;
 };
 
 static_assert(std::is_trivially_copyable_v<Spinlock> == true);
