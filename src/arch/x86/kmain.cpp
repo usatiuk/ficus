@@ -117,12 +117,16 @@ void stress() {
 
     char buf[69];
     itoa(curi, buf, 10);
+    all_tty_putstr("stress ");
+    all_tty_putstr(buf);
+    all_tty_putstr("\n");
     remove_self();
 }
 
 void templates_tester() {
     all_tty_putstr("Testing templates\n");
-    test_templates();
+    for (int i = 0; i < 200000; i++)
+        test_templates();
     all_tty_putstr("Testing templates OK\n");
 
     remove_self();
@@ -144,6 +148,8 @@ void ktask_main() {
     new_ktask(mtest2, "mtest2");
     new_ktask(mtest3, "mtest3");
     new_ktask(templates_tester, "templates_tester");
+    new_ktask(templates_tester, "templates_tester2");
+    new_ktask(templates_tester, "templates_tester3");
     new_ktask(stress_tester, "stress_tester");
 
     remove_self();
