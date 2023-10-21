@@ -3,9 +3,23 @@
 //
 
 #include <cstddef>
+#include <cstdint>
 
 #include "kmem.hpp"
 #include "misc.hpp"
+#include "serial.hpp"
+
+#if UINT32_MAX == UINTPTR_MAX
+#define STACK_CHK_GUARD 0xb079a218
+#else
+#define STACK_CHK_GUARD 0x2e61e13e4d5ae23c
+#endif
+
+uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
+
+extern "C" __attribute__((noreturn)) void __stack_chk_fail(void) {
+    assert2(false, "Stack protection triggered!");
+}
 
 extern "C" void __cxa_pure_virtual() {
     // Do nothing or print an error message.

@@ -1,8 +1,8 @@
 
 add_executable(kernel.elf)
 
-target_compile_options(kernel.elf PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions -fno-rtti -ffreestanding>)
-target_compile_options(kernel.elf PUBLIC $<$<COMPILE_LANGUAGE:C>:-ffreestanding>)
+target_compile_options(kernel.elf PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-fstack-protector-all -fno-exceptions -fno-rtti -ffreestanding>)
+target_compile_options(kernel.elf PUBLIC $<$<COMPILE_LANGUAGE:C>:-fstack-protector-all -ffreestanding>)
 
 add_subdirectory(./arch/)
 add_subdirectory(./kernel/)
