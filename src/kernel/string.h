@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 21.10.2023.
 //
 
-#ifndef OS2_STRING_HPP
-#define OS2_STRING_HPP
+#ifndef OS2_STRING_H
+#define OS2_STRING_H
 
 #include <cstddef>
 #include <cstdint>
@@ -98,4 +98,4 @@ inline void strcpy(const char *src, char *dst) {
     dst[i] = '\0';
 }
 
-#endif//OS2_STRING_HPP
+#endif//OS2_STRING_H

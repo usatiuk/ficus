@@ -3,6 +3,7 @@
 //
 #include <cstddef>
 
+#include "TestTemplates.hpp"
 #include "globals.hpp"
 #include "kmem.hpp"
 #include "limine_fb.hpp"
@@ -115,24 +116,34 @@ void stress() {
 
     char buf[69];
     itoa(curi, buf, 10);
-    all_tty_putstr("stress ");
-    all_tty_putstr(buf);
-    all_tty_putstr("\n");
+    remove_self();
+}
+
+void templates_tester() {
+    all_tty_putstr("Testing templates\n");
+    test_templates();
+    all_tty_putstr("Testing templates OK\n");
+
+    remove_self();
+}
+
+void stress_tester() {
+    for (int i = 0; i < 2000; i++)
+        new_ktask(stress, "stress");
+
+    all_tty_putstr("Finished stress\n");
+
     remove_self();
 }
 
 void ktask_main() {
-
     new_ktask(ktask, "one");
     new_ktask(freeprinter, "freeprinter");
     new_ktask(mtest1, "mtest1");
     new_ktask(mtest2, "mtest2");
     new_ktask(mtest3, "mtest3");
-
-    for (int i = 0; i < 2000; i++)
-        new_ktask(stress, "stress");
-
-    all_tty_putstr("Finished stress");
+    new_ktask(templates_tester, "templates_tester");
+    new_ktask(stress_tester, "stress_tester");
 
     remove_self();
 }

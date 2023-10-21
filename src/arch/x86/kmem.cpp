@@ -8,7 +8,7 @@
 #include "serial.hpp"
 #include "task.hpp"
 
-#include "string.hpp"
+#include "string.h"
 
 struct HeapEntry *KERN_HeapBegin;
 uintptr_t KERN_HeapEnd;// Past the end
