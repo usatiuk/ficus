@@ -52,7 +52,17 @@ static void extend_heap(size_t n_pages) {
 // n is required length!
 struct HeapEntry *split_entry(struct HeapEntry *what, size_t n) {
     assert2(what->len > (n + sizeof(struct HeapEntry)), "Trying to split a heap entry that's too small!");
+    assert(n <= allocated);
+
+    assert(reinterpret_cast<uintptr_t>(what) >= KERN_HeapVirtBegin &&
+           reinterpret_cast<uintptr_t>(what) < KERN_HeapEnd);
+
     struct HeapEntry *new_entry = (struct HeapEntry *) (((void *) what) + sizeof(struct HeapEntry) + n);
+
+    assert(reinterpret_cast<uintptr_t>(new_entry) >= KERN_HeapVirtBegin &&
+           reinterpret_cast<uintptr_t>(new_entry) < KERN_HeapEnd);
+
+    assert(what->len <= allocated);
 
     new_entry->magic = KERN_HeapMagicFree;
     new_entry->next = what->next;
@@ -64,6 +74,9 @@ struct HeapEntry *split_entry(struct HeapEntry *what, size_t n) {
         new_entry->next->prev = new_entry;
 
     what->next = new_entry;
+
+    assert(what->len <= allocated);
+    assert(new_entry->len <= allocated);
 
     return new_entry;
 }
@@ -206,8 +219,8 @@ static void try_merge_fwd(struct HeapEntry *entry) {
 static struct HeapEntry *try_shrink_heap(struct HeapEntry *entry) {
     assert(entry->prev == NULL);
     if ((uint64_t) entry + sizeof(struct HeapEntry) + entry->len == KERN_HeapEnd) {
-        // Shrink it if it's at least two pages
-        if (entry->len + sizeof(struct HeapEntry) < 4096 * 2) {
+        // Shrink it if it's at least three pages
+        if (entry->len + sizeof(struct HeapEntry) < 4096 * 3) {
             return entry;
         }
 
@@ -215,9 +228,14 @@ static struct HeapEntry *try_shrink_heap(struct HeapEntry *entry) {
 
         // Check alignment, in case of non-alignment, split
         if (((uint64_t) entry & 0xFFF) != 0) {
-            uint64_t diff = (uint64_t) entry & 0xFFF;
-            // Should always work as we're checking if the length is at least two pages
-            entry = split_entry(entry, (0x1000ULL - diff) - sizeof(struct HeapEntry));
+            // How long the entry should be to pad for the next one to be aligned
+            uint64_t diff = 0x1000ULL - ((uint64_t) entry & 0xFFF);
+
+            // Should always work as we're checking if the length is at least three pages
+            // But also check if it's enough...
+            if (diff <= sizeof(struct HeapEntry)) diff += 0x1000ULL;
+
+            entry = split_entry(entry, diff - sizeof(struct HeapEntry));
             ret = entry->prev;
             ret->next = entry->next;
             if (entry->next)

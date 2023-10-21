@@ -111,7 +111,7 @@ void stress() {
     int curi = i++;
     if (curi > 1500) remove_self();
 
-    sleep_self(10000 - curi * 10);
+    sleep_self(100000 - curi * 10);
 
     char buf[69];
     itoa(curi, buf, 10);
