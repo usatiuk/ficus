@@ -26,7 +26,7 @@ void ktask2() {
     for (uint32_t c = 0; c < 2; c++) {
         // Note: we assume the framebuffer model is RGB with 32-bit pixels.
         for (size_t i = 0; i < 100; i++) {
-            sleep_self(250);
+            sleep_self(25000);
             uint32_t *fb_ptr = framebuffer->address;
             fb_ptr[i * (framebuffer->pitch / 4) + i + 100] = c ? 0 : 0xFFFFFF;
         }
@@ -45,7 +45,7 @@ void ktask() {
     for (uint32_t c = 0; c < 2; c++) {
         // Note: we assume the framebuffer model is RGB with 32-bit pixels.
         for (size_t i = 0; i < 100; i++) {
-            sleep_self(250);
+            sleep_self(25000);
             uint32_t *fb_ptr = framebuffer->address;
             fb_ptr[i * (framebuffer->pitch / 4) + i] = c ? 0 : 0xFFFFFF;
         }
@@ -61,7 +61,7 @@ void freeprinter() {
         all_tty_putstr("Free mem: ");
         all_tty_putstr(buf);
         write_serial('\n');
-        sleep_self(10000);
+        sleep_self(1000000);
     }
 }
 
