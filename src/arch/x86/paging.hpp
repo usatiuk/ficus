@@ -40,6 +40,6 @@ void *virt2real(void *virt, struct AddressSpace *space);
 
 void map_hddm(uint64_t *pml4);
 
-void _tlb_flush();
+extern "C" void _tlb_flush();
 
 #endif//OS1_PAGING_H

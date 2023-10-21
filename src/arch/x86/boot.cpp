@@ -1,26 +1,26 @@
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 
-#include "gdt.h"
-#include "globals.h"
-#include "idt.h"
-#include "kmem.h"
+#include "gdt.hpp"
+#include "globals.hpp"
+#include "idt.hpp"
+#include "kmem.hpp"
 #include "limine.h"
-#include "limine_fb.h"
-#include "limine_mm.h"
-#include "memman.h"
-#include "misc.h"
-#include "paging.h"
-#include "serial.h"
+#include "limine_fb.hpp"
+#include "limine_mm.hpp"
+#include "memman.hpp"
+#include "misc.hpp"
+#include "paging.hpp"
+#include "serial.hpp"
 
 struct AddressSpace BOOT_AddressSpace;
 
 extern void kmain();
 
 // Do final preparations in the new address space then call kmain
-__attribute__((noreturn))
-__attribute__((used))
-void real_start() {
+extern "C" __attribute__((noreturn))
+__attribute__((used)) void
+real_start() {
     parse_limine_memmap(limine_mm_entries, limine_mm_count, LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE);
     limine_fb_remap(KERN_AddressSpace);
     init_kern_heap();
@@ -29,7 +29,7 @@ void real_start() {
 
 // Set up the address space for the kernel and prepare other structures to work without the bootloader,
 // then call real_start with this address space and the new stack.
-void _start(void) {
+extern "C" void _start(void) {
     _sse_setup();
     barrier();
     gdt_setup();
@@ -49,7 +49,7 @@ void _start(void) {
 
     parse_limine_memmap(limine_mm_entries, limine_mm_count, LIMINE_MEMMAP_USABLE);
 
-    KERN_AddressSpace = get4k();
+    KERN_AddressSpace = static_cast<AddressSpace *>(get4k());
     assert2(!init_addr_space(KERN_AddressSpace), "Couldn't init kernel address space!");
 
     for (int i = 0; i < 512; i++)

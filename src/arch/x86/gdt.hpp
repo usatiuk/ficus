@@ -1,7 +1,7 @@
 #ifndef OS1_GDT_H
 #define OS1_GDT_H
 
-#include "stdint.h"
+#include <cstdint>
 
 struct gdt_entry_bits {
     unsigned int limit_low : 16;
@@ -53,7 +53,7 @@ struct tss_entry_struct {
     uint32_t reserved4;
 } __attribute__((packed));
 
-void _gdt_setup();
+extern "C" void _gdt_setup();
 void gdt_setup();
 
 extern volatile struct gdt_entry_bits gdt_null;

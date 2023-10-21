@@ -1,22 +1,22 @@
-#include "kmem.h"
+#include "kmem.hpp"
 
-#include "globals.h"
-#include "memman.h"
-#include "mutex.h"
-#include "paging.h"
-#include "serial.h"
-#include "task.h"
+#include "globals.hpp"
+#include "memman.hpp"
+#include "mutex.hpp"
+#include "paging.hpp"
+#include "serial.hpp"
+#include "task.hpp"
 
 struct HeapEntry *KERN_HeapBegin;
 uintptr_t KERN_HeapEnd;// Past the end
 
 static bool initialized = false;
 
-static struct Mutex kmem_lock = DefaultMutex;
+static struct Mutex kmem_lock;
 static char kmem_lock_tasklist[256];//FIXME:
 
 void init_kern_heap() {
-    KERN_HeapBegin = get4k();
+    KERN_HeapBegin = static_cast<HeapEntry *>(get4k());
     KERN_HeapBegin->magic = KERN_HeapMagicFree;
     KERN_HeapBegin->len = 4096 - (sizeof(struct HeapEntry));
     KERN_HeapBegin->next = NULL;
@@ -44,7 +44,7 @@ struct HeapEntry *split_entry(struct HeapEntry *what, size_t n) {
     assert(kmem_lock.owner == cur_task());
 
     assert2(what->len > (n + sizeof(struct HeapEntry)), "Trying to split a heap entry that's too small!");
-    struct HeapEntry *new_entry = (((void *) what) + sizeof(struct HeapEntry) + n);
+    struct HeapEntry *new_entry = (struct HeapEntry *) (((void *) what) + sizeof(struct HeapEntry) + n);
 
     new_entry->magic = KERN_HeapMagicFree;
     new_entry->next = what->next;
@@ -242,7 +242,7 @@ void kfree(void *addr) {
     assert(initialized);
     m_lock(&kmem_lock);
 
-    struct HeapEntry *freed = addr - (sizeof(struct HeapEntry));
+    struct HeapEntry *freed = (struct HeapEntry *) (addr - (sizeof(struct HeapEntry)));
     struct HeapEntry *entry = KERN_HeapBegin;
     assert2(freed->magic == KERN_HeapMagicTaken, "Bad free!");
     assert2(freed->next == NULL, "Bad free!");
@@ -267,15 +267,15 @@ void kfree(void *addr) {
 void *krealloc(void *addr, size_t newsize) {
     assert(initialized);
 
-    struct HeapEntry *info = addr - (sizeof(struct HeapEntry));
+    struct HeapEntry *info = (struct HeapEntry *) (addr - (sizeof(struct HeapEntry)));
     assert2(info->magic == KERN_HeapMagicTaken, "Bad realloc!");
 
-    void *new = kmalloc(newsize);
+    void *newt = kmalloc(newsize);
 
-    memcpy(new, addr, newsize > info->len ? info->len : newsize);
+    memcpy(newt, addr, newsize > info->len ? info->len : newsize);
     kfree(addr);
 
-    return new;
+    return newt;
 }
 
 void *memcpy(void *dest, const void *src, size_t n) {

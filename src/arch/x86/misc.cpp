@@ -2,7 +2,7 @@
 // Created by Stepan Usatiuk on 13.08.2023.
 //
 
-void _hcf() {
+extern "C" void _hcf() {
     while (1)
         asm volatile("cli; hlt");
 }

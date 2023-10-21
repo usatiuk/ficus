@@ -7,7 +7,7 @@
 
 #include <stdbool.h>
 
-#include "idt.h"
+#include "idt.hpp"
 
 #define TASK_SS 16384
 
@@ -39,17 +39,17 @@ struct Task {
 struct Task *cur_task();
 
 void init_tasks();
-struct Task *new_ktask(void(*fn), char *name);
+struct Task *new_ktask(void (*fn)(), char *name);
 void remove_self();
 void sleep_self(uint64_t diff);
-void switch_task(struct task_frame *cur_frame);
+extern "C" void switch_task(struct task_frame *cur_frame);
 void switch_task_int(struct task_frame *cur_frame);
 void wait_m_on_self(struct Mutex *m);
 void m_unlock_sched_hook(struct Mutex *m);
 void wait_cv_on_self(struct CV *cv);
 void stop_waiting_on(struct Mutex *m);
 void yield_self();
-void _yield_self_kern();// Expects the caller to save interrupt state
+extern "C" void _yield_self_kern();// Expects the caller to save interrupt state
 void cv_unlock_sched_hook(struct CV *cv, int who);
 
 #endif//OS1_TASK_H

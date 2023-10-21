@@ -2,16 +2,16 @@
 // Created by Stepan Usatiuk on 18.08.2023.
 //
 
-#include "task.h"
-#include "cv.h"
-#include "gdt.h"
-#include "kmem.h"
-#include "misc.h"
-#include "mutex.h"
-#include "paging.h"
-#include "serial.h"
-#include "timer.h"
-#include "tty.h"
+#include "task.hpp"
+#include "cv.hpp"
+#include "gdt.hpp"
+#include "kmem.hpp"
+#include "misc.hpp"
+#include "mutex.hpp"
+#include "paging.hpp"
+#include "serial.hpp"
+#include "timer.hpp"
+#include "tty.hpp"
 
 void sanity_check_frame(struct task_frame *cur_frame) {
     assert2((void *) cur_frame->ip != NULL, "Sanity check");
@@ -36,16 +36,16 @@ struct TaskListNode *RunningTask;
 struct TaskList NextTasks;
 
 // New tasks
-struct Mutex NewTasks_lock = DefaultMutex;
+struct Mutex NewTasks_lock;
 struct TaskList NewTasks;
 
 // Unblocked tasks
-struct Mutex UnblockedTasks_lock = DefaultMutex;
+struct Mutex UnblockedTasks_lock;
 struct TaskList UnblockedTasks;
 
 // Task freer
-struct Mutex TasksToFree_lock = DefaultMutex;
-struct CV TasksToFree_cv = DefaultCV;
+struct Mutex TasksToFree_lock;
+struct CV TasksToFree_cv;
 struct TaskList TasksToFree;
 struct TaskList TasksToFreeTemp;
 
@@ -53,7 +53,7 @@ struct TaskList TasksToFreeTemp;
 //struct Mutex WaitingTasks_lock = DefaultMutex;
 struct TaskList WaitingTasks;
 
-static volatile atomic_bool initialized = false;
+static std::atomic<bool> initialized = false;
 
 static void free_task(struct Task *t) {
     kfree(t->stack);
@@ -66,7 +66,7 @@ static void free_task_list_node(struct TaskListNode *t) {
 }
 
 static struct TaskListNode *new_task_list_node() {
-    struct TaskListNode *ret = kmalloc(sizeof(struct TaskListNode));
+    struct TaskListNode *ret = static_cast<TaskListNode *>(kmalloc(sizeof(struct TaskListNode)));
     ret->task = NULL;
     ret->next = NULL;
     return ret;
@@ -153,7 +153,7 @@ static struct TaskListNode *pop_front_node(struct TaskList *list) {
 }
 
 
-_Noreturn static void task_freer() {
+static void task_freer() {
     while (true) {
         m_lock(&TasksToFree_lock);
         cv_wait(&TasksToFree_lock, &TasksToFree_cv);
@@ -165,29 +165,29 @@ _Noreturn static void task_freer() {
     }
 }
 
-struct Task *new_ktask(void(*fn), char *name) {
-    struct Task *new = kmalloc(sizeof(struct Task));
-    new->stack = kmalloc(TASK_SS);
-    new->name = kmalloc(strlen(name) + 1);
-    strcpy(name, new->name);
+struct Task *new_ktask(void (*fn)(), char *name) {
+    struct Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
+    newt->stack = static_cast<uint64_t *>(kmalloc(TASK_SS));
+    newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
+    strcpy(name, newt->name);
 
-    new->frame.sp = ((uint64_t) (&((void *) new->stack)[TASK_SS - 1]) & (~0xFULL));// Ensure 16byte alignment
-    new->frame.ip = (uint64_t) fn;
-    new->frame.cs = GDTSEL(gdt_code);
-    new->frame.ss = GDTSEL(gdt_data);
-    for (int i = 0; i < 512; i++) new->frame.ssestate[i] = 0;
-    new->frame.flags = flags();
-    new->frame.guard = IDT_GUARD;
-    new->addressSpace = KERN_AddressSpace;
-    new->state = TS_RUNNING;
-    new->mode = TASKMODE_KERN;
+    newt->frame.sp = ((((uintptr_t) newt->stack) + TASK_SS - 1) & (~0xFULL));// Ensure 16byte alignment
+    newt->frame.ip = (uint64_t) fn;
+    newt->frame.cs = GDTSEL(gdt_code);
+    newt->frame.ss = GDTSEL(gdt_data);
+    for (int i = 0; i < 512; i++) newt->frame.ssestate[i] = 0;
+    newt->frame.flags = flags();
+    newt->frame.guard = IDT_GUARD;
+    newt->addressSpace = KERN_AddressSpace;
+    newt->state = TS_RUNNING;
+    newt->mode = TASKMODE_KERN;
 
-    sanity_check_frame(&new->frame);
+    sanity_check_frame(&newt->frame);
 
     m_lock(&NewTasks_lock);
-    append_task(&NewTasks, new);
+    append_task(&NewTasks, newt);
     m_unlock(&NewTasks_lock);
-    return new;
+    return newt;
 }
 
 void init_tasks() {
@@ -218,7 +218,7 @@ void yield_self() {
 }
 
 
-void switch_task(struct task_frame *cur_frame) {
+extern "C" void switch_task(struct task_frame *cur_frame) {
     if (!atomic_load(&initialized)) return;
     sanity_check_frame(cur_frame);
 
@@ -316,7 +316,7 @@ void switch_task_int(struct task_frame *cur_frame) {
 
 void wait_m_on_self(struct Mutex *m) {
     if (!m->waiters) {
-        m->waiters = kmalloc(sizeof(struct TaskList));
+        m->waiters = static_cast<TaskList *>(kmalloc(sizeof(struct TaskList)));
         m->waiters->cur = NULL;
         m->waiters->last = NULL;
     }
@@ -327,16 +327,16 @@ void wait_m_on_self(struct Mutex *m) {
 }
 
 void m_unlock_sched_hook(struct Mutex *m) {
-    struct TaskListNode *new = NULL;
+    struct TaskListNode *newt = NULL;
 
     NO_INT(if (m->waiters) {
-        new = pop_front_node(m->waiters);
+        newt = pop_front_node(m->waiters);
     })
 
-    if (new) {
-        new->task->state = TS_RUNNING;
+    if (newt) {
+        newt->task->state = TS_RUNNING;
         m_spin_lock(&UnblockedTasks_lock);
-        append_task_node(&UnblockedTasks, new);
+        append_task_node(&UnblockedTasks, newt);
         m_unlock(&UnblockedTasks_lock);
     }
 }
@@ -344,7 +344,7 @@ void m_unlock_sched_hook(struct Mutex *m) {
 
 void wait_cv_on_self(struct CV *cv) {
     if (!cv->waiters) {
-        cv->waiters = kmalloc(sizeof(struct TaskList));
+        cv->waiters = static_cast<TaskList *>(kmalloc(sizeof(struct TaskList)));
         cv->waiters->cur = NULL;
         cv->waiters->last = NULL;
     }
@@ -355,19 +355,19 @@ void wait_cv_on_self(struct CV *cv) {
 }
 
 void cv_unlock_sched_hook(struct CV *cv, int who) {
-    struct TaskListNode *new = NULL;
+    struct TaskListNode *newt = NULL;
     do {
         NO_INT(if (cv->waiters) {
-            new = pop_front_node(cv->waiters);
+            newt = pop_front_node(cv->waiters);
         })
 
-        if (new) {
-            new->task->state = TS_RUNNING;
+        if (newt) {
+            newt->task->state = TS_RUNNING;
             m_spin_lock(&UnblockedTasks_lock);
-            append_task_node(&UnblockedTasks, new);
+            append_task_node(&UnblockedTasks, newt);
             m_unlock(&UnblockedTasks_lock);
         }
-    } while (new && (who == CV_NOTIFY_ALL));
+    } while (newt && (who == CV_NOTIFY_ALL));
 }
 
 

@@ -2,10 +2,10 @@
 // Created by Stepan Usatiuk on 20.08.2023.
 //
 
-#include "mutex.h"
-#include "serial.h"
-#include "task.h"
-#include "timer.h"
+#include "mutex.hpp"
+#include "serial.hpp"
+#include "task.hpp"
+#include "timer.hpp"
 
 void m_init(struct Mutex *m) {
     atomic_init(&m->locked, false);
@@ -15,8 +15,8 @@ void m_init(struct Mutex *m) {
 }
 
 bool m_try_lock(struct Mutex *m) {
-    volatile atomic_bool expected = ATOMIC_VAR_INIT(false);
-    if (!atomic_compare_exchange_strong(&m->locked, &expected, true)) {
+    bool expected = false;
+    if (!m->locked.compare_exchange_strong(expected, true)) {
         return false;
     }
     m->owner = cur_task();
@@ -64,8 +64,8 @@ void m_lock(struct Mutex *m) {
 }
 
 void m_unlock(struct Mutex *m) {
-    volatile atomic_bool expected = ATOMIC_VAR_INIT(true);
-    if (!atomic_compare_exchange_strong(&m->locked, &expected, false))
+    bool expected = true;
+    if (!m->locked.compare_exchange_strong(expected, false))
         writestr("Unlocking an unlocked mutex!\n");
     m_unlock_sched_hook(m);
 }

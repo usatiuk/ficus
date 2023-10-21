@@ -3,10 +3,11 @@
 
 #include <stdint.h>
 
-void _sse_setup();
-void _hcf();
+extern "C" void _sse_setup();
+extern "C" void _hcf();
 
-#define barrier()  __asm__ __volatile__ ("" ::: "memory");
+#define barrier() __asm__ __volatile__("" :: \
+                                               : "memory");
 
 static inline uint64_t *get_cr3() {
     uint64_t *cr3;
@@ -50,7 +51,6 @@ static inline void irqrestore(unsigned long flags) {
         x                                    \
                 irqrestore(f);               \
     }
-
 
 
 char *itoa(int value, char *str, int base);

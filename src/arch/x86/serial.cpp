@@ -2,12 +2,12 @@
 // Created by Stepan Usatiuk on 12.08.2023.
 //
 
-#include "serial.h"
+#include "serial.hpp"
 
 #include <stdint.h>
 
-#include "io.h"
-#include "task.h"
+#include "io.hpp"
+#include "task.hpp"
 
 #define PORT 0x3f8// COM1
 

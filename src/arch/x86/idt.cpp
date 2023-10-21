@@ -1,39 +1,39 @@
-#include "idt.h"
+#include "idt.hpp"
 
-#include "gdt.h"
-#include "io.h"
-#include "misc.h"
-#include "serial.h"
-#include "task.h"
-#include "timer.h"
+#include "gdt.hpp"
+#include "io.hpp"
+#include "misc.hpp"
+#include "serial.hpp"
+#include "task.hpp"
+#include "timer.hpp"
 
 __attribute__((aligned(0x10))) static idt_entry_t idt[256];// Create an array of IDT entries; aligned for performance
 static idtr_t idtr;
 
-__attribute__((noreturn)) void exception_handler(void) {
+extern "C" __attribute__((noreturn)) void exception_handler(void) {
     _hcf();
 }
 
-extern void pic1_irq_0();
-extern void pic1_irq_1();
-extern void pic1_irq_2();
-extern void pic1_irq_3();
-extern void pic1_irq_4();
-extern void pic1_irq_5();
-extern void pic1_irq_6();
-extern void pic1_irq_7();
+extern "C" void pic1_irq_0();
+extern "C" void pic1_irq_1();
+extern "C" void pic1_irq_2();
+extern "C" void pic1_irq_3();
+extern "C" void pic1_irq_4();
+extern "C" void pic1_irq_5();
+extern "C" void pic1_irq_6();
+extern "C" void pic1_irq_7();
 
-extern void pic2_irq_0();
-extern void pic2_irq_1();
-extern void pic2_irq_2();
-extern void pic2_irq_3();
-extern void pic2_irq_4();
-extern void pic2_irq_5();
-extern void pic2_irq_6();
-extern void pic2_irq_7();
+extern "C" void pic2_irq_0();
+extern "C" void pic2_irq_1();
+extern "C" void pic2_irq_2();
+extern "C" void pic2_irq_3();
+extern "C" void pic2_irq_4();
+extern "C" void pic2_irq_5();
+extern "C" void pic2_irq_6();
+extern "C" void pic2_irq_7();
 
 
-void idt_set_descriptor(uint8_t vector, void *isr, uint8_t flags) {
+void idt_set_descriptor(uint8_t vector, void (*isr)(), uint8_t flags) {
     idt_entry_t *descriptor = &idt[vector];
 
     descriptor->isr_low = (uint64_t) isr & 0xFFFF;
@@ -163,7 +163,7 @@ uint16_t pic_get_isr(void) {
     return __pic_get_irq_reg(PIC_READ_ISR);
 }
 
-void pic1_irq_real_0(struct task_frame *frame) {
+extern "C" void pic1_irq_real_0(struct task_frame *frame) {
     timer_tick();
     assert2(frame->guard == IDT_GUARD, "IDT Guard wrong!");
     assert2((frame->ss == GDTSEL(gdt_data) || frame->ss == GDTSEL(gdt_data_user)), "SS wrong!");
@@ -172,53 +172,53 @@ void pic1_irq_real_0(struct task_frame *frame) {
     assert2((frame->ss == GDTSEL(gdt_data) || frame->ss == GDTSEL(gdt_data_user)), "SS wrong!");
     PIC_sendEOI(0);
 }
-void pic1_irq_real_1() {
+extern "C" void pic1_irq_real_1() {
     PIC_sendEOI(1);
 }
-void pic1_irq_real_2() {
+extern "C" void pic1_irq_real_2() {
     _hcf();
     PIC_sendEOI(2);
 }
-void pic1_irq_real_3() {
+extern "C" void pic1_irq_real_3() {
     PIC_sendEOI(3);
 }
-void pic1_irq_real_4() {
+extern "C" void pic1_irq_real_4() {
     PIC_sendEOI(4);
 }
-void pic1_irq_real_5() {
+extern "C" void pic1_irq_real_5() {
     PIC_sendEOI(5);
 }
-void pic1_irq_real_6() {
+extern "C" void pic1_irq_real_6() {
     PIC_sendEOI(6);
 }
-void pic1_irq_real_7() {
+extern "C" void pic1_irq_real_7() {
     int irr = pic_get_irr();
     if (!(irr & 0x80)) return;
     PIC_sendEOI(7);
 }
 
-void pic2_irq_real_0() {
+extern "C" void pic2_irq_real_0() {
     PIC_sendEOI(8);
 }
-void pic2_irq_real_1() {
+extern "C" void pic2_irq_real_1() {
     PIC_sendEOI(9);
 }
-void pic2_irq_real_2() {
+extern "C" void pic2_irq_real_2() {
     PIC_sendEOI(10);
 }
-void pic2_irq_real_3() {
+extern "C" void pic2_irq_real_3() {
     PIC_sendEOI(11);
 }
-void pic2_irq_real_4() {
+extern "C" void pic2_irq_real_4() {
     PIC_sendEOI(12);
 }
-void pic2_irq_real_5() {
+extern "C" void pic2_irq_real_5() {
     PIC_sendEOI(13);
 }
-void pic2_irq_real_6() {
+extern "C" void pic2_irq_real_6() {
     PIC_sendEOI(14);
 }
-void pic2_irq_real_7() {
+extern "C" void pic2_irq_real_7() {
     // Probaby wrong
     int irr = pic_get_irr();
     if (!(irr & (0x80 << 8))) {

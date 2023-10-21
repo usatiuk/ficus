@@ -2,24 +2,24 @@
 // Created by Stepan Usatiuk on 09.08.2023.
 //
 
-#include "paging.h"
+#include "paging.hpp"
 #include "limine.h"
-#include "memman.h"
-#include "misc.h"
-#include "serial.h"
+#include "memman.hpp"
+#include "misc.hpp"
+#include "serial.hpp"
 
 struct AddressSpace *KERN_AddressSpace;
 
 int init_addr_space(struct AddressSpace *space) {
     assert2(space != NULL, "Got null!");
-    space->PML4 = get4k();
+    space->PML4 = static_cast<uint64_t *>(get4k());
     if (space->PML4 == NULL) return 1;
     return 0;
 }
 
 // Returns a free page frame in HHDM
 uint64_t *get_free_frame() {
-    uint64_t *res = get4k();
+    uint64_t *res = static_cast<uint64_t *>(get4k());
     if (res)
         for (int j = 0; j < 512; j++)
             res[j] = 0;

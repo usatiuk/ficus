@@ -7,10 +7,10 @@
 
 #include "limine.h"
 
-#include "paging.h"
+#include "paging.hpp"
 
-void limine_fb_save_response(struct AddressSpace* boot_address_space);
-void limine_fb_remap(struct AddressSpace* space);
+void limine_fb_save_response(struct AddressSpace *boot_address_space);
+void limine_fb_remap(struct AddressSpace *space);
 
 extern int framebuffer_count;
 extern struct limine_framebuffer framebuffers[10];

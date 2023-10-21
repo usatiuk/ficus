@@ -2,11 +2,11 @@
 // Created by Stepan Usatiuk on 20.08.2023.
 //
 
-#include "cv.h"
+#include "cv.hpp"
 
-#include "mutex.h"
-#include "serial.h"
-#include "task.h"
+#include "mutex.hpp"
+#include "serial.hpp"
+#include "task.hpp"
 
 void cv_wait(struct Mutex *m, struct CV *cv) {
     m_unlock(m);

@@ -2,11 +2,11 @@
 // Created by Stepan Usatiuk on 12.08.2023.
 //
 
-#include "memman.h"
-#include "misc.h"
-#include "mutex.h"
-#include "paging.h"
-#include "serial.h"
+#include "memman.hpp"
+#include "misc.hpp"
+#include "mutex.hpp"
+#include "paging.hpp"
+#include "serial.hpp"
 #include <stddef.h>
 
 

@@ -2,14 +2,14 @@
 // Created by Stepan Usatiuk on 25.08.2023.
 //
 
-#include "tty.h"
+#include "tty.hpp"
 
-#include "kmem.h"
-#include "mutex.h"
-#include "serial.h"
+#include "kmem.hpp"
+#include "mutex.hpp"
+#include "serial.hpp"
 
 static unsigned ttyNum = 0;
-static struct Mutex ttysMutex = DefaultMutex;
+static struct Mutex ttysMutex;
 
 struct ttys {
     unsigned num;
@@ -18,16 +18,16 @@ struct ttys {
 
 struct ttys ttys = {.num = 0};
 
-unsigned add_tty(struct tty_funcs funcs) {
+void add_tty(struct tty_funcs funcs) {
     m_lock(&ttysMutex);
 
     if (ttyNum >= ttys.num) {
         if (ttys.num == 0) {
-            ttys.ttys = kmalloc(sizeof(struct ttys) + sizeof(struct tty));
+            ttys.ttys = static_cast<tty *>(kmalloc(sizeof(struct ttys) + sizeof(struct tty)));
             ttys.num = 1;
         } else {
             ttys.num *= 2;
-            ttys.ttys = krealloc(ttys.ttys, sizeof(struct ttys) + sizeof(struct tty) * ttys.num);
+            ttys.ttys = static_cast<tty *>(krealloc(ttys.ttys, sizeof(struct ttys) + sizeof(struct tty) * ttys.num));
         }
         assert2(ttys.ttys != NULL, "Couldn't allocate memory for ttys!");
     }

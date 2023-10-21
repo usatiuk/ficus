@@ -2,11 +2,11 @@
 // Created by Stepan Usatiuk on 12.08.2023.
 //
 
-#include "limine_fb.h"
+#include "limine_fb.hpp"
 
 #include <stddef.h>
 
-#include "kmem.h"
+#include "kmem.hpp"
 
 static volatile struct limine_framebuffer_request framebuffer_request = {
         .id = LIMINE_FRAMEBUFFER_REQUEST,
@@ -19,7 +19,7 @@ struct {
     uint64_t len;
 } framebufferAddrs[10];
 
-void limine_fb_save_response(struct AddressSpace* boot_address_space) {
+void limine_fb_save_response(struct AddressSpace *boot_address_space) {
     if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1) {
         framebuffer_count = 0;
         return;
@@ -33,7 +33,7 @@ void limine_fb_save_response(struct AddressSpace* boot_address_space) {
     }
 }
 
-void limine_fb_remap(struct AddressSpace* space) {
+void limine_fb_remap(struct AddressSpace *space) {
     for (int i = 0; i < framebuffer_count; i++) {
         void *base = framebuffers[i].address;
         void *realbase = framebufferAddrs[i].base;

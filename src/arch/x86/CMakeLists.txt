@@ -1,27 +1,27 @@
 
 target_sources(kernel.elf PRIVATE
-        limine_mm.c
+        limine_mm.cpp
         task.asm
-        tty.c
-        kmem.c
+        tty.cpp
+        kmem.cpp
         kmain.asm
         paging.asm
         gdt.asm
         misc.asm
-        limine_fb.c
-        idt.c
-        serial.c
+        limine_fb.cpp
+        idt.cpp
+        serial.cpp
         idt.asm
-        globals.c
-        memman.c
-        timer.c
-        boot.c
-        io.c
-        task.c
-        paging.c
-        kmain.c
-        gdt.c
-        misc.c)
+        globals.cpp
+        memman.cpp
+        timer.cpp
+        boot.cpp
+        io.cpp
+        task.cpp
+        paging.cpp
+        kmain.cpp
+        gdt.cpp
+        misc.cpp)
 
 target_include_directories(kernel.elf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

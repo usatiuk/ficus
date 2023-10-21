@@ -2,10 +2,10 @@
 // Created by Stepan Usatiuk on 14.08.2023.
 //
 
-#include "timer.h"
+#include "timer.hpp"
 
-#include "idt.h"
-#include "io.h"
+#include "idt.hpp"
+#include "io.hpp"
 
 volatile uint64_t ticks;
 volatile uint64_t micros;

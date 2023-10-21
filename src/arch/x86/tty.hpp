@@ -5,7 +5,7 @@
 #ifndef OS1_TTY_H
 #define OS1_TTY_H
 
-#include "mutex.h"
+#include "mutex.hpp"
 #include <stdint.h>
 
 struct tty_funcs {
@@ -18,7 +18,7 @@ struct tty {
     struct tty_funcs funcs;
 };
 
-unsigned add_tty(struct tty_funcs);
+void add_tty(struct tty_funcs);
 void tty_putchar(struct tty *tty, char c);
 void tty_putstr(struct tty *tty, const char *str);
 

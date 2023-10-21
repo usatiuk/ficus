@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 13.08.2023.
 //
 
-#include "gdt.h"
-#include "misc.h"
+#include "gdt.hpp"
+#include "misc.hpp"
 
 static struct tss_entry_struct tss_entry;
 static struct tss_entry_struct tss_entry_user;

@@ -31,6 +31,11 @@ SECTIONS
     . += CONSTANT(MAXPAGESIZE);
 
     .rodata : {
+        ctors_begin = .;
+        *(.ctors)
+        *(.init_array)
+        ctors_end = .;
+
         *(.rodata .rodata.*)
     } :rodata
 
