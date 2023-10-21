@@ -156,14 +156,16 @@ static struct TaskListNode *pop_front_node(struct TaskList *list) {
 
 static void task_freer() {
     while (true) {
-        LockGuard l(TasksToFree_lock);
-        if (!peek_front(&TasksToFree)) {
-            yield_self();
-            continue;
-        }
-        assert2(peek_front(&TasksToFree) != NULL, "Sanity check");
-        while (peek_front(&TasksToFree) && peek_front(&TasksToFree)->state == TS_TO_REMOVE) {
-            free_task(pop_front(&TasksToFree));
+        sleep_self(10000);
+        {
+            LockGuard l(TasksToFree_lock);
+            if (peek_front(&TasksToFree) == NULL)
+                continue;
+
+            assert2(peek_front(&TasksToFree) != NULL, "Sanity check");
+            while (peek_front(&TasksToFree) && peek_front(&TasksToFree)->state == TS_TO_REMOVE) {
+                free_task(pop_front(&TasksToFree));
+            }
         }
     }
 }
@@ -264,7 +266,7 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
     }
 
     if (TasksToFreeTemp.cur && !UnblockedTasks_lock.test() && TasksToFree_lock.try_lock()) {
-        if (!TasksToFree.cur) {
+        if (peek_front(&TasksToFree) == NULL) {
             TasksToFree.cur = TasksToFreeTemp.cur;
             TasksToFree.last = TasksToFreeTemp.last;
             TasksToFreeTemp.cur = NULL;
