@@ -32,4 +32,7 @@ void *kmalloc(size_t n);
 void kfree(void *addr);
 void *krealloc(void *addr, size_t newsize);
 
+uint64_t get_heap_allocated();
+uint64_t get_heap_used();
+
 #endif

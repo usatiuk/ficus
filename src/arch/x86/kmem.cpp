@@ -13,10 +13,21 @@ uintptr_t KERN_HeapEnd;// Past the end
 
 static bool initialized = false;
 
+std::atomic<uint64_t> allocated = 0;
+std::atomic<uint64_t> used = 0;
+
+uint64_t get_heap_allocated() {
+    return allocated;
+}
+uint64_t get_heap_used() {
+    return used;
+}
+
 static Spinlock kmem_lock;
 
 void init_kern_heap() {
     KERN_HeapBegin = static_cast<HeapEntry *>(get4k());
+    allocated.fetch_add(4096);
     KERN_HeapBegin->magic = KERN_HeapMagicFree;
     KERN_HeapBegin->len = 4096 - (sizeof(struct HeapEntry));
     KERN_HeapBegin->next = NULL;
@@ -34,6 +45,7 @@ static void extend_heap(size_t n_pages) {
         map((void *) KERN_HeapEnd, (void *) HHDM_V2P(p), PAGE_RW, KERN_AddressSpace);
         KERN_HeapEnd += 4096;
     }
+    allocated.fetch_add(n_pages * 4096);
 }
 
 // n is required length!
@@ -156,6 +168,7 @@ void *kmalloc(size_t n) {
         res->magic = KERN_HeapMagicTaken;
     }
     for (size_t i = 0; i < n; i++) res->data[i] = 0xFEU;
+    used.fetch_add(n);
     return res->data;
 }
 
@@ -220,6 +233,7 @@ static struct HeapEntry *try_shrink_heap(struct HeapEntry *entry) {
         uint64_t total_pages = totallen / 4096;
         for (uint64_t i = 0; i < total_pages; i++) {
             free4k((void *) HHDM_P2V(virt2real((void *) (KERN_HeapEnd + 4096 * i), KERN_AddressSpace)));
+            allocated.fetch_sub(4096);
             unmap((void *) (KERN_HeapEnd + 4096 * i), KERN_AddressSpace);
         }
         return ret;
@@ -233,6 +247,8 @@ void kfree(void *addr) {
     LockGuard l(kmem_lock);
 
     struct HeapEntry *freed = (struct HeapEntry *) (addr - (sizeof(struct HeapEntry)));
+    used.fetch_sub(freed->len);
+
     struct HeapEntry *entry = KERN_HeapBegin;
     assert2(freed->magic == KERN_HeapMagicTaken, "Bad free!");
     assert2(freed->next == NULL, "Bad free!");
