@@ -206,10 +206,10 @@ public:
 
 int test_templates() {
 
-    //    SkipListTester SLTester;
-    //    SLTester.test();
-    //    SkipListSetTester SLSTester;
-    //    SLSTester.test();
+    SkipListTester SLTester;
+    SLTester.test();
+    SkipListSetTester SLSTester;
+    SLSTester.test();
     StringTester stringTester;
     stringTester.test();
     VectorTester vectorTester;

@@ -3,6 +3,7 @@
 //
 
 extern "C" void _hcf() {
+    //    *(volatile char *) (0) = 42;
     while (1)
         asm volatile("cli; hlt");
 }
