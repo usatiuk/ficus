@@ -30,6 +30,7 @@ struct Task {
     struct task_frame frame;
     struct AddressSpace *addressSpace;
     uint64_t *stack;
+    char *fxsave;
     char *name;
     enum TaskMode mode;
     uint64_t sleep_until;

@@ -5,6 +5,8 @@
 ; OBJECT_DEPENDS also doesn't seem to work...
 ; =!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
 
+extern temp_fxsave
+
 ; TODO: This is probably not enough
 %macro pushaq 0
     push rax
@@ -23,18 +25,7 @@
     push r14
     push r15
 
-    ; Ensure 16-byte alignment
-    ; This works as last bunch of bits in fxsave state aren't used
-    ; Fxsaved memory needs to be zeroed before!
-    mov rsi, 0x0000000000000000
-    times 64 push rsi
-
-    mov rsi, rsp
-    add rsi, 32
-    mov rdi, 0xFFFFFFFFFFFFFFF0
-    and rsi, rdi
-
-    fxsave64 [rsi]
+    fxsave64 [temp_fxsave]
 
     mov rdi, 0xdeadbe3fdeadb3ef ; IDT_GUARD
     push rdi ; IDT_GUARD
@@ -43,15 +34,7 @@
 %macro popaq 0
     add rsp, 8 ; remove IDT_GUARD
 
-    ; Ensure 16-byte alignment
-    ; This works as last bunch of bits in fxsave state aren't used
-    mov rsi, rsp
-    add rsi, 32
-    mov rdi, 0xFFFFFFFFFFFFFFF0
-    and rsi, rdi
-
-    fxrstor64 [rsi]
-    add rsp, 512
+    fxrstor64 [temp_fxsave]
 
     pop r15
     pop r14

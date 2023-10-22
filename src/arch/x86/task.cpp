@@ -16,6 +16,8 @@
 #include "timer.hpp"
 #include "tty.hpp"
 
+char temp_fxsave[512] __attribute__((aligned(16)));
+
 void sanity_check_frame(struct task_frame *cur_frame) {
     assert2((void *) cur_frame->ip != NULL, "Sanity check");
     assert2((void *) cur_frame->sp != NULL, "Sanity check");
@@ -60,6 +62,7 @@ static std::atomic<bool> initialized = false;
 static void free_task(struct Task *t) {
     kfree(t->stack);
     kfree(t->name);
+    kfree(t->fxsave);
     kfree(t);
 }
 
@@ -175,13 +178,16 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
     struct Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
     newt->stack = static_cast<uint64_t *>(kmalloc(TASK_SS));
     newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
+    newt->fxsave = static_cast<char *>(kmalloc(512));
     strcpy(name, newt->name);
 
     newt->frame.sp = ((((uintptr_t) newt->stack) + TASK_SS - 1) & (~0xFULL));// Ensure 16byte alignment
     newt->frame.ip = (uint64_t) fn;
     newt->frame.cs = GDTSEL(gdt_code);
     newt->frame.ss = GDTSEL(gdt_data);
-    for (int i = 0; i < 512; i++) newt->frame.ssestate[i] = 0;
+
+    for (int i = 0; i < 512; i++) newt->fxsave[i] = 0;
+
     newt->frame.flags = flags();
     newt->frame.guard = IDT_GUARD;
     newt->addressSpace = KERN_AddressSpace;
@@ -249,6 +255,7 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
 
     if (RunningTask) {
         RunningTask->task->frame = *cur_frame;
+        memcpy(RunningTask->task->fxsave, temp_fxsave, 512);
         if (RunningTask->task->state == TS_RUNNING) {
             assert2(RunningTask->next == NULL, "next should be removed from RunningTask!");
             append_task_node(&NextTasks, RunningTask);
@@ -315,6 +322,7 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
 
     RunningTask = next;
     *cur_frame = RunningTask->task->frame;
+    memcpy(temp_fxsave, RunningTask->task->fxsave, 512);
 
     sanity_check_frame(cur_frame);
 }

@@ -58,8 +58,6 @@ typedef struct {
 struct task_frame {
     uint64_t guard;
 
-    char ssestate[512];
-
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;
