@@ -20,6 +20,8 @@ _sse_setup:
     mov rax, cr4
     or ax, 3 << 9		;set CR4.OSFXSR and CR4.OSXMMEXCPT at the same time
     mov cr4, rax
+    finit
+    emms
     ret
 .noSSE:
     hlt
