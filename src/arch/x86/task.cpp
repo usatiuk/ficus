@@ -181,8 +181,9 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
     newt->fxsave = static_cast<char *>(kmalloc(512));
     strcpy(name, newt->name);
 
-    newt->frame.sp = ((((uintptr_t) newt->stack) + TASK_SS - 1) & (~0xFULL));// Ensure 16byte alignment
-    assert((newt->frame.sp & 0xFULL) == 0);
+    newt->frame.sp = ((((uintptr_t) newt->stack) + (TASK_SS - 9) - 1) & (~0xFULL)) + 8;// Ensure 16byte alignment
+    // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
+    assert((newt->frame.sp & 0xFULL) == 8);
 
     newt->frame.ip = (uint64_t) fn;
     newt->frame.cs = GDTSEL(gdt_code);
