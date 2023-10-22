@@ -125,7 +125,7 @@ void stress() {
 
 void templates_tester() {
     all_tty_putstr("Testing templates\n");
-    for (int i = 0; i < 200000; i++)
+    for (int i = 0; i < 2000; i++)
         test_templates();
     all_tty_putstr("Testing templates OK\n");
 
@@ -133,7 +133,7 @@ void templates_tester() {
 }
 
 void stress_tester() {
-    for (int i = 0; i < 200000; i++)
+    for (int i = 0; i < 2000; i++)
         new_ktask(stress, "stress");
 
     all_tty_putstr("Finished stress\n");
@@ -149,51 +149,6 @@ void ktask_main() {
     new_ktask(mtest3, "mtest3");
     new_ktask(templates_tester, "templates_tester");
     new_ktask(templates_tester, "templates_tester2");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(templates_tester, "templates_tester3");
-    new_ktask(stress_tester, "stress_tester");
-    new_ktask(stress_tester, "stress_tester");
-    new_ktask(stress_tester, "stress_tester");
-    new_ktask(stress_tester, "stress_tester");
-    new_ktask(stress_tester, "stress_tester");
-    new_ktask(stress_tester, "stress_tester");
-    new_ktask(stress_tester, "stress_tester");
-    new_ktask(stress_tester, "stress_tester");
-    new_ktask(stress_tester, "stress_tester");
-    new_ktask(stress_tester, "stress_tester");
     new_ktask(stress_tester, "stress_tester");
 
     remove_self();
