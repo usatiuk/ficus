@@ -57,6 +57,7 @@ typedef struct {
 // Assuming the compiler understands that this is pushed on the stack in the correct order
 struct task_frame {
     uint64_t guard;
+    uint64_t guard2;// To keep stack aligned after pushaq
 
     uint64_t r15;
     uint64_t r14;

@@ -28,11 +28,11 @@ void gdt_setup() {
     gdt_tss.unused = 0;
     gdt_tss.gran = 0;
     gdt_tss.base_high = (tss_base >> 24) & 0xFFFFFFFFFF;
-    
-    tss_entry.ist1 = ((uintptr_t) int_stack + INT_STACK_SIZE - 1) & (~0xFULL);
-    if ((tss_entry.ist1 & 0xFULL) != 0) _hcf();
-    tss_entry.rsp0 = ((uintptr_t) rsp_stack + RSP_STACK_SIZE - 1) & (~0xFULL);
-    if ((tss_entry.rsp0 & 0xFULL) != 0) _hcf();
+
+    tss_entry.ist1 = (((uintptr_t) int_stack + (INT_STACK_SIZE - 9) - 1) & (~0xFULL)) + 8;
+    if ((tss_entry.ist1 & 0xFULL) != 8) _hcf();
+    tss_entry.rsp0 = (((uintptr_t) rsp_stack + (RSP_STACK_SIZE - 9) - 1) & (~0xFULL)) + 8;
+    if ((tss_entry.rsp0 & 0xFULL) != 8) _hcf();
 
     barrier();// The asm function might clobber registers
     _gdt_setup();

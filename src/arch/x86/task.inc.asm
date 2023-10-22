@@ -29,10 +29,11 @@ extern temp_fxsave
 
     mov rdi, 0xdeadbe3fdeadb3ef ; IDT_GUARD
     push rdi ; IDT_GUARD
+    push rdi ; IDT_GUARD2 for alignment
 
 %endmacro
 %macro popaq 0
-    add rsp, 8 ; remove IDT_GUARD
+    add rsp, 16 ; remove IDT_GUARD
 
     fxrstor64 [temp_fxsave]
 
