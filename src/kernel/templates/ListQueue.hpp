@@ -13,17 +13,23 @@
 
 template<typename T>
 class ListQueue {
-private:
+public:
     struct Node {
         T val;
         Node *next;
     };
 
+private:
     Node *head = nullptr;
     Node *tail = nullptr;
 
 public:
     ListQueue() = default;
+    ~ListQueue() {
+        while (!empty()) {
+            pop_back();
+        }
+    }
 
     template<class... Args>
     void emplace_front(Args &&...args) {
@@ -60,6 +66,21 @@ public:
         auto old_tail = tail;
         tail = tail->next;
         delete old_tail;
+    }
+
+    Node *extract_back() {
+        if (!head) return nullptr;
+
+        if (tail == head) {
+            auto b = tail;
+            tail = nullptr;
+            head = nullptr;
+            return b;
+        }
+
+        auto old_tail = tail;
+        tail = tail->next;
+        return old_tail;
     }
 
     bool empty() {

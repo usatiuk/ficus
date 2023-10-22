@@ -35,6 +35,12 @@ public:
     T &operator*() const { return *ptr; }
 
     T *get() const noexcept { return ptr; }
+    
+    T *release() noexcept {
+        auto b = ptr;
+        ptr = nullptr;
+        return b;
+    }
 
 private:
     T *ptr = nullptr;
