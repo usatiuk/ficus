@@ -84,6 +84,15 @@ struct HeapEntry *split_entry(struct HeapEntry *what, size_t n) {
 
 void *kmalloc(size_t n) {
     assert(initialized);
+
+    if ((n & 0xFULL) != 0) {
+        size_t origN = n;
+        n += 15;
+        n &= ~0xFULL;
+        assert(n > origN);
+    }
+    assert((n & 0xFULL) == 0);
+
     struct HeapEntry *res = NULL;
     {
         LockGuard l(kmem_lock);
@@ -182,6 +191,8 @@ void *kmalloc(size_t n) {
         res->prev = NULL;
         res->magic = KERN_HeapMagicTaken;
     }
+    assert((((uintptr_t) res->data) & 0xFULL) == 0);
+
     for (size_t i = 0; i < n; i++) res->data[i] = 0xFEU;
     used.fetch_add(n);
     return res->data;

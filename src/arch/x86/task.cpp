@@ -182,6 +182,8 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
     strcpy(name, newt->name);
 
     newt->frame.sp = ((((uintptr_t) newt->stack) + TASK_SS - 1) & (~0xFULL));// Ensure 16byte alignment
+    assert((newt->frame.sp & 0xFULL) == 0);
+
     newt->frame.ip = (uint64_t) fn;
     newt->frame.cs = GDTSEL(gdt_code);
     newt->frame.ss = GDTSEL(gdt_data);

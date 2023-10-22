@@ -15,8 +15,8 @@ struct HeapEntry {
     struct HeapEntry *next;
     struct HeapEntry *prev;
     uint64_t len;
-    char data[];
-};
+    char data[] __attribute__((aligned(16)));
+} __attribute__((packed, aligned(32)));
 
 extern struct HeapEntry *KERN_HeapBegin;
 extern uintptr_t KERN_HeapEnd;// Past the end
