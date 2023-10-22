@@ -26,17 +26,16 @@ _yield_self_kern:
     pushf ; eflags
     PUSH r11; Push code segment
     push rsi ; instruction address to return to
-    pushaq
 
-    mov rdi, 0xdeadbe3fdeadb3ef ; IDT_GUARD
-    push rdi ; IDT_GUARD
+
+    pushaq
 
     ; pass the "pointer" to the stack as pointer to the interrupt_frame argument,
     ; the stack and the struct must match!
     mov rdi, rsp
 
     call switch_task
-    add rsp, 8 ; remove IDT_GUARD
+
     popaq
     iretq
 .end:

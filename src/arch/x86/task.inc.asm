@@ -36,8 +36,12 @@
 
     fxsave64 [rsi]
 
+    mov rdi, 0xdeadbe3fdeadb3ef ; IDT_GUARD
+    push rdi ; IDT_GUARD
+
 %endmacro
 %macro popaq 0
+    add rsp, 8 ; remove IDT_GUARD
 
     ; Ensure 16-byte alignment
     ; This works as last bunch of bits in fxsave state aren't used

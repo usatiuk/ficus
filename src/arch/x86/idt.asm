@@ -76,16 +76,11 @@ global pic1_irq_0
 pic1_irq_0:
     pushaq
 
-    mov rdi, 0xdeadbe3fdeadb3ef ; IDT_GUARD
-    push rdi ; IDT_GUARD
-
     ; pass the "pointer" to the stack as pointer to the interrupt_frame argument,
     ; the stack and the struct must match!
     mov rdi, rsp
 
     call pic1_irq_real_0
-
-    add rsp, 8 ; remove IDT_GUARD
 
     popaq
     iretq

@@ -165,11 +165,7 @@ uint16_t pic_get_isr(void) {
 
 extern "C" void pic1_irq_real_0(struct task_frame *frame) {
     timer_tick();
-    assert2(frame->guard == IDT_GUARD, "IDT Guard wrong!");
-    assert2((frame->ss == GDTSEL(gdt_data) || frame->ss == GDTSEL(gdt_data_user)), "SS wrong!");
-    switch_task_int(frame);
-    assert2(frame->guard == IDT_GUARD, "IDT Guard wrong!");
-    assert2((frame->ss == GDTSEL(gdt_data) || frame->ss == GDTSEL(gdt_data_user)), "SS wrong!");
+    switch_task(frame);
     PIC_sendEOI(0);
 }
 extern "C" void pic1_irq_real_1() {

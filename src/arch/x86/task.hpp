@@ -43,7 +43,6 @@ struct Task *new_ktask(void (*fn)(), const char *name);
 void remove_self();
 void sleep_self(uint64_t diff);
 extern "C" void switch_task(struct task_frame *cur_frame);
-void switch_task_int(struct task_frame *cur_frame);
 void wait_m_on_self(struct Mutex *m);
 void m_unlock_sched_hook(struct Mutex *m);
 void wait_cv_on_self(struct CV *cv);

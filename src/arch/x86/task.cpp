@@ -226,8 +226,24 @@ void yield_self() {
 
 
 extern "C" void switch_task(struct task_frame *cur_frame) {
+    assert2(!are_interrupts_enabled(), "Switching tasks with enabled interrupts!");
     if (!atomic_load(&initialized)) return;
     sanity_check_frame(cur_frame);
+
+    struct TaskListNode *node = WaitingTasks.cur;
+
+    while (node) {
+        if (node->task->sleep_until <= micros && node->task->state == TS_TO_SLEEP) {
+            assert2(node->task->sleep_until, "Sleeping until 0?");
+            node->task->sleep_until = 0;
+            node->task->state = TS_RUNNING;
+            append_task_node(&NextTasks, pop_front_node(&WaitingTasks));
+            node = WaitingTasks.cur;
+        } else {
+            break;
+        }
+    }
+
 
     assert2(!are_interrupts_enabled(), "Switching tasks with enabled interrupts!");
 
@@ -301,25 +317,6 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
     *cur_frame = RunningTask->task->frame;
 
     sanity_check_frame(cur_frame);
-}
-
-void switch_task_int(struct task_frame *cur_frame) {
-    assert2(!are_interrupts_enabled(), "Switching tasks with enabled interrupts!");
-    struct TaskListNode *node = WaitingTasks.cur;
-
-    while (node) {
-        if (node->task->sleep_until <= micros && node->task->state == TS_TO_SLEEP) {
-            assert2(node->task->sleep_until, "Sleeping until 0?");
-            node->task->sleep_until = 0;
-            node->task->state = TS_RUNNING;
-            append_task_node(&NextTasks, pop_front_node(&WaitingTasks));
-            node = WaitingTasks.cur;
-        } else {
-            break;
-        }
-    }
-
-    switch_task(cur_frame);
 }
 
 void wait_m_on_self(struct Mutex *m) {
