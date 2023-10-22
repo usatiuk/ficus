@@ -5,6 +5,7 @@
 #include "TestTemplates.hpp"
 
 
+#include "ListQueue.hpp"
 #include "PointersCollection.hpp"
 #include "SkipList.hpp"
 #include "SkipListSet.hpp"
@@ -204,6 +205,50 @@ public:
     }
 };
 
+void test_unique_ptr() {
+    UniquePtr<String> ptr("Hello");
+    assert(*ptr == "Hello");
+}
+
+void test_list_queue() {
+    ListQueue<int> lq;
+    for (int i = 0; i < 5; i++) {
+        assert(lq.empty());
+        lq.emplace_front(1);
+        assert(!lq.empty());
+        assert(lq.back() == 1);
+        lq.pop_back();
+
+        assert(lq.empty());
+        lq.emplace_front(2);
+        lq.emplace_front(3);
+        assert(!lq.empty());
+        assert(lq.back() == 2);
+        lq.pop_back();
+        assert(!lq.empty());
+        assert(lq.back() == 3);
+        lq.pop_back();
+        assert(lq.empty());
+
+        assert(lq.empty());
+        lq.emplace_front(2);
+        lq.emplace_front(3);
+        assert(!lq.empty());
+        assert(lq.back() == 2);
+        lq.pop_back();
+        assert(!lq.empty());
+        assert(lq.back() == 3);
+        lq.emplace_front(4);
+        assert(!lq.empty());
+        assert(lq.back() == 3);
+        lq.pop_back();
+        assert(!lq.empty());
+        assert(lq.back() == 4);
+        lq.pop_back();
+        assert(lq.empty());
+    }
+}
+
 int test_templates() {
 
     SkipListTester SLTester;
@@ -218,5 +263,7 @@ int test_templates() {
     sharedPtrTester.test();
     COWTester cowTester;
     cowTester.test();
+    test_unique_ptr();
+    test_list_queue();
     return 0;
 }

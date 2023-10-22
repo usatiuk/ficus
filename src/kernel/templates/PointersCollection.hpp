@@ -8,13 +8,46 @@
 class SharedPtrTester;
 
 template<typename T>
+class UniquePtr {
+public:
+    UniquePtr() = default;
+
+    template<class... Args>
+    explicit UniquePtr(Args &&...args) : ptr(new T(std::forward<Args>(args)...)) {}
+
+    explicit UniquePtr(T *data) : ptr(data) {}
+
+    ~UniquePtr() {
+        if (ptr == nullptr) return;
+        delete ptr;
+    }
+
+    UniquePtr(UniquePtr const &other) = delete;
+    UniquePtr &operator=(UniquePtr other) = delete;
+
+    UniquePtr(UniquePtr &&other) {
+        ptr = other.ptr;
+        other.ptr = nullptr;
+    }
+
+    T *operator->() const { return ptr; }
+
+    T &operator*() const { return *ptr; }
+
+    T *get() const noexcept { return ptr; }
+
+private:
+    T *ptr = nullptr;
+};
+
+template<typename T>
 class SharedPtr {
     friend SharedPtrTester;
 
 public:
     SharedPtr() = default;
 
-    SharedPtr(T *data) : ptr(data), uses(new int(1)) {}
+    explicit SharedPtr(T *data) : ptr(data), uses(new int(1)) {}
 
     ~SharedPtr() {
         if (ptr == nullptr || uses == nullptr) return;
@@ -48,7 +81,7 @@ public:
 
     T *get() const noexcept { return ptr; }
 
-    int useCount() const { return *uses; }
+    [[nodiscard]] int useCount() const { return *uses; }
 
 private:
     T *ptr = nullptr;
@@ -72,9 +105,9 @@ private:
 public:
     COWPointer() = default;
 
-    COWPointer(T *data) : ptr(data) {}
+    explicit COWPointer(T *data) : ptr(data) {}
 
-    COWPointer(SharedPtr<T> data) : ptr(std::move(data)) {}
+    explicit COWPointer(SharedPtr<T> data) : ptr(std::move(data)) {}
 
     COWPointer(COWPointer &&other) = default;
 
