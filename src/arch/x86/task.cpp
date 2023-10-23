@@ -18,6 +18,7 @@
 char temp_fxsave[512] __attribute__((aligned(16)));
 
 void sanity_check_frame(struct task_frame *cur_frame) {
+    assert((((uintptr_t) cur_frame) & 0xFULL) == 0);
     assert2((void *) cur_frame->ip != NULL, "Sanity check");
     assert2((void *) cur_frame->sp != NULL, "Sanity check");
     assert2(cur_frame->guard == IDT_GUARD, "IDT Guard wrong!");
