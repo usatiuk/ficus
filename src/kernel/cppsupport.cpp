@@ -72,3 +72,14 @@ void operator delete(void *p, size_t n) {
 void operator delete[](void *p, size_t n) {
     kfree(p);
 }
+
+extern "C" {
+
+void *__dso_handle = nullptr;
+
+// Do we really care about destructors at kernel exit?
+int __cxa_atexit(void (*f)(void *), void *objptr, void *dso) {
+    writestr("Something registered\n");
+    return 0;
+};
+};

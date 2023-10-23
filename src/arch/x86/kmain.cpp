@@ -3,6 +3,7 @@
 //
 #include <cstddef>
 
+#include "LockGuard.hpp"
 #include "TestTemplates.hpp"
 #include "globals.hpp"
 #include "kmem.hpp"
@@ -79,31 +80,34 @@ void freeprinter() {
     }
 }
 
-static struct Mutex testmutex;
+static Mutex testmutex;
 
 void mtest1() {
-    m_lock(&testmutex);
-    all_tty_putstr("Locked1\n");
-    sleep_self(100000);
-    m_unlock(&testmutex);
+    {
+        LockGuard l(testmutex);
+        all_tty_putstr("Locked1\n");
+        sleep_self(100000);
+    }
     all_tty_putstr("Unlocked1\n");
     remove_self();
 }
 
 void mtest2() {
-    m_lock(&testmutex);
-    all_tty_putstr("Locked2\n");
-    sleep_self(100000);
-    m_unlock(&testmutex);
+    {
+        LockGuard l(testmutex);
+        all_tty_putstr("Locked2\n");
+        sleep_self(100000);
+    }
     all_tty_putstr("Unlocked2\n");
     remove_self();
 }
 
 void mtest3() {
-    m_lock(&testmutex);
-    all_tty_putstr("Locked3\n");
-    sleep_self(100000);
-    m_unlock(&testmutex);
+    {
+        LockGuard l(testmutex);
+        all_tty_putstr("Locked3\n");
+        sleep_self(100000);
+    }
     all_tty_putstr("Unlocked3\n");
     remove_self();
 }
@@ -142,6 +146,9 @@ void stress_tester() {
 }
 
 void ktask_main() {
+    struct tty_funcs serial_tty = {.putchar = write_serial};
+    add_tty(serial_tty);
+
     new_ktask(ktask, "one");
     new_ktask(freeprinter, "freeprinter");
     new_ktask(mtest1, "mtest1");
@@ -164,9 +171,6 @@ extern void (*ctors_begin[])();
 extern void (*ctors_end[])();
 
 void kmain() {
-    struct tty_funcs serial_tty = {.putchar = write_serial};
-    add_tty(serial_tty);
-
     for (void (**ctor)() = ctors_begin; ctor < ctors_end; ctor++)
         (*ctor)();
 

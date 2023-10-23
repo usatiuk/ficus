@@ -5,7 +5,6 @@
 #include "task.hpp"
 #include "LockGuard.hpp"
 #include "Spinlock.hpp"
-#include "cv.hpp"
 #include "gdt.hpp"
 #include "kmem.hpp"
 #include "misc.hpp"
@@ -330,64 +329,24 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
     sanity_check_frame(cur_frame);
 }
 
-void wait_m_on_self(struct Mutex *m) {
-    if (!m->waiters) {
-        m->waiters = static_cast<TaskList *>(kmalloc(sizeof(struct TaskList)));
-        m->waiters->cur = NULL;
-        m->waiters->last = NULL;
-    }
-    // TODO: lock-free?
-    NO_INT(append_task_node(m->waiters, RunningTask);
+void self_block() {
+    RunningTask->task->state = TS_BLOCKED;
+    yield_self();
+}
+
+void self_block(Spinlock &to_unlock) {
+    NO_INT(to_unlock.unlock();
            RunningTask->task->state = TS_BLOCKED;)
     yield_self();
 }
 
-void m_unlock_sched_hook(struct Mutex *m) {
-    struct TaskListNode *newt = NULL;
-
-    NO_INT(if (m->waiters) {
-        newt = pop_front_node(m->waiters);
-    })
-
-    if (newt) {
-        newt->task->state = TS_RUNNING;
-        {
-            LockGuard l(UnblockedTasks_lock);
-            append_task_node(&UnblockedTasks, newt);
-        }
+void unblock(Task *what) {
+    what->state = TS_RUNNING;
+    {
+        LockGuard l(UnblockedTasks_lock);
+        append_task(&UnblockedTasks, what);
     }
-}
-
-
-void wait_cv_on_self(struct CV *cv) {
-    if (!cv->waiters) {
-        cv->waiters = static_cast<TaskList *>(kmalloc(sizeof(struct TaskList)));
-        cv->waiters->cur = NULL;
-        cv->waiters->last = NULL;
-    }
-    // TODO: lock-free?
-    NO_INT(append_task_node(cv->waiters, RunningTask);
-           RunningTask->task->state = TS_BLOCKED;)
-    yield_self();
-}
-
-void cv_unlock_sched_hook(struct CV *cv, int who) {
-    struct TaskListNode *newt = NULL;
-    do {
-        NO_INT(if (cv->waiters) {
-            newt = pop_front_node(cv->waiters);
-        })
-
-        if (newt) {
-            newt->task->state = TS_RUNNING;
-            {
-                LockGuard l(UnblockedTasks_lock);
-                append_task_node(&UnblockedTasks, newt);
-            }
-        }
-    } while (newt && (who == CV_NOTIFY_ALL));
-}
-
+};
 
 struct Task *cur_task() {
     if (!RunningTask) return NULL;

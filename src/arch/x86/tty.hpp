@@ -6,16 +6,17 @@
 #define OS1_TTY_H
 
 #include "mutex.hpp"
-#include <stdint.h>
 
 struct tty_funcs {
     void (*putchar)(char);
 };
 
 struct tty {
+    Mutex lock;
     unsigned id;
-    struct Mutex lock;
-    struct tty_funcs funcs;
+    tty_funcs funcs;
+
+    tty(unsigned id, tty_funcs funcs) : id(id), funcs(funcs) {}
 };
 
 void add_tty(struct tty_funcs);

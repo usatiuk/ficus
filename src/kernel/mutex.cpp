@@ -3,73 +3,78 @@
 //
 
 #include "mutex.hpp"
+#include "LockGuard.hpp"
 #include "serial.hpp"
 #include "task.hpp"
 #include "timer.hpp"
 
-void m_init(struct Mutex *m) {
-    atomic_init(&m->locked, false);
-    m->waiters = NULL;
-    m->spin_success = 127;
-    m->owner = NULL;
-}
 
-bool m_try_lock(struct Mutex *m) {
+bool Mutex::try_lock() {
     bool expected = false;
-    if (!m->locked.compare_exchange_strong(expected, true)) {
+    if (!locked.compare_exchange_strong(expected, true)) {
         return false;
     }
-    m->owner = cur_task();
+    owner = cur_task();
     return true;
 }
 
-void m_spin_lock(struct Mutex *m) {
-    while (!m_try_lock(m)) { __builtin_ia32_pause(); }
+void Mutex::spin_lock() {
+    while (!Mutex::try_lock()) { yield_self(); }
 }
 
-void m_lock(struct Mutex *m) {
-    bool spin_success = false;
+void Mutex::lock() {
+    bool spinned = false;
 
-    if (m_try_lock(m)) {
-        if (m->spin_success < 255)
-            m->spin_success++;
+    if (Mutex::try_lock()) {
+        if (spin_success < 255)
+            spin_success++;
         return;
     }
 
-    if (m->spin_success >= 127) {
+    if (spin_success >= 127) {
         uint64_t startMicros = micros;
         while (micros - startMicros < 10) {
 
-            if (m_try_lock(m)) {
-                spin_success = true;
+            if (Mutex::try_lock()) {
+                spinned = true;
                 break;
             }
 
-            __builtin_ia32_pause();
+            yield_self();
         }
     }
 
-    if (spin_success) {
-        if (m->spin_success < 255)
-            m->spin_success++;
+    if (spinned) {
+        if (spin_success < 255)
+            spin_success++;
         return;
     } else {
-        if (m->spin_success > 0)
-            m->spin_success--;
+        if (spin_success > 0)
+            spin_success--;
 
-        while (!m_try_lock(m)) {
-            wait_m_on_self(m);
+        while (!Mutex::try_lock()) {
+            waiters_lock.lock();
+            waiters.emplace_front(cur_task());
+            self_block(waiters_lock);
         }
     }
 }
 
-void m_unlock(struct Mutex *m) {
+void Mutex::unlock() {
     bool expected = true;
-    if (!m->locked.compare_exchange_strong(expected, false))
+    if (!locked.compare_exchange_strong(expected, false))
         writestr("Unlocking an unlocked mutex!\n");
-    m_unlock_sched_hook(m);
+    Task *t = nullptr;
+    {
+        LockGuard l(waiters_lock);
+        if (!waiters.empty()) {
+            t = waiters.back();
+            waiters.pop_back();
+        }
+    }
+    if (t) unblock(t);
 }
 
-bool m_test(struct Mutex *m) {
-    return atomic_load(&m->locked);
+bool Mutex::test() {
+    return atomic_load(&locked);
 }
