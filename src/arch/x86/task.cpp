@@ -313,14 +313,7 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
 
     if (UnblockedTasks_lock.try_lock()) {
         while (peek_front(&UnblockedTasks)) {
-            if (NextTasks.last) {
-                NextTasks.last->next = UnblockedTasks.cur;
-                NextTasks.last = UnblockedTasks.last;
-                UnblockedTasks.last = nullptr;
-                UnblockedTasks.cur = nullptr;
-            } else {
-                append_task_node(&NextTasks, pop_front_node(&UnblockedTasks));
-            }
+            append_task_node(&NextTasks, pop_front_node(&UnblockedTasks));
         }
         UnblockedTasks_lock.unlock();
     }
