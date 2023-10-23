@@ -5,7 +5,7 @@
 #include "TestTemplates.hpp"
 
 
-#include "ListQueue.hpp"
+#include "List.hpp"
 #include "PointersCollection.hpp"
 #include "SkipList.hpp"
 #include "SkipListSet.hpp"
@@ -210,8 +210,8 @@ void test_unique_ptr() {
     assert(*ptr == "Hello");
 }
 
-void test_list_queue() {
-    ListQueue<int> lq;
+void test_list() {
+    List<int> lq;
     for (int i = 0; i < 5; i++) {
         assert(lq.empty());
         lq.emplace_front(1);
@@ -264,6 +264,6 @@ int test_templates() {
     COWTester cowTester;
     cowTester.test();
     test_unique_ptr();
-    test_list_queue();
+    test_list();
     return 0;
 }

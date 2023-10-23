@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 21.10.2023.
 //
 
-#ifndef OS2_LISTQUEUE_HPP
-#define OS2_LISTQUEUE_HPP
+#ifndef OS2_LIST_HPP
+#define OS2_LIST_HPP
 
 #include <atomic>
 #include <cstdint>
@@ -12,7 +12,7 @@
 #include "serial.hpp"
 
 template<typename T>
-class ListQueue {
+class List {
 public:
     struct Node {
         T val;
@@ -24,8 +24,8 @@ private:
     Node *tail = nullptr;
 
 public:
-    ListQueue() = default;
-    ~ListQueue() {
+    List() = default;
+    ~List() {
         while (!empty()) {
             pop_back();
         }
@@ -90,4 +90,4 @@ public:
 };
 
 
-#endif//OS2_LISTQUEUE_HPP
+#endif//OS2_LIST_HPP
