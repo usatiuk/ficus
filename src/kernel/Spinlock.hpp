@@ -18,6 +18,7 @@ public:
         if (!locked.compare_exchange_strong(expected, true)) {
             return false;
         }
+        owner = cur_task();
         return true;
     }
 
@@ -27,16 +28,22 @@ public:
 
     void unlock() {
         bool expected = true;
-        if (!locked.compare_exchange_strong(expected, false))
-            writestr("Unlocking an unlocked spinlock!\n");
+        assert(owner == cur_task());
+        owner = nullptr;
+        assert(locked.compare_exchange_strong(expected, false));
+        //        if (!locked.compare_exchange_strong(expected, false))
+        //            writestr("Unlocking an unlocked spinlock!\n");
     }
 
     bool test() {
         return locked.load();
     }
 
+    Task *get_owner() { return locked.load() ? owner : nullptr; }
+
 private:
     std::atomic<bool> locked = false;
+    Task *owner;
 };
 
 static_assert(std::is_trivially_copyable_v<Spinlock> == true);
