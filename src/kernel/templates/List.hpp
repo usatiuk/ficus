@@ -36,6 +36,11 @@ public:
         emplace_front(new Node{std::forward<Args>(args)..., nullptr});
     }
 
+    template<class... Args>
+    Node* create_node(Args &&...args) {
+        return new Node{std::forward<Args>(args)..., nullptr};
+    }
+
     void emplace_front(Node *new_node) {
         if (head) {
             assert(tail != nullptr);

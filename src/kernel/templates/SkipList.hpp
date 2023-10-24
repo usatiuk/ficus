@@ -224,8 +224,8 @@ public:
                 toUpdate[i] = cur;
             }
             cur = cur->next[0];
-
-            if (cur->key == k && !cur->end) return nullptr;
+            // Without this it's a multimap TODO: multiple variants of this and merge it with set
+            //            if (cur->key == k && !cur->end) return nullptr;
         }
 
         size_t newLevel = randomL();
@@ -350,18 +350,19 @@ public:
     }
 
 
+    // TODO: pair
     struct SkipListIterator {
         //        using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = const V;
+        using value_type = Node;
         using pointer = value_type *;
         using reference = value_type &;
 
         explicit SkipListIterator(Node *n) : n(std::move(n)){};
 
-        reference operator*() const { return n->data; }
+        reference operator*() const { return *n; }
 
-        pointer operator->() const { return &(n->data); }
+        pointer operator->() const { return n; }
 
         SkipListIterator &operator--() {
             if (!n->end)
@@ -389,12 +390,12 @@ public:
         Node *n;
     };
 
-    //        using iterator = SkipListIterator;
-    using const_iterator = SkipListIterator;
+    using iterator = SkipListIterator;
+    //    using const_iterator = SkipListIterator;
 
-    const_iterator begin() const { return SkipListIterator(root->next[0]); }
+    iterator begin() const { return SkipListIterator(root->next[0]); }
 
-    const_iterator end() const { return SkipListIterator(endnode); }
+    iterator end() const { return SkipListIterator(endnode); }
 
     //    void print() const {
     //        std::cout << "LIST STATUS" << std::endl;

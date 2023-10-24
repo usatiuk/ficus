@@ -18,9 +18,7 @@ enum TaskMode {
 
 enum TaskState {
     TS_RUNNING,
-    TS_BLOCKED,
-    TS_TO_REMOVE,
-    TS_TO_SLEEP
+    TS_BLOCKED
 };
 
 struct Task {
