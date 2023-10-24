@@ -192,7 +192,7 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
 
     if (RunningTask) {
         RunningTask->val->frame = *cur_frame;
-        memcpy(RunningTask->val->fxsave, temp_fxsave, 512);
+        __builtin_memcpy(RunningTask->val->fxsave, temp_fxsave, 512);
         if (RunningTask->val->state == TS_RUNNING) {
             NextTasks.emplace_front(RunningTask);
         }
@@ -208,7 +208,7 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
 
     RunningTask = next;
     *cur_frame = RunningTask->val->frame;
-    memcpy(temp_fxsave, RunningTask->val->fxsave, 512);
+    __builtin_memcpy(temp_fxsave, RunningTask->val->fxsave, 512);
 
     sanity_check_frame(cur_frame);
 }
