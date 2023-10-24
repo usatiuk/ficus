@@ -60,17 +60,17 @@ void freeprinter() {
     char buf[69];
     while (1) {
         all_tty_putstr("=====\n");
-        itoa(get_free(), buf, 10);
+        itoa(get_free() * 1024, buf, 10);
         all_tty_putstr("Free mem: ");
         all_tty_putstr(buf);
         write_serial('\n');
 
-        itoa(get_heap_allocated() / 1024, buf, 10);
+        itoa(get_heap_allocated(), buf, 10);
         all_tty_putstr("Heap allocated: ");
         all_tty_putstr(buf);
         write_serial('\n');
 
-        itoa(get_heap_used() / 1024, buf, 10);
+        itoa(get_heap_used(), buf, 10);
         all_tty_putstr("Heap used: ");
         all_tty_putstr(buf);
         write_serial('\n');

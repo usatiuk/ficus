@@ -54,7 +54,7 @@ void Mutex::lock() {
 
         while (!Mutex::try_lock()) {
             waiters_lock.lock();
-            waiters.emplace_front(cur_task());
+            waiters.emplace_front(extract_running_task_node());
             self_block(waiters_lock);
         }
     }
@@ -64,7 +64,7 @@ void Mutex::unlock() {
     bool expected = true;
     if (!locked.compare_exchange_strong(expected, false))
         writestr("Unlocking an unlocked mutex!\n");
-    Task *t = nullptr;
+    List<Task *>::Node *t = nullptr;
     {
         LockGuard l(waiters_lock);
         if (!waiters.empty()) {

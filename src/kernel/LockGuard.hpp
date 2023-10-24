@@ -15,6 +15,8 @@ public:
         lock->unlock();
     }
 
+    LockGuard(LockGuard const &d) = delete;
+
 private:
     T *lock;
 };

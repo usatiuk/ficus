@@ -5,6 +5,7 @@
 #ifndef OS1_TASK_H
 #define OS1_TASK_H
 
+#include "List.hpp"
 #include "idt.hpp"
 
 #define TASK_SS 16384
@@ -33,18 +34,19 @@ struct Task {
 };
 
 struct Task *cur_task();
+List<Task *>::Node *extract_running_task_node();
 
 void init_tasks();
 struct Task *new_ktask(void (*fn)(), const char *name);
 void remove_self();
 void sleep_self(uint64_t diff);
 
-
 void self_block();
 
 class Spinlock;
 void self_block(Spinlock &to_unlock);
 void unblock(Task *what);
+void unblock(List<Task *>::Node *what);
 
 extern "C" void switch_task(struct task_frame *cur_frame);
 

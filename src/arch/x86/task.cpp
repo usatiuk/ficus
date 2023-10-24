@@ -34,11 +34,11 @@ List<Task *> NextTasks;
 
 // Task freer
 Spinlock TasksToFree_lock;
-List<Task *> TasksToFree;
+List<List<Task *>::Node *> TasksToFree;
 
 // Waiting
 Spinlock WaitingTasks_lock;
-SkipList<uint64_t, Task *> WaitingTasks;
+SkipList<uint64_t, List<Task *>::Node *> WaitingTasks;
 
 static std::atomic<bool> initialized = false;
 
@@ -55,9 +55,10 @@ static void task_freer() {
         {
             LockGuard l(TasksToFree_lock);
             while (!TasksToFree.empty()) {
-                auto t = TasksToFree.back();
+                List<Task *>::Node *t = TasksToFree.back();
                 TasksToFree.pop_back();
-                free_task(t);
+                free_task(t->val);
+                delete t;
             }
         }
     }
@@ -100,7 +101,8 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
 void remove_self() {
     {
         LockGuard l(TasksToFree_lock);
-        TasksToFree.emplace_front(cur_task());
+        assert(RunningTask != nullptr);
+        TasksToFree.emplace_front(RunningTask);
         NextTasks_lock.lock();
         RunningTask->val->state = TS_BLOCKED;
     }
@@ -117,12 +119,13 @@ void sleep_self(uint64_t diff) {
 
             // TODO this is all ugly
             uint64_t l1 = 0;
-            for(auto cur = &*WaitingTasks.begin(); !cur->end; cur=cur->next[0])l1++;
+            for (auto cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) l1++;
 
-           assert(WaitingTasks.add(wake_time, cur_task()) != nullptr);
+            assert(RunningTask != nullptr);
+            assert(WaitingTasks.add(wake_time, RunningTask) != nullptr);
 
             uint64_t l2 = 0;
-            for(auto cur = &*WaitingTasks.begin(); !cur->end; cur=cur->next[0])l2++;
+            for (auto cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) l2++;
 
             assert(l2 - l1 == 1);
             NextTasks_lock.lock();
@@ -146,27 +149,26 @@ static void task_waker() {
         {
             LockGuard l(WaitingTasks_lock);
 
-            while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->key <= micros && WaitingTasks.begin()->data->state != TS_RUNNING) {
+            while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->key <= micros && WaitingTasks.begin()->data->val->state != TS_RUNNING) {
                 auto *node = &*WaitingTasks.begin();
                 auto task = WaitingTasks.begin()->data;
 
                 // TODO this is all ugly
                 uint64_t l1 = 0;
-                for(auto cur = node; !cur->end; cur=cur->next[0])l1++;
+                for (auto cur = node; !cur->end; cur = cur->next[0]) l1++;
 
                 WaitingTasks.erase(node, node->next[0], false);
 
                 uint64_t l2 = 0;
-                for(auto *cur = &*WaitingTasks.begin(); !cur->end; cur=cur->next[0])l2++;
+                for (auto *cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) l2++;
 
                 assert(l1 - l2 == 1);
-                task->sleep_until = 0;
-                task->state = TS_RUNNING;
+                task->val->sleep_until = 0;
+                task->val->state = TS_RUNNING;
 
-                auto new_node = NextTasks.create_node(task);
                 {
                     LockGuard l(NextTasks_lock);
-                    NextTasks.emplace_front(new_node);
+                    NextTasks.emplace_front(task);
                 }
             }
         }
@@ -237,7 +239,20 @@ void unblock(Task *what) {
     }
 };
 
+void unblock(List<Task *>::Node *what) {
+    what->val->state = TS_RUNNING;
+    {
+        LockGuard l(NextTasks_lock);
+        NextTasks.emplace_front(what);
+    }
+};
+
 struct Task *cur_task() {
     if (!RunningTask) return NULL;
     return RunningTask->val;
+}
+
+List<Task *>::Node *extract_running_task_node() {
+    if (!RunningTask) return nullptr;
+    return RunningTask;
 }

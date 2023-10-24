@@ -28,7 +28,7 @@ public:
 private:
     std::atomic<bool> locked = false;
 
-    List<Task *> waiters; // leaking List<Task *>::Node
+    List<List<Task *>::Node *> waiters;
     Spinlock waiters_lock;
 
     Task *owner = nullptr;
