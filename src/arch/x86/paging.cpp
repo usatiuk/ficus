@@ -8,21 +8,12 @@
 #include "misc.hpp"
 #include "serial.hpp"
 
-struct AddressSpace *KERN_AddressSpace;
-
-int init_addr_space(struct AddressSpace *space) {
-    assert2(space != NULL, "Got null!");
-    space->PML4 = static_cast<uint64_t *>(get4k());
-    if (space->PML4 == NULL) return 1;
-    return 0;
-}
-
 // Returns a free page frame in HHDM
-uint64_t *get_free_frame() {
+static uint64_t *get_free_frame() {
     uint64_t *res = static_cast<uint64_t *>(get4k());
-    if (res)
-        for (int j = 0; j < 512; j++)
-            res[j] = 0;
+    assert(res != nullptr);
+    for (int j = 0; j < 512; j++)
+        res[j] = 0;
     return res;
 }
 
@@ -34,19 +25,30 @@ static inline void invlpg(void *m) {
                  : "memory");
 }
 
-void *virt2real(void *virt, struct AddressSpace *space) {
+AddressSpace::AddressSpace() {
+    PML4 = static_cast<uint64_t *>(get4k());
+}
+
+AddressSpace::AddressSpace(uint64_t *PML4) : PML4(PML4) {}
+
+AddressSpace::~AddressSpace() {
+    // TODO:
+    free4k(PML4);
+}
+
+void *AddressSpace::virt2real(void *virt) {
     assert2(((uint64_t) virt & 0xFFF) == 0, "Trying to unmap non-aligned memory!");
 
     // Assuming everything related to paging is HHDM
-    assert2((uint64_t) space->PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
-    assert2((uint64_t) space->PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
+    assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
+    assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
 
     uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
     uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;
     uint64_t pdei = (uint64_t) virt >> 21 & 0x01FF;
     uint64_t ptsi = (uint64_t) virt >> 12 & 0x01FF;
 
-    uint64_t *pml4e = space->PML4 + pml4i;
+    uint64_t *pml4e = PML4 + pml4i;
     if (!((*pml4e) & PAGE_PRESENT)) return 0;
 
     uint64_t *pdpeb = (uint64_t *) HHDM_P2V((*pml4e & 0x000FFFFFFFFFF000ULL));
@@ -68,13 +70,13 @@ void *virt2real(void *virt, struct AddressSpace *space) {
     return (void *) (*ptse & 0x000FFFFFFFFFF000ULL);
 }
 
-int map(void *virt, void *real, uint32_t flags, struct AddressSpace *space) {
+int AddressSpace::map(void *virt, void *real, uint32_t flags) {
     assert2(((uint64_t) virt & 0xFFF) == 0, "Trying to map non-aligned memory!");
     assert2(((uint64_t) real & 0xFFF) == 0, "Trying to map to non-aligned memory!");
 
     // Assuming everything related to paging is HHDM
-    assert2((uint64_t) space->PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
-    assert2((uint64_t) space->PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
+    assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
+    assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
 
     uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
     uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;
@@ -82,7 +84,7 @@ int map(void *virt, void *real, uint32_t flags, struct AddressSpace *space) {
     uint64_t ptsi = (uint64_t) virt >> 12 & 0x01FF;
 
 
-    uint64_t *pml4e = space->PML4 + pml4i;
+    uint64_t *pml4e = PML4 + pml4i;
 
     if (!(*pml4e & PAGE_PRESENT)) {
         uint64_t *newp = get_free_frame();
@@ -123,19 +125,19 @@ int map(void *virt, void *real, uint32_t flags, struct AddressSpace *space) {
     invlpg((void *) ((uint64_t) virt & 0x000FFFFFFFFFF000ULL));
     return 1;
 }
-int unmap(void *virt, struct AddressSpace *space) {
+int AddressSpace::unmap(void *virt) {
     assert2(((uint64_t) virt & 0xFFF) == 0, "Trying to map non-aligned memory!");
 
     // Assuming everything related to paging is HHDM
-    assert2((uint64_t) space->PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
-    assert2((uint64_t) space->PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
+    assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
+    assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
 
     uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
     uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;
     uint64_t pdei = (uint64_t) virt >> 21 & 0x01FF;
     uint64_t ptsi = (uint64_t) virt >> 12 & 0x01FF;
 
-    uint64_t *pml4e = space->PML4 + pml4i;
+    uint64_t *pml4e = PML4 + pml4i;
 
     assert((*pml4e & PAGE_PRESENT));
 

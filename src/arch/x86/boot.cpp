@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstdint>
+#include <new>
 
 #include "gdt.hpp"
 #include "globals.hpp"
@@ -13,7 +14,11 @@
 #include "paging.hpp"
 #include "serial.hpp"
 
-struct AddressSpace BOOT_AddressSpace;
+AddressSpace *BOOT_AddressSpace;
+alignas(AddressSpace) char BOOT_AddressSpace_storage[sizeof(AddressSpace)];
+
+AddressSpace *KERN_AddressSpace;
+alignas(AddressSpace) char KERN_AddressSpace_storage[sizeof(AddressSpace)];
 
 extern void kmain();
 
@@ -42,27 +47,28 @@ extern "C" void _start(void) {
     barrier();
     map_hddm(get_cr3());
     barrier();
-    BOOT_AddressSpace.PML4 = (uint64_t *) HHDM_P2V(get_cr3());
+    new (BOOT_AddressSpace_storage) AddressSpace((uint64_t *) HHDM_P2V(get_cr3()));
+    BOOT_AddressSpace = reinterpret_cast<AddressSpace *>(BOOT_AddressSpace_storage);
 
-    limine_fb_save_response(&BOOT_AddressSpace);
+    limine_fb_save_response(BOOT_AddressSpace);
     limine_mm_save_response();
 
     parse_limine_memmap(limine_mm_entries, limine_mm_count, LIMINE_MEMMAP_USABLE);
 
-    KERN_AddressSpace = static_cast<AddressSpace *>(get4k());
-    assert2(!init_addr_space(KERN_AddressSpace), "Couldn't init kernel address space!");
-
+    uint64_t *KERN_AddressSpace_PML4 = static_cast<uint64_t *>(get4k());
     for (int i = 0; i < 512; i++)
-        ((struct AddressSpace *) (KERN_AddressSpace))->PML4[i] = 0x02;
+        KERN_AddressSpace_PML4[i] = 0x02;
+    map_hddm((uint64_t *) HHDM_V2P(KERN_AddressSpace_PML4));
 
-    map_hddm((uint64_t *) HHDM_V2P(((struct AddressSpace *) (KERN_AddressSpace))->PML4));
+    new (KERN_AddressSpace_storage) AddressSpace(KERN_AddressSpace_PML4);
+    KERN_AddressSpace = reinterpret_cast<AddressSpace *>(KERN_AddressSpace_storage);
 
     // TODO: Accurate kernel length
     for (int i = 0; i < 100000; i++) {
-        map((void *) (kernel_virt_base + i * 4096), (void *) (kernel_phys_base + i * 4096), PAGE_RW, KERN_AddressSpace);
+        KERN_AddressSpace->map((void *) (kernel_virt_base + i * 4096), (void *) (kernel_phys_base + i * 4096), PAGE_RW);
     }
 
-    uint64_t real_new_cr3 = (uint64_t) HHDM_V2P(((struct AddressSpace *) (KERN_AddressSpace))->PML4);
+    uint64_t real_new_cr3 = (uint64_t) HHDM_V2P(KERN_AddressSpace_PML4);
     uint64_t *new_stack_top = &KERN_stack[KERN_STACK_SIZE - 1];// Don't forget in which direction the stack grows...
 
     barrier();

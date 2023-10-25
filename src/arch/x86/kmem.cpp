@@ -34,7 +34,7 @@ void init_kern_heap() {
     KERN_HeapBegin->len = 4096 - (sizeof(struct HeapEntry));
     KERN_HeapBegin->next = NULL;
     KERN_HeapBegin->prev = NULL;
-    map((void *) KERN_HeapVirtBegin, (void *) HHDM_V2P(KERN_HeapBegin), PAGE_RW, KERN_AddressSpace);
+    KERN_AddressSpace->map((void *) KERN_HeapVirtBegin, (void *) HHDM_V2P(KERN_HeapBegin), PAGE_RW);
     KERN_HeapBegin = (struct HeapEntry *) KERN_HeapVirtBegin;
     KERN_HeapEnd = (KERN_HeapVirtBegin + 4096);
     initialized = true;
@@ -44,7 +44,7 @@ static void extend_heap(size_t n_pages) {
     for (size_t i = 0; i < n_pages; i++) {
         void *p = get4k();
         assert2(p != NULL, "Kernel out of memory!");
-        map((void *) KERN_HeapEnd, (void *) HHDM_V2P(p), PAGE_RW, KERN_AddressSpace);
+        KERN_AddressSpace->map((void *) KERN_HeapEnd, (void *) HHDM_V2P(p), PAGE_RW);
         KERN_HeapEnd += 4096;
     }
     allocated.fetch_add(n_pages * 4096);
@@ -263,9 +263,9 @@ static struct HeapEntry *try_shrink_heap(struct HeapEntry *entry) {
         assert(((uint64_t) totallen & 0xFFF) == 0);
         uint64_t total_pages = totallen / 4096;
         for (uint64_t i = 0; i < total_pages; i++) {
-            free4k((void *) HHDM_P2V(virt2real((void *) (KERN_HeapEnd + 4096 * i), KERN_AddressSpace)));
+            free4k((void *) HHDM_P2V(KERN_AddressSpace->virt2real((void *) (KERN_HeapEnd + 4096 * i))));
             allocated.fetch_sub(4096);
-            unmap((void *) (KERN_HeapEnd + 4096 * i), KERN_AddressSpace);
+            KERN_AddressSpace->unmap((void *) (KERN_HeapEnd + 4096 * i));
         }
         return ret;
     }
