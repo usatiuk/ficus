@@ -196,7 +196,6 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
         if (RunningTask->val->state == TS_RUNNING) {
             NextTasks.emplace_front(RunningTask);
         }
-        // TODO: leak of nodes
     }
 
     List<Task *>::Node *next = NextTasks.extract_back();
