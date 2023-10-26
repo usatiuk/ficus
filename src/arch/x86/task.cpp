@@ -6,6 +6,7 @@
 #include "LockGuard.hpp"
 #include "SkipList.hpp"
 #include "Spinlock.hpp"
+#include "VMA.hpp"
 #include "asserts.hpp"
 #include "gdt.hpp"
 #include "kmem.hpp"
@@ -23,7 +24,7 @@ void sanity_check_frame(struct task_frame *cur_frame) {
     assert2((void *) cur_frame->ip != NULL, "Sanity check");
     assert2((void *) cur_frame->sp != NULL, "Sanity check");
     assert2(cur_frame->guard == IDT_GUARD, "IDT Guard wrong!");
-    assert2((cur_frame->ss == GDTSEL(gdt_data) || cur_frame->ss == GDTSEL(gdt_data_user)), "SS wrong!");
+    assert2((cur_frame->ss == GDTSEL(gdt_data) || cur_frame->ss == GDTSEL(gdt_data_user)) | 0x3, "SS wrong!");
 }
 
 std::atomic<uint64_t> max_pid = 0;
@@ -123,6 +124,50 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
     }
     return newt;
 }
+struct Task *new_utask(void (*fn)(), const char *name) {
+    struct Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
+    newt->stack = static_cast<uint64_t *>(kmalloc(TASK_SS));
+    newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
+    newt->fxsave = static_cast<char *>(kmalloc(512));
+    strcpy(name, newt->name);
+
+    newt->frame.sp = ((((uintptr_t) newt->stack) + (TASK_SS - 9) - 1) & (~0xFULL)) + 8;// Ensure 16byte alignment
+    // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
+    assert((newt->frame.sp & 0xFULL) == 8);
+
+    newt->frame.ip = (uint64_t) fn;
+    newt->frame.cs = GDTSEL(gdt_code_user) | 0x3;
+    newt->frame.ss = GDTSEL(gdt_data_user) | 0x3;
+
+    for (int i = 0; i < 512; i++) newt->fxsave[i] = 0;
+
+    newt->frame.flags = flags();
+    newt->frame.guard = IDT_GUARD;
+    newt->addressSpace = new AddressSpace();
+    newt->vma = new VMA(newt->addressSpace);
+    newt->state = TS_RUNNING;
+    newt->mode = TASKMODE_USER;
+    newt->pid = max_pid.fetch_add(1);
+    newt->used_time = 0;
+
+    newt->vma->map_kern();
+
+    sanity_check_frame(&newt->frame);
+
+    auto new_node = NextTasks.create_node(newt);
+
+    {
+        LockGuard l(NextTasks_lock);
+        NextTasks.emplace_front(new_node);
+    }
+
+    {
+        LockGuard l(AllTasks_lock);
+        AllTasks.add(newt->pid, newt);
+    }
+    return newt;
+}
+
 
 void remove_self() {
     {
@@ -220,9 +265,12 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
     uint64_t prevSwitchMicros = lastSwitchMicros;
     lastSwitchMicros = micros;
 
+    AddressSpace *oldspace = nullptr;
+
     if (RunningTask) {
         RunningTask->val->frame = *cur_frame;
         __builtin_memcpy(RunningTask->val->fxsave, temp_fxsave, 512);
+        oldspace = RunningTask->val->addressSpace;
         RunningTask->val->used_time.fetch_add(lastSwitchMicros - prevSwitchMicros);
         if (RunningTask->val->state == TS_RUNNING) {
             NextTasks.emplace_front(RunningTask);
@@ -239,6 +287,16 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
     RunningTask = next;
     *cur_frame = RunningTask->val->frame;
     __builtin_memcpy(temp_fxsave, RunningTask->val->fxsave, 512);
+
+    AddressSpace *newspace = RunningTask->val->addressSpace;
+
+    if (newspace != oldspace) {
+        uint64_t real_new_cr3 = (uint64_t) HHDM_V2P(newspace->get_cr3());
+        __asm__ volatile("movq %[real_new_cr3], %%cr3"
+                         :
+                         : [real_new_cr3] "r"(real_new_cr3)
+                         : "memory");
+    }
 
     sanity_check_frame(cur_frame);
 }

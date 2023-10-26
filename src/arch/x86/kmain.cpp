@@ -187,6 +187,12 @@ void stress_tester() {
     remove_self();
 }
 
+void user_task() {
+    while (true) {
+        __builtin_ia32_pause();
+    }
+}
+
 void ktask_main() {
     struct tty_funcs serial_tty = {.putchar = write_serial};
     add_tty(serial_tty);
@@ -200,6 +206,8 @@ void ktask_main() {
     new_ktask(templates_tester, "templates_tester");
     new_ktask(templates_tester, "templates_tester2");
     new_ktask(stress_tester, "stress_tester");
+
+    new_utask(user_task, "user");
 
     remove_self();
 }

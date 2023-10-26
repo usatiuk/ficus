@@ -24,11 +24,15 @@ enum TaskState {
     TS_BLOCKED
 };
 
+struct AddressSpace;
+class VMA;
+
 struct Task {
     struct task_frame frame;
     uint64_t pid;
     std::atomic<uint64_t> used_time;
-    struct AddressSpace *addressSpace;
+    AddressSpace *addressSpace;
+    VMA *vma;
     uint64_t *stack;
     char *fxsave;
     char *name;
@@ -42,6 +46,7 @@ List<Task *>::Node *extract_running_task_node();
 
 void init_tasks();
 struct Task *new_ktask(void (*fn)(), const char *name);
+struct Task *new_utask(void (*fn)(), const char *name);
 void remove_self();
 void sleep_self(uint64_t diff);
 

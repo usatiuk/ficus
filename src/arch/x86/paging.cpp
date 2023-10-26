@@ -27,6 +27,8 @@ static inline void invlpg(void *m) {
 
 AddressSpace::AddressSpace() {
     PML4 = static_cast<uint64_t *>(get4k());
+    for (int j = 0; j < 512; j++)
+        PML4[j] = 0;
 }
 
 AddressSpace::AddressSpace(uint64_t *PML4) : PML4(PML4) {}
@@ -121,7 +123,8 @@ int AddressSpace::map(void *virt, void *real, uint32_t flags) {
 
     uint64_t *ptsb = (uint64_t *) HHDM_P2V((*pdee & 0x000FFFFFFFFFF000ULL));
     uint64_t *ptse = &ptsb[ptsi];
-    *ptse = ((uint64_t) real & 0x000FFFFFFFFFF000ULL) | (flags & 0xFFF) | PAGE_PRESENT;
+    // FIXME:
+    *ptse = ((uint64_t) real & 0x000FFFFFFFFFF000ULL) | (flags & 0xFFF) | PAGE_PRESENT | PAGE_USER;
     invlpg((void *) ((uint64_t) virt & 0x000FFFFFFFFFF000ULL));
     return 1;
 }
@@ -204,7 +207,8 @@ void map_hddm(uint64_t *pml4) {
         uint64_t *pdpeb = (uint64_t *) (*pml4e & 0x000FFFFFFFFFF000ULL);
         uint64_t *pdpee = &pdpeb[pdpei];
         assert2((!(*pdpee & PAGE_PRESENT)), "HHDM area is already mapped!");
-        *pdpee = PAGE_RW | PAGE_PRESENT | PAGE_PS;
+        // FIXME:
+        *pdpee = PAGE_RW | PAGE_PRESENT | PAGE_PS | PAGE_USER;
         *pdpee |= (uint64_t) real & (uint64_t) 0x000FFFFFFFFFF000ULL;
     }
     _tlb_flush();
