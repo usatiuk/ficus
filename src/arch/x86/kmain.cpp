@@ -15,6 +15,7 @@
 #include "misc.hpp"
 #include "mutex.hpp"
 #include "rand.h"
+#include "syscalls.hpp"
 #include "task.hpp"
 #include "timer.hpp"
 #include "tty.hpp"
@@ -187,8 +188,10 @@ void stress_tester() {
     remove_self();
 }
 
+
 void user_task() {
     while (true) {
+        asm("syscall");
         __builtin_ia32_pause();
     }
 }
@@ -231,6 +234,7 @@ void kmain() {
 
     new_ktask(ktask_main, "ktask_main");
     new_ktask(dummy_task, "dummy");
+    setup_syscalls();
     init_tasks();
     for (;;) {
         __asm__ __volatile__("hlt");

@@ -60,19 +60,19 @@ gdt_data:
     db PRESENT | NOT_SYS | RW                   ; Access
     db GRAN_4K | SZ_32 | 0xF                    ; Flags & Limit (high, bits 16-19)
     db 0                                        ; Base (high, bits 24-31)
-global gdt_code_user:data
-gdt_code_user:
-    dd 0xFFFF                                   ; Limit & Base (low, bits 0-15)
-    db 0                                        ; Base (mid, bits 16-23)
-    db PRESENT | USER | NOT_SYS | EXEC | RW     ; Access
-    db GRAN_4K | LONG_MODE | 0xF                ; Flags & Limit (high, bits 16-19)
-    db 0                                        ; Base (high, bits 24-31)
 global gdt_data_user:data
 gdt_data_user:
     dd 0xFFFF                                   ; Limit & Base (low, bits 0-15)
     db 0                                        ; Base (mid, bits 16-23)
     db PRESENT | USER | NOT_SYS | RW            ; Access
     db GRAN_4K | SZ_32 | 0xF                    ; Flags & Limit (high, bits 16-19)
+    db 0                                        ; Base (high, bits 24-31)
+global gdt_code_user:data
+gdt_code_user:
+    dd 0xFFFF                                   ; Limit & Base (low, bits 0-15)
+    db 0                                        ; Base (mid, bits 16-23)
+    db PRESENT | USER | NOT_SYS | EXEC | RW     ; Access
+    db GRAN_4K | LONG_MODE | 0xF                ; Flags & Limit (high, bits 16-19)
     db 0                                        ; Base (high, bits 24-31)
 global gdt_tss:data
 gdt_tss:
