@@ -47,7 +47,7 @@ SkipList<uint64_t, List<Task *>::Node *> WaitingTasks;
 static std::atomic<bool> initialized = false;
 
 static void free_task(struct Task *t) {
-    kfree(t->stack);
+    kfree(t->kstack);
     kfree(t->name);
     kfree(t->fxsave);
     kfree(t);
@@ -86,12 +86,12 @@ static void task_freer() {
 
 struct Task *new_ktask(void (*fn)(), const char *name) {
     struct Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
-    newt->stack = static_cast<uint64_t *>(kmalloc(TASK_SS));
+    newt->kstack = static_cast<uint64_t *>(kmalloc(TASK_SS));
     newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
     newt->fxsave = static_cast<char *>(kmalloc(512));
     strcpy(name, newt->name);
 
-    newt->frame.sp = ((((uintptr_t) newt->stack) + (TASK_SS - 9) - 1) & (~0xFULL)) + 8;// Ensure 16byte alignment
+    newt->frame.sp = ((((uintptr_t) newt->kstack) + (TASK_SS - 9) - 1) & (~0xFULL)) + 8;// Ensure 16byte alignment
     // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
     assert((newt->frame.sp & 0xFULL) == 8);
 
@@ -126,14 +126,10 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
 }
 struct Task *new_utask(void (*fn)(), const char *name) {
     struct Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
-    newt->stack = static_cast<uint64_t *>(kmalloc(TASK_SS));
+    newt->kstack = static_cast<uint64_t *>(kmalloc(TASK_SS));
     newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
     newt->fxsave = static_cast<char *>(kmalloc(512));
     strcpy(name, newt->name);
-
-    newt->frame.sp = ((((uintptr_t) newt->stack) + (TASK_SS - 9) - 1) & (~0xFULL)) + 8;// Ensure 16byte alignment
-    // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
-    assert((newt->frame.sp & 0xFULL) == 8);
 
     newt->frame.ip = (uint64_t) fn;
     newt->frame.cs = GDTSEL(gdt_code_user) | 0x3;
@@ -149,6 +145,12 @@ struct Task *new_utask(void (*fn)(), const char *name) {
     newt->mode = TASKMODE_USER;
     newt->pid = max_pid.fetch_add(1);
     newt->used_time = 0;
+
+    void *ustack = newt->vma->mmap_mem_any(TASK_SS, 0, 0);
+
+    newt->frame.sp = ((((uintptr_t) ustack) + (TASK_SS - 17) - 1) & (~0xFULL)) + 8;// Ensure 16byte alignment
+    // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
+    assert((newt->frame.sp & 0xFULL) == 8);
 
     newt->vma->map_kern();
 

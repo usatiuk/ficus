@@ -65,7 +65,8 @@ extern "C" void _start(void) {
 
     // TODO: Accurate kernel length
     for (int i = 0; i < 100000; i++) {
-        KERN_AddressSpace->map((void *) (kernel_virt_base + i * PAGE_SIZE), (void *) (kernel_phys_base + i * PAGE_SIZE), PAGE_RW);
+        // FIXME:
+        KERN_AddressSpace->map((void *) (kernel_virt_base + i * PAGE_SIZE), (void *) (kernel_phys_base + i * PAGE_SIZE), PAGE_RW | PAGE_USER);
     }
 
     uint64_t real_new_cr3 = (uint64_t) HHDM_V2P(KERN_AddressSpace_PML4);

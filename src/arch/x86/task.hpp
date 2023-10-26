@@ -33,7 +33,7 @@ struct Task {
     std::atomic<uint64_t> used_time;
     AddressSpace *addressSpace;
     VMA *vma;
-    uint64_t *stack;
+    uint64_t *kstack;
     char *fxsave;
     char *name;
     enum TaskMode mode;

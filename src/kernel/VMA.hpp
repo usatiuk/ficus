@@ -5,6 +5,8 @@
 #ifndef OS2_VMA_HPP
 #define OS2_VMA_HPP
 
+#include "SkipList.hpp"
+#include "Spinlock.hpp"
 #include <cstddef>
 #include <cstdint>
 
@@ -25,6 +27,16 @@ public:
 
 private:
     AddressSpace *space = nullptr;
+    Spinlock space_lock;
+
+    struct ListEntry {
+        uintptr_t begin;
+        uint64_t length;
+        bool available;
+    };
+
+    SkipList<uintptr_t, ListEntry> regions;
+    Spinlock regions_lock;
 };
 
 
