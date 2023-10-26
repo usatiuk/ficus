@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <utility>
 
-#include "serial.hpp"
+#include "asserts.hpp"
 
 template<typename T>
 class List {
@@ -37,7 +37,7 @@ public:
     }
 
     template<class... Args>
-    Node* create_node(Args &&...args) {
+    Node *create_node(Args &&...args) {
         return new Node{std::forward<Args>(args)..., nullptr};
     }
 

@@ -2,10 +2,10 @@
 
 #include "LockGuard.hpp"
 #include "Spinlock.hpp"
+#include "asserts.hpp"
 #include "globals.hpp"
 #include "memman.hpp"
 #include "paging.hpp"
-#include "serial.hpp"
 #include "task.hpp"
 
 #include "string.h"

@@ -5,7 +5,7 @@
 #ifndef OS2_SPINLOCK_H
 #define OS2_SPINLOCK_H
 
-#include "serial.hpp"
+#include "asserts.hpp"
 #include "task.hpp"
 #include <atomic>
 #include <cstdint>

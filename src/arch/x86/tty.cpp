@@ -6,9 +6,9 @@
 
 #include "LockGuard.hpp"
 #include "Vector.hpp"
+#include "asserts.hpp"
 #include "kmem.hpp"
 #include "mutex.hpp"
-#include "serial.hpp"
 
 static Mutex ttysMutex;
 

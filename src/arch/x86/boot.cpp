@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <new>
 
+#include "asserts.hpp"
 #include "gdt.hpp"
 #include "globals.hpp"
 #include "idt.hpp"
@@ -12,7 +13,6 @@
 #include "memman.hpp"
 #include "misc.hpp"
 #include "paging.hpp"
-#include "serial.hpp"
 
 AddressSpace *BOOT_AddressSpace;
 alignas(AddressSpace) char BOOT_AddressSpace_storage[sizeof(AddressSpace)];

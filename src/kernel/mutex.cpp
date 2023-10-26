@@ -4,7 +4,7 @@
 
 #include "mutex.hpp"
 #include "LockGuard.hpp"
-#include "serial.hpp"
+#include "asserts.hpp"
 #include "task.hpp"
 #include "timer.hpp"
 

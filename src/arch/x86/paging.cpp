@@ -3,10 +3,10 @@
 //
 
 #include "paging.hpp"
+#include "asserts.hpp"
 #include "limine.h"
 #include "memman.hpp"
 #include "misc.hpp"
-#include "serial.hpp"
 
 // Returns a free page frame in HHDM
 static uint64_t *get_free_frame() {

@@ -3,8 +3,8 @@
 
 #include <new>
 
+#include "asserts.hpp"
 #include "kmem.hpp"
-#include "serial.hpp"
 #include "string.h"
 
 class VectorTester;

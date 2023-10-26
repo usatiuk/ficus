@@ -2,7 +2,7 @@
 // Created by Stepan Usatiuk on 12.08.2023.
 //
 
-#include "serial.hpp"
+#include "asserts.hpp"
 
 #include <stdint.h>
 

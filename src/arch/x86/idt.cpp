@@ -1,9 +1,9 @@
 #include "idt.hpp"
 
+#include "asserts.hpp"
 #include "gdt.hpp"
 #include "io.hpp"
 #include "misc.hpp"
-#include "serial.hpp"
 #include "task.hpp"
 #include "timer.hpp"
 

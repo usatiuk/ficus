@@ -5,9 +5,9 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "asserts.hpp"
 #include "kmem.hpp"
 #include "misc.hpp"
-#include "serial.hpp"
 
 #if UINT32_MAX == UINTPTR_MAX
 #define STACK_CHK_GUARD 0xb079a218

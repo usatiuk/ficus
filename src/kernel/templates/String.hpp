@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include <utility>
 
+#include "asserts.hpp"
 #include "kmem.hpp"
-#include "serial.hpp"
 #include "string.h"
 
 class String {
