@@ -29,6 +29,8 @@ extern uintptr_t kernel_phys_base;
 extern uintptr_t kernel_virt_base;
 void limine_kern_save_response();
 
+#define PAGE_SIZE 4096
+
 #define KERN_V2P(a) ((((uintptr_t) (a) + kernel_phys_base) & ~kernel_virt_base))
 #define KERN_P2V(a) ((((uintptr_t) (a) -kernel_phys_base) | kernel_virt_base))
 

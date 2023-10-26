@@ -169,7 +169,7 @@ void limine_kern_save_response() {
 }
 
 #define EARLY_PAGES_SIZE ((HHDM_SIZE + 1) * 2)
-static uint64_t early_pages[EARLY_PAGES_SIZE][512] __attribute__((aligned(4096)));
+static uint64_t early_pages[EARLY_PAGES_SIZE][512] __attribute__((aligned(PAGE_SIZE)));
 static uint64_t early_pages_used = 0;
 
 uintptr_t kernel_phys_base;

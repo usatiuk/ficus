@@ -39,7 +39,7 @@ void limine_fb_remap(AddressSpace *space) {
         void *realbase = framebufferAddrs[i].base;
         // TODO: Proper map
         for (int i = 0; i < 100000; i++) {
-            space->map(base + i * 4096, realbase + i * 4096, PAGE_RW);
+            space->map(base + i * PAGE_SIZE, realbase + i * PAGE_SIZE, PAGE_RW);
         }
     }
     _tlb_flush();

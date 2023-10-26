@@ -29,14 +29,14 @@ static Spinlock kmem_lock;
 
 void init_kern_heap() {
     KERN_HeapBegin = static_cast<HeapEntry *>(get4k());
-    allocated.fetch_add(4096);
+    allocated.fetch_add(PAGE_SIZE);
     KERN_HeapBegin->magic = KERN_HeapMagicFree;
-    KERN_HeapBegin->len = 4096 - (sizeof(struct HeapEntry));
+    KERN_HeapBegin->len = PAGE_SIZE - (sizeof(struct HeapEntry));
     KERN_HeapBegin->next = NULL;
     KERN_HeapBegin->prev = NULL;
     KERN_AddressSpace->map((void *) KERN_HeapVirtBegin, (void *) HHDM_V2P(KERN_HeapBegin), PAGE_RW);
     KERN_HeapBegin = (struct HeapEntry *) KERN_HeapVirtBegin;
-    KERN_HeapEnd = (KERN_HeapVirtBegin + 4096);
+    KERN_HeapEnd = (KERN_HeapVirtBegin + PAGE_SIZE);
     initialized = true;
 }
 
@@ -45,9 +45,9 @@ static void extend_heap(size_t n_pages) {
         void *p = get4k();
         assert2(p != NULL, "Kernel out of memory!");
         KERN_AddressSpace->map((void *) KERN_HeapEnd, (void *) HHDM_V2P(p), PAGE_RW);
-        KERN_HeapEnd += 4096;
+        KERN_HeapEnd += PAGE_SIZE;
     }
-    allocated.fetch_add(n_pages * 4096);
+    allocated.fetch_add(n_pages * PAGE_SIZE);
 }
 
 // n is required length!
@@ -126,7 +126,7 @@ void *kmalloc(size_t n) {
                         KERN_HeapBegin->next = NULL;
                         KERN_HeapBegin->prev = NULL;
                         KERN_HeapBegin->magic = KERN_HeapMagicFree;
-                        KERN_HeapBegin->len = 4096 - (sizeof(struct HeapEntry));
+                        KERN_HeapBegin->len = PAGE_SIZE - (sizeof(struct HeapEntry));
                     }
                 }
                 break;
@@ -168,7 +168,7 @@ void *kmalloc(size_t n) {
             new_entry->next = NULL;
             new_entry->prev = entry;
             new_entry->magic = KERN_HeapMagicFree;
-            new_entry->len = (pages_needed * 4096) - (sizeof(struct HeapEntry));
+            new_entry->len = (pages_needed * PAGE_SIZE) - (sizeof(struct HeapEntry));
             assert2(new_entry->len >= n, "Expected allocated heap entry to fit what we wanted");
             res = new_entry;
             if (new_entry->len > n) {
@@ -232,7 +232,7 @@ static struct HeapEntry *try_shrink_heap(struct HeapEntry *entry) {
     assert(entry->prev == NULL);
     if ((uint64_t) entry + sizeof(struct HeapEntry) + entry->len == KERN_HeapEnd) {
         // Shrink it if it's at least three pages
-        if (entry->len + sizeof(struct HeapEntry) < 4096 * 3) {
+        if (entry->len + sizeof(struct HeapEntry) < PAGE_SIZE * 3) {
             return entry;
         }
 
@@ -261,11 +261,11 @@ static struct HeapEntry *try_shrink_heap(struct HeapEntry *entry) {
         KERN_HeapEnd = (uintptr_t) entry;
         uint64_t totallen = entry->len + sizeof(struct HeapEntry);
         assert(((uint64_t) totallen & 0xFFF) == 0);
-        uint64_t total_pages = totallen / 4096;
+        uint64_t total_pages = totallen / PAGE_SIZE;
         for (uint64_t i = 0; i < total_pages; i++) {
-            free4k((void *) HHDM_P2V(KERN_AddressSpace->virt2real((void *) (KERN_HeapEnd + 4096 * i))));
-            allocated.fetch_sub(4096);
-            KERN_AddressSpace->unmap((void *) (KERN_HeapEnd + 4096 * i));
+            free4k((void *) HHDM_P2V(KERN_AddressSpace->virt2real((void *) (KERN_HeapEnd + PAGE_SIZE * i))));
+            allocated.fetch_sub(PAGE_SIZE);
+            KERN_AddressSpace->unmap((void *) (KERN_HeapEnd + PAGE_SIZE * i));
         }
         return ret;
     }
