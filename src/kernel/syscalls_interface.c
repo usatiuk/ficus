@@ -14,3 +14,13 @@ uint64_t putchar(char c) {
         : "memory");
     return res;
 }
+
+uint64_t sleep(uint64_t micros) {
+    uint64_t res;
+    uint64_t id = SYSCALL_SLEEP_ID;
+    asm("syscall"
+        : "=r"(res)
+        : "Di"(id), "Si"(micros)
+        : "memory");
+    return res;
+}

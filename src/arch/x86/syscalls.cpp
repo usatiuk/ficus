@@ -12,10 +12,14 @@
 #include "misc.hpp"
 #include "tty.hpp"
 
+// Don't forget the correct order
+// Shockingly, it doesn't immediately break and even something simple as putchar works
+// even with completely broken 16-bit segments somehow
+// But what happens with something more complex is completely bonkers
 struct STAR {
-    unsigned ret_cs_ss : 16;
-    unsigned call_cs_ss : 16;
     unsigned unused : 32;
+    unsigned call_cs_ss : 16;
+    unsigned ret_cs_ss : 16;
 } __attribute__((packed));
 
 static_assert(sizeof(STAR) == 8);
@@ -46,10 +50,17 @@ uint64_t syscall_putchar(char c) {
     return 0;
 }
 
+uint64_t syscall_sleep(uint64_t micros) {
+    sleep_self(micros);
+    return 0;
+}
+
 extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     switch (id_rdi) {
         case SYSCALL_PUTCHAR_ID:
             return syscall_putchar(a1_rsi);
+        case SYSCALL_SLEEP_ID:
+            return syscall_sleep(a1_rsi);
         default:
             return -1;
     }

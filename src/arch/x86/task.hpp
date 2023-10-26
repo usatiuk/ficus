@@ -44,7 +44,7 @@ struct Task {
 
 struct task_pointer {
     Task *taskptr;
-    uint64_t *entry_ksp_val;
+    uint64_t entry_ksp_val;
     uint64_t ret_sp;
 } __attribute__((packed));
 

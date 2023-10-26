@@ -26,7 +26,11 @@ void sanity_check_frame(struct task_frame *cur_frame) {
     assert2((void *) cur_frame->ip != NULL, "Sanity check");
     assert2((void *) cur_frame->sp != NULL, "Sanity check");
     assert2(cur_frame->guard == IDT_GUARD, "IDT Guard wrong!");
-    assert2((cur_frame->ss == GDTSEL(gdt_data) || cur_frame->ss == GDTSEL(gdt_data_user)) | 0x3, "SS wrong!");
+    assert(cur_frame->ss != 0);
+    assert(cur_frame->cs != 0);
+    assert(cur_frame->sp != 0);
+    assert2((cur_frame->ss == GDTSEL(gdt_data) || (cur_frame->ss == GDTSEL(gdt_data_user)) | 0x3), "SS wrong!");
+    assert2((cur_frame->cs == GDTSEL(gdt_code) || (cur_frame->ss == GDTSEL(gdt_code_user)) | 0x3), "CS wrong!");
 }
 
 std::atomic<uint64_t> max_pid = 0;
@@ -158,8 +162,8 @@ struct Task *new_utask(void (*fn)(), const char *name) {
     assert((newt->entry_ksp_val & 0xFULL) == 0);
 
     taskptr_real->taskptr = newt;
-    taskptr_real->entry_ksp_val = &newt->entry_ksp_val;
-    taskptr_real->ret_sp = 0xFEFE;
+    taskptr_real->entry_ksp_val = newt->entry_ksp_val;
+    taskptr_real->ret_sp = 0x0;
 
     void *ustack = newt->vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
 

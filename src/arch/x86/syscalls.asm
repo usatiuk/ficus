@@ -15,7 +15,7 @@ _syscall_entrypoint:
     ; Do very complicated stuff here
     call syscall_impl
 
-    mov r11, 0x10016 ; TASK_POINTER->entry_ksp_val
+    mov r11, 0x10016 ; TASK_POINTER->ret_sp_val
     mov rsp, [r11]
     mov rcx, r15
     o64 sysret

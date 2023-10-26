@@ -193,7 +193,9 @@ void stress_tester() {
 void user_task() {
     while (true) {
         putchar('h');
-        __builtin_ia32_pause();
+        putchar('i');
+        putchar('\n');
+        sleep(100000);
     }
 }
 

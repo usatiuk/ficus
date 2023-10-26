@@ -22,8 +22,7 @@ void VMA::mark_taken(void *addr, size_t length) {
 
 void VMA::map_kern() {
     LockGuard l(space_lock);
-    for (uintptr_t i = (uint64_t) (0xFFFF800000000000ULL >> 39) & 0x01FF; i < 512; i++) {
-        assert(i >= 256);
+    for (uintptr_t i = 256; i < 512; i++) {
         space->get_cr3()[i] = KERN_AddressSpace->get_cr3()[i];
     }
 }

@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #define SYSCALL_PUTCHAR_ID 1
+#define SYSCALL_SLEEP_ID 2
 
 #ifdef __cplusplus
 }

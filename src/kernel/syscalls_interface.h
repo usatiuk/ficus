@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 uint64_t putchar(char c);
+uint64_t sleep(uint64_t micros);
 
 #ifdef __cplusplus
 }
