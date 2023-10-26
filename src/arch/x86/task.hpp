@@ -6,6 +6,8 @@
 #define OS1_TASK_H
 
 #include "List.hpp"
+#include "SkipList.hpp"
+#include "String.hpp"
 #include "idt.hpp"
 
 #define TASK_SS 16384
@@ -25,6 +27,7 @@ enum TaskState {
 struct Task {
     struct task_frame frame;
     uint64_t pid;
+    std::atomic<uint64_t> used_time;
     struct AddressSpace *addressSpace;
     uint64_t *stack;
     char *fxsave;
@@ -50,6 +53,9 @@ void unblock(Task *what);
 void unblock(List<Task *>::Node *what);
 
 extern "C" void switch_task(struct task_frame *cur_frame);
+
+// TODO: that's quite inefficient!
+SkipList<uint64_t, std::pair<String, uint64_t>> getTaskTimePerPid();
 
 void yield_self();
 

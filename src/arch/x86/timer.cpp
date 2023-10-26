@@ -7,8 +7,8 @@
 #include "idt.hpp"
 #include "io.hpp"
 
-volatile uint64_t ticks;
-volatile uint64_t micros;
+volatile std::atomic<uint64_t> ticks;
+volatile std::atomic<uint64_t> micros;
 
 unsigned read_pit_count(void) {
     unsigned count = 0;
@@ -48,6 +48,6 @@ void init_timer() {
 }
 
 void timer_tick() {
-    ticks++;
-    micros += MICROS_PER_TICK;
+    ticks.fetch_add(1);
+    micros.fetch_add(MICROS_PER_TICK);
 }

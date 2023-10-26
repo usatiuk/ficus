@@ -52,6 +52,17 @@ static void free_task(struct Task *t) {
     kfree(t);
 }
 
+SkipList<uint64_t, std::pair<String, uint64_t>> getTaskTimePerPid() {
+    SkipList<uint64_t, std::pair<String, uint64_t>> ret;
+    {
+        LockGuard l(AllTasks_lock);
+        for (const auto &t: AllTasks) {
+            ret.add(t.data->pid, std::make_pair(t.data->name, t.data->used_time.load()));
+        }
+    }
+    return ret;
+}
+
 static void task_freer() {
     while (true) {
         sleep_self(10000);
@@ -60,6 +71,11 @@ static void task_freer() {
             while (!TasksToFree.empty()) {
                 List<Task *>::Node *t = TasksToFree.back();
                 TasksToFree.pop_back();
+                uint64_t pid = t->val->pid;
+                {
+                    LockGuard l(AllTasks_lock);
+                    AllTasks.erase(pid);
+                }
                 free_task(t->val);
                 delete t;
             }
@@ -90,6 +106,7 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
     newt->state = TS_RUNNING;
     newt->mode = TASKMODE_KERN;
     newt->pid = max_pid.fetch_add(1);
+    newt->used_time = 0;
 
     sanity_check_frame(&newt->frame);
 
@@ -199,9 +216,14 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
 
     if (!NextTasks_lock.try_lock()) return;
 
+    static uint64_t lastSwitchMicros = 0;
+    uint64_t prevSwitchMicros = lastSwitchMicros;
+    lastSwitchMicros = micros;
+
     if (RunningTask) {
         RunningTask->val->frame = *cur_frame;
         __builtin_memcpy(RunningTask->val->fxsave, temp_fxsave, 512);
+        RunningTask->val->used_time.fetch_add(lastSwitchMicros - prevSwitchMicros);
         if (RunningTask->val->state == TS_RUNNING) {
             NextTasks.emplace_front(RunningTask);
         }
