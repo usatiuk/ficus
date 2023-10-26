@@ -5,22 +5,20 @@
 #include "syscalls_interface.h"
 #include "syscalls_defs.h"
 
-uint64_t putchar(char c) {
+uint64_t do_syscall(uint64_t num, uint64_t a1_rsi) {
     uint64_t res;
-    uint64_t id = SYSCALL_PUTCHAR_ID;
-    asm("syscall"
-        : "=r"(res)
-        : "Di"(id), "Si"(c)
-        : "memory");
+    asm volatile("syscall"
+                 : "=r"(res)
+                 : "D"(num), "S"(a1_rsi)
+                 : "cc", "rdx", "rcx", "r8",
+                   "r9", "r10", "r11", "r15", "memory");
     return res;
 }
 
+uint64_t putchar(char c) {
+    return do_syscall(SYSCALL_PUTCHAR_ID, c);
+}
+
 uint64_t sleep(uint64_t micros) {
-    uint64_t res;
-    uint64_t id = SYSCALL_SLEEP_ID;
-    asm("syscall"
-        : "=r"(res)
-        : "Di"(id), "Si"(micros)
-        : "memory");
-    return res;
+    return do_syscall(SYSCALL_SLEEP_ID, micros);
 }
