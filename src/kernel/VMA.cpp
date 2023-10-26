@@ -38,21 +38,25 @@ void *VMA::mmap_phys(void *v_addr, void *real_addr, size_t length, int flags) {
     return v_addr;
 }
 
-void *VMA::mmap_mem_any(size_t length, int prot, int flags) {
-    if ((length & PAGE_SIZE) != 0) {
+void *VMA::mmap_mem(void *v_addr, size_t length, int prot, int flags) {
+    if ((length & (PAGE_SIZE - 1)) != 0) {
         length += PAGE_SIZE - 1;
-        length &= ~PAGE_SIZE;
+        length &= ~(PAGE_SIZE - 1);
     }
-    assert((length & PAGE_SIZE) == 0);
+    assert((length & (PAGE_SIZE - 1)) == 0);
     uint64_t page_len = length / PAGE_SIZE;
 
     std::optional<ListEntry> found;
     {
         LockGuard l(regions_lock);
 
-        for (auto &n: regions) {
-            if (n.data.available && n.data.length >= length) {
-                found = n.data;
+        if (v_addr) {
+            found = regions.find((uintptr_t) v_addr)->data;
+        } else {
+            for (auto &n: regions) {
+                if (n.data.available && n.data.length >= length) {
+                    found = n.data;
+                }
             }
         }
         if (!found) return nullptr;
@@ -65,7 +69,7 @@ void *VMA::mmap_mem_any(size_t length, int prot, int flags) {
         void *p = get4k();
         {
             LockGuard l(space_lock);
-            space->map(reinterpret_cast<void *>(found->begin + i * PAGE_SIZE), (void *) HHDM_V2P(p), PAGE_RW | PAGE_USER);
+            space->map(reinterpret_cast<void *>(found->begin + i * PAGE_SIZE), (void *) HHDM_V2P(p), flags);
         }
     }
     return reinterpret_cast<void *>(found->begin);

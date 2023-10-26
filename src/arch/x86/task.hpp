@@ -28,6 +28,7 @@ struct AddressSpace;
 class VMA;
 
 struct Task {
+    uint64_t entry_ksp_val;
     struct task_frame frame;
     uint64_t pid;
     std::atomic<uint64_t> used_time;
@@ -40,6 +41,12 @@ struct Task {
     uint64_t sleep_until;
     enum TaskState state;
 };
+
+struct task_pointer {
+    Task *taskptr;
+    uint64_t *entry_ksp_val;
+    uint64_t ret_sp;
+} __attribute__((packed));
 
 struct Task *cur_task();
 List<Task *>::Node *extract_running_task_node();

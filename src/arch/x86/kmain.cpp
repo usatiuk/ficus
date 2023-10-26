@@ -16,6 +16,7 @@
 #include "mutex.hpp"
 #include "rand.h"
 #include "syscalls.hpp"
+#include "syscalls_interface.h"
 #include "task.hpp"
 #include "timer.hpp"
 #include "tty.hpp"
@@ -191,7 +192,7 @@ void stress_tester() {
 
 void user_task() {
     while (true) {
-        asm("syscall");
+        putchar('h');
         __builtin_ia32_pause();
     }
 }

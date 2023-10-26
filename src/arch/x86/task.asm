@@ -3,9 +3,6 @@
 %include "task.inc.asm"
 
 extern switch_task
-extern gdt_code
-extern gdt_null
-extern gdt_data
 
 ; FIXME: 75% chance this leaks stack or something
 section .text
@@ -14,12 +11,8 @@ _yield_self_kern:
     pop rsi ; save the return ip
     mov r8, rsp ; save cur sp
 
-    mov r10, gdt_null
-    mov r9, gdt_data
-    mov r11, gdt_code
-
-    sub r9, r10
-    sub r11, r10
+    mov r9, ss
+    mov r11, cs
 
     PUSH r9; Push data segment
     push r8 ; current sp

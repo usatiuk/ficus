@@ -9,6 +9,7 @@
 #include "VMA.hpp"
 #include "asserts.hpp"
 #include "gdt.hpp"
+#include "globals.hpp"
 #include "kmem.hpp"
 #include "misc.hpp"
 #include "mutex.hpp"
@@ -20,7 +21,8 @@
 char temp_fxsave[512] __attribute__((aligned(16)));
 
 void sanity_check_frame(struct task_frame *cur_frame) {
-    assert((((uintptr_t) cur_frame) & 0xFULL) == 0);
+    // TODO: This makes sense to check when entering, but not when switching
+    //    assert((((uintptr_t) cur_frame) & 0xFULL) == 0);
     assert2((void *) cur_frame->ip != NULL, "Sanity check");
     assert2((void *) cur_frame->sp != NULL, "Sanity check");
     assert2(cur_frame->guard == IDT_GUARD, "IDT Guard wrong!");
@@ -125,7 +127,7 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
     return newt;
 }
 struct Task *new_utask(void (*fn)(), const char *name) {
-    struct Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
+    Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
     newt->kstack = static_cast<uint64_t *>(kmalloc(TASK_SS));
     newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
     newt->fxsave = static_cast<char *>(kmalloc(512));
@@ -146,7 +148,20 @@ struct Task *new_utask(void (*fn)(), const char *name) {
     newt->pid = max_pid.fetch_add(1);
     newt->used_time = 0;
 
-    void *ustack = newt->vma->mmap_mem_any(TASK_SS, 0, 0);
+    task_pointer *taskptr = static_cast<task_pointer *>(newt->vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER), sizeof(task_pointer), 0, PAGE_RW));
+    assert((uintptr_t) taskptr == TASK_POINTER);
+
+    task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(newt->addressSpace->virt2real(taskptr)));
+
+    newt->entry_ksp_val = ((((uintptr_t) newt->kstack) + (TASK_SS - 9) - 1) & (~0xFULL));// Ensure 16byte alignment
+    // It should be aligned before call, therefore it actually should be aligned here
+    assert((newt->entry_ksp_val & 0xFULL) == 0);
+
+    taskptr_real->taskptr = newt;
+    taskptr_real->entry_ksp_val = &newt->entry_ksp_val;
+    taskptr_real->ret_sp = 0xFEFE;
+
+    void *ustack = newt->vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
 
     newt->frame.sp = ((((uintptr_t) ustack) + (TASK_SS - 17) - 1) & (~0xFULL)) + 8;// Ensure 16byte alignment
     // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
@@ -212,9 +227,7 @@ void sleep_self(uint64_t diff) {
 void yield_self() {
     if (!RunningTask) return;
     NO_INT(
-            if (RunningTask->val->mode == TASKMODE_KERN) {
-                _yield_self_kern();
-            })
+            _yield_self_kern();)
 }
 
 static void task_waker() {

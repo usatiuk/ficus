@@ -22,7 +22,7 @@ public:
     /// By linking them to same entries as kernel
     void map_kern();
     void *mmap_phys(void *v_addr, void *real_addr, size_t length, int flags);
-    void *mmap_mem_any(size_t length, int prot, int flags);
+    void *mmap_mem(void *v_addr, size_t length, int prot, int flags);
     int munmap(void *addr, size_t length);
 
 private:

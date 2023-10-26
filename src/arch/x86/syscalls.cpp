@@ -3,12 +3,14 @@
 //
 
 #include "syscalls.hpp"
+#include "syscalls_defs.h"
 
 #include <cstdint>
 
 #include "asserts.hpp"
 #include "gdt.hpp"
 #include "misc.hpp"
+#include "tty.hpp"
 
 struct STAR {
     unsigned ret_cs_ss : 16;
@@ -37,4 +39,18 @@ void setup_syscalls() {
     wrmsr(0xc0000084, 0);
 
     wrmsr(0xC0000080, rdmsr(0xC0000080) | 0b1);
+}
+
+uint64_t syscall_putchar(char c) {
+    all_tty_putchar(c);
+    return 0;
+}
+
+extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
+    switch (id_rdi) {
+        case SYSCALL_PUTCHAR_ID:
+            return syscall_putchar(a1_rsi);
+        default:
+            return -1;
+    }
 }
