@@ -24,6 +24,7 @@ enum TaskState {
 
 struct Task {
     struct task_frame frame;
+    uint64_t pid;
     struct AddressSpace *addressSpace;
     uint64_t *stack;
     char *fxsave;

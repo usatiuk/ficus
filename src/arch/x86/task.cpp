@@ -26,6 +26,9 @@ void sanity_check_frame(struct task_frame *cur_frame) {
     assert2((cur_frame->ss == GDTSEL(gdt_data) || cur_frame->ss == GDTSEL(gdt_data_user)), "SS wrong!");
 }
 
+std::atomic<uint64_t> max_pid = 0;
+Spinlock AllTasks_lock;
+SkipList<uint64_t, Task *> AllTasks;
 
 List<Task *>::Node *RunningTask;
 
@@ -86,6 +89,7 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
     newt->addressSpace = KERN_AddressSpace;
     newt->state = TS_RUNNING;
     newt->mode = TASKMODE_KERN;
+    newt->pid = max_pid.fetch_add(1);
 
     sanity_check_frame(&newt->frame);
 
@@ -94,6 +98,11 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
     {
         LockGuard l(NextTasks_lock);
         NextTasks.emplace_front(new_node);
+    }
+
+    {
+        LockGuard l(AllTasks_lock);
+        AllTasks.add(newt->pid, newt);
     }
     return newt;
 }

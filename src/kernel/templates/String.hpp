@@ -58,6 +58,15 @@ public:
         return *this;
     }
 
+    String &operator+=(int value) {
+        char buf[20];
+        itoa(value, buf, 10);
+
+        *this += buf;
+
+        return *this;
+    }
+
     const char *c_str() {
         return data;
     }

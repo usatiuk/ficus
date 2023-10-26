@@ -4,6 +4,7 @@
 #include <cstddef>
 
 #include "LockGuard.hpp"
+#include "String.hpp"
 #include "TestTemplates.hpp"
 #include "globals.hpp"
 #include "kmem.hpp"
@@ -57,25 +58,26 @@ void ktask() {
 }
 
 void freeprinter() {
-    char buf[69];
     while (1) {
-        all_tty_putstr("=====\n");
-        itoa(get_free() * 1024, buf, 10);
-        all_tty_putstr("Free mem: ");
-        all_tty_putstr(buf);
-        write_serial('\n');
+        String buf;
+        buf += "=====\n";
+        buf += "Free mem: ";
+        buf += get_free() * 1024;
+        buf += "\n";
+        all_tty_putstr(buf.c_str());
+        buf = "";
 
-        itoa(get_heap_allocated(), buf, 10);
-        all_tty_putstr("Heap allocated: ");
-        all_tty_putstr(buf);
-        write_serial('\n');
+        buf += "Heap allocated: ";
+        buf += get_heap_allocated();
+        buf += "\n";
+        all_tty_putstr(buf.c_str());
+        buf = "";
 
-        itoa(get_heap_used(), buf, 10);
-        all_tty_putstr("Heap used: ");
-        all_tty_putstr(buf);
-        write_serial('\n');
-        all_tty_putstr("=====\n");
-
+        buf += "Heap used: ";
+        buf += get_heap_used();
+        buf += "\n";
+        buf += "=====\n";
+        all_tty_putstr(buf.c_str());
         sleep_self(1000000);
     }
 }
@@ -163,7 +165,7 @@ void ktask_main() {
 
 void dummy_task() {
     for (;;) {
-        __asm__ __volatile__("hlt");
+        yield_self();
     }
 }
 
