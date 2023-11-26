@@ -53,7 +53,8 @@ List<Task *>::Node *extract_running_task_node();
 
 void init_tasks();
 struct Task *new_ktask(void (*fn)(), const char *name);
-struct Task *new_utask(void (*fn)(), const char *name);
+struct Task *new_utask(void (*entrypoint)(), const char *name);
+void start_utask(struct Task *task);
 void remove_self();
 void sleep_self(uint64_t diff);
 

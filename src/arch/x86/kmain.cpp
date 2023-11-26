@@ -7,10 +7,12 @@
 #include "SkipList.hpp"
 #include "String.hpp"
 #include "TestTemplates.hpp"
+#include "VMA.hpp"
 #include "asserts.hpp"
 #include "globals.hpp"
 #include "kmem.hpp"
 #include "limine_fb.hpp"
+#include "limine_modules.hpp"
 #include "memman.hpp"
 #include "misc.hpp"
 #include "mutex.hpp"
@@ -213,7 +215,17 @@ void ktask_main() {
     new_ktask(templates_tester, "templates_tester2");
     new_ktask(stress_tester, "stress_tester");
 
-    new_utask(user_task, "user");
+    for (int i = 0; i < saved_modules_size; i++) {
+        all_tty_putstr("Starting ");
+        all_tty_putstr(saved_modules_names[i]);
+        all_tty_putchar('\n');
+
+        Task *utask = new_utask((void (*)()) 0x00020000, saved_modules_names[i]);
+        assert(saved_modules_size > 0);
+        utask->vma->mmap_phys((void *) 0x00020000, (void *) KERN_V2P(saved_modules_data[i]),
+                              max_saved_module_file_size, PAGE_USER | PAGE_RW);
+        start_utask(utask);
+    }
 
     remove_self();
 }

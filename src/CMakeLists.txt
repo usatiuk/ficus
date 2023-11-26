@@ -6,5 +6,8 @@ target_compile_options(kernel.elf PUBLIC $<$<COMPILE_LANGUAGE:C>:-fstack-protect
 
 add_subdirectory(./arch/)
 add_subdirectory(./kernel/)
+add_subdirectory(./uapi/)
+
+add_subdirectory(./test/)
 
 add_subdirectory(./iso/)

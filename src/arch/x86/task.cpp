@@ -130,14 +130,14 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
     }
     return newt;
 }
-struct Task *new_utask(void (*fn)(), const char *name) {
+struct Task *new_utask(void (*entrypoint)(), const char *name) {
     Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
     newt->kstack = static_cast<uint64_t *>(kmalloc(TASK_SS));
     newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
     newt->fxsave = static_cast<char *>(kmalloc(512));
     strcpy(name, newt->name);
 
-    newt->frame.ip = (uint64_t) fn;
+    newt->frame.ip = (uint64_t) entrypoint;
     newt->frame.cs = GDTSEL(gdt_code_user) | 0x3;
     newt->frame.ss = GDTSEL(gdt_data_user) | 0x3;
 
@@ -147,7 +147,7 @@ struct Task *new_utask(void (*fn)(), const char *name) {
     newt->frame.guard = IDT_GUARD;
     newt->addressSpace = new AddressSpace();
     newt->vma = new VMA(newt->addressSpace);
-    newt->state = TS_RUNNING;
+    newt->state = TS_BLOCKED;
     newt->mode = TASKMODE_USER;
     newt->pid = max_pid.fetch_add(1);
     newt->used_time = 0;
@@ -175,18 +175,20 @@ struct Task *new_utask(void (*fn)(), const char *name) {
 
     sanity_check_frame(&newt->frame);
 
-    auto new_node = NextTasks.create_node(newt);
-
-    {
-        LockGuard l(NextTasks_lock);
-        NextTasks.emplace_front(new_node);
-    }
-
     {
         LockGuard l(AllTasks_lock);
         AllTasks.add(newt->pid, newt);
     }
     return newt;
+}
+
+void start_utask(struct Task *task) {
+    task->state = TS_RUNNING;
+    auto new_node = NextTasks.create_node(task);
+    {
+        LockGuard l(NextTasks_lock);
+        NextTasks.emplace_front(new_node);
+    }
 }
 
 

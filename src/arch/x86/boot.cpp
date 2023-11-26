@@ -10,6 +10,7 @@
 #include "limine.h"
 #include "limine_fb.hpp"
 #include "limine_mm.hpp"
+#include "limine_modules.hpp"
 #include "memman.hpp"
 #include "misc.hpp"
 #include "paging.hpp"
@@ -44,6 +45,7 @@ extern "C" void _start(void) {
     init_serial();
     barrier();
     limine_kern_save_response();
+    limine_modules_save();
     barrier();
     map_hddm(get_cr3());
     barrier();

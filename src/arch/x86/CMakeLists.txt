@@ -23,7 +23,8 @@ target_sources(kernel.elf PRIVATE
         gdt.cpp
         misc.cpp
         syscalls.cpp
-        syscalls.asm)
+        syscalls.asm
+        limine_modules.cpp)
 
 target_include_directories(kernel.elf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 

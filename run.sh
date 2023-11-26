@@ -69,5 +69,5 @@ fi
 
 cmake --build cmake-build-$MODE --target iso
 
-qemu-system-x86_64 -s $QEMU_OPTS -cdrom cmake-build-relwithdebinfo/src/iso/os2.iso
+qemu-system-x86_64 -s $QEMU_OPTS -cdrom cmake-build-$MODE/src/iso/os2.iso
 
