@@ -63,7 +63,7 @@ void Mutex::lock() {
 void Mutex::unlock() {
     bool expected = true;
     if (!locked.compare_exchange_strong(expected, false))
-        writestr("Unlocking an unlocked mutex!\n");
+        assert2(false, "Unlocking an unlocked mutex!\n");
     List<Task *>::Node *t = nullptr;
     {
         LockGuard l(waiters_lock);

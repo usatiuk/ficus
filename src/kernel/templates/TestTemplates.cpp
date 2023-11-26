@@ -13,7 +13,7 @@
 #include "Vector.hpp"
 #include "asserts.hpp"
 
-#include "tty.hpp"
+#include "TtyManager.hpp"
 
 class SharedPtrTester {
 private:
@@ -36,7 +36,7 @@ public:
         assert(test2->size() == 2);
         assert((*test2)[1] == "Thingy2");
 
-        // all_tty_putstr("SharedPtr tests ok!\n");
+        // GlobalTtyManager.all_tty_putstr("SharedPtr tests ok!\n");
         return true;
     }
 };
@@ -80,7 +80,7 @@ public:
         assert(test12.ptr.get() != test1.ptr.get());
         assert(test22.ptr.get() != test2.ptr.get());
 
-        // all_tty_putstr("COWPointer tests ok!\n");
+        // GlobalTtyManager.all_tty_putstr("COWPointer tests ok!\n");
         return true;
     }
 };
@@ -120,7 +120,7 @@ public:
         assert(testv1[2] == "H6");
         assert(testv2[2] == "H5");
 
-        // all_tty_putstr("Vector tests ok!\n");
+        // GlobalTtyManager.all_tty_putstr("Vector tests ok!\n");
         return true;
     }
 };
@@ -140,7 +140,7 @@ public:
         str2 = "abcd";
         assert(str1 <= str2);
 
-        // all_tty_putstr("String tests ok!\n");
+        // GlobalTtyManager.all_tty_putstr("String tests ok!\n");
         return true;
     }
 };
@@ -170,7 +170,7 @@ public:
         test1.add(78, "test78", true);
         assert(test1.find(78)->data == "test78");
 
-        // all_tty_putstr("SkipList tests ok!\n");
+        // GlobalTtyManager.all_tty_putstr("SkipList tests ok!\n");
         return true;
     }
 };
@@ -200,7 +200,7 @@ public:
         test1.add(78, true);
         assert(test1.find(78)->key == 78);
 
-        // all_tty_putstr("SkipListSet tests ok!\n");
+        // GlobalTtyManager.all_tty_putstr("SkipListSet tests ok!\n");
         return true;
     }
 };

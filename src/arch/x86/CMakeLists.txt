@@ -2,7 +2,6 @@
 target_sources(kernel.elf PRIVATE
         limine_mm.cpp
         task.asm
-        tty.cpp
         kmem.cpp
         kmain.asm
         paging.asm
@@ -11,6 +10,7 @@ target_sources(kernel.elf PRIVATE
         limine_fb.cpp
         idt.cpp
         serial.cpp
+        SerialTty.cpp
         idt.asm
         globals.cpp
         memman.cpp

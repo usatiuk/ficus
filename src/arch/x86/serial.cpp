@@ -57,6 +57,17 @@ void write_serial(char a) {
     outb(PORT, a);
 }
 
+void write_serial_no_yield(char a) {
+    while (is_transmit_empty() == 0) {
+        __builtin_ia32_pause();
+    }
+
+    outb(PORT, a);
+}
 void writestr(const char *a) {
     while (*a != '\0') write_serial(*a++);
+}
+
+void writestr_no_yield(const char *a) {
+    while (*a != '\0') write_serial_no_yield(*a++);
 }

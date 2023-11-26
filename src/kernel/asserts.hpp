@@ -11,7 +11,7 @@
 extern "C" {
 static inline void _assert2(int val, const char *msg) {
     if (!val) {
-        writestr(msg);
+        writestr_no_yield(msg);
         _hcf();
     }
 }

@@ -6,6 +6,7 @@
 #include "LockGuard.hpp"
 #include "SkipList.hpp"
 #include "Spinlock.hpp"
+#include "TtyManager.hpp"
 #include "VMA.hpp"
 #include "asserts.hpp"
 #include "gdt.hpp"
@@ -16,7 +17,6 @@
 #include "paging.hpp"
 #include "string.h"
 #include "timer.hpp"
-#include "tty.hpp"
 
 char temp_fxsave[512] __attribute__((aligned(16)));
 

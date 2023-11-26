@@ -15,5 +15,7 @@ char read_serial();
 int is_transmit_empty();
 void write_serial(char a);
 void writestr(const char *a);
+void write_serial_no_yield(char a);
+void writestr_no_yield(const char *a);
 
 #endif//OS1_SERIAL_H

@@ -4,9 +4,11 @@
 #include <cstddef>
 
 #include "LockGuard.hpp"
+#include "SerialTty.hpp"
 #include "SkipList.hpp"
 #include "String.hpp"
 #include "TestTemplates.hpp"
+#include "TtyManager.hpp"
 #include "VMA.hpp"
 #include "asserts.hpp"
 #include "globals.hpp"
@@ -21,7 +23,6 @@
 #include "syscalls_interface.h"
 #include "task.hpp"
 #include "timer.hpp"
-#include "tty.hpp"
 
 void ktask();
 
@@ -69,20 +70,20 @@ void freeprinter() {
         buf += "Free mem: ";
         buf += get_free() * 1024;
         buf += "\n";
-        all_tty_putstr(buf.c_str());
+        GlobalTtyManager.all_tty_putstr(buf.c_str());
         buf = "";
 
         buf += "Heap allocated: ";
         buf += get_heap_allocated();
         buf += "\n";
-        all_tty_putstr(buf.c_str());
+        GlobalTtyManager.all_tty_putstr(buf.c_str());
         buf = "";
 
         buf += "Heap used: ";
         buf += get_heap_used();
         buf += "\n";
         buf += "=====\n";
-        all_tty_putstr(buf.c_str());
+        GlobalTtyManager.all_tty_putstr(buf.c_str());
         sleep_self(1000000);
     }
 }
@@ -112,7 +113,7 @@ void statprinter() {
                 buf += " usage: ";
                 buf += (((f->data.second - t.data.second) * 100ULL) / slice);
                 buf += "%\n";
-                all_tty_putstr(buf.c_str());
+                GlobalTtyManager.all_tty_putstr(buf.c_str());
             } else {
                 String buf;
                 buf += "PID: ";
@@ -120,7 +121,7 @@ void statprinter() {
                 buf += " ";
                 buf += t.data.first;
                 buf += " dead \n";
-                all_tty_putstr(buf.c_str());
+                GlobalTtyManager.all_tty_putstr(buf.c_str());
             }
         }
     }
@@ -131,30 +132,30 @@ static Mutex testmutex;
 void mtest1() {
     {
         LockGuard l(testmutex);
-        all_tty_putstr("Locked1\n");
+        GlobalTtyManager.all_tty_putstr("Locked1\n");
         sleep_self(100000);
     }
-    all_tty_putstr("Unlocked1\n");
+    GlobalTtyManager.all_tty_putstr("Unlocked1\n");
     remove_self();
 }
 
 void mtest2() {
     {
         LockGuard l(testmutex);
-        all_tty_putstr("Locked2\n");
+        GlobalTtyManager.all_tty_putstr("Locked2\n");
         sleep_self(100000);
     }
-    all_tty_putstr("Unlocked2\n");
+    GlobalTtyManager.all_tty_putstr("Unlocked2\n");
     remove_self();
 }
 
 void mtest3() {
     {
         LockGuard l(testmutex);
-        all_tty_putstr("Locked3\n");
+        GlobalTtyManager.all_tty_putstr("Locked3\n");
         sleep_self(100000);
     }
-    all_tty_putstr("Unlocked3\n");
+    GlobalTtyManager.all_tty_putstr("Unlocked3\n");
     remove_self();
 }
 
@@ -167,17 +168,17 @@ void stress() {
 
     char buf[69];
     itoa(curi, buf, 10);
-    //    all_tty_putstr("stress ");
-    //    all_tty_putstr(buf);
-    //    all_tty_putstr("\n");
+    //    GlobalTtyManager.all_tty_putstr("stress ");
+    //    GlobalTtyManager.all_tty_putstr(buf);
+    //    GlobalTtyManager.all_tty_putstr("\n");
     remove_self();
 }
 
 void templates_tester() {
-    all_tty_putstr("Testing templates\n");
+    GlobalTtyManager.all_tty_putstr("Testing templates\n");
     for (int i = 0; i < 2000; i++)
         test_templates();
-    all_tty_putstr("Testing templates OK\n");
+    GlobalTtyManager.all_tty_putstr("Testing templates OK\n");
 
     remove_self();
 }
@@ -186,7 +187,7 @@ void stress_tester() {
     for (int i = 0; i < 2000; i++)
         new_ktask(stress, "stress");
 
-    all_tty_putstr("Finished stress\n");
+    GlobalTtyManager.all_tty_putstr("Finished stress\n");
 
     remove_self();
 }
@@ -202,8 +203,7 @@ void user_task() {
 }
 
 void ktask_main() {
-    struct tty_funcs serial_tty = {.putchar = write_serial};
-    add_tty(serial_tty);
+    GlobalTtyManager.add_tty(new SerialTty());
 
     new_ktask(ktask, "one");
     new_ktask(freeprinter, "freeprinter");
@@ -216,9 +216,9 @@ void ktask_main() {
     new_ktask(stress_tester, "stress_tester");
 
     for (int i = 0; i < saved_modules_size; i++) {
-        all_tty_putstr("Starting ");
-        all_tty_putstr(saved_modules_names[i]);
-        all_tty_putchar('\n');
+        GlobalTtyManager.all_tty_putstr("Starting ");
+        GlobalTtyManager.all_tty_putstr(saved_modules_names[i]);
+        GlobalTtyManager.all_tty_putchar('\n');
 
         Task *utask = new_utask((void (*)()) 0x00020000, saved_modules_names[i]);
         assert(saved_modules_size > 0);

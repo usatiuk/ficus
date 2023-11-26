@@ -7,10 +7,10 @@
 
 #include <cstdint>
 
+#include "TtyManager.hpp"
 #include "asserts.hpp"
 #include "gdt.hpp"
 #include "misc.hpp"
-#include "tty.hpp"
 
 // Don't forget the correct order
 // Shockingly, it doesn't immediately break and even something simple as putchar works
@@ -46,7 +46,7 @@ void setup_syscalls() {
 }
 
 uint64_t syscall_putchar(char c) {
-    all_tty_putchar(c);
+    GlobalTtyManager.all_tty_putchar(c);
     return 0;
 }
 
