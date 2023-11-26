@@ -55,6 +55,7 @@ void *VMA::mmap_mem(void *v_addr, size_t length, int prot, int flags) {
             for (auto &n: regions) {
                 if (n.data.available && n.data.length >= length) {
                     found = n.data;
+                    break;
                 }
             }
         }
