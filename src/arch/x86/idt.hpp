@@ -92,4 +92,8 @@ void idt_init(void);
 
 extern void (*isr_stub_table[])();
 
+using int_handler_t = void (*)(void *);
+
+void attach_interrupt(unsigned num, int_handler_t handler, void *arg);
+
 #endif

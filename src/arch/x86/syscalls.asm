@@ -6,17 +6,17 @@ section .text
 global _syscall_entrypoint:function (_syscall_entrypoint.end - _syscall_entrypoint)
 _syscall_entrypoint:
     ; TODO: make it synced somehow
-    mov r11, 0x10016 ; TASK_POINTER->ret_sp_val
-    mov [r11], rsp
-    mov r11, 0x10008 ; TASK_POINTER->entry_ksp_val
-    mov rsp, [r11]
-    mov r15, rcx
+    mov [0x10016], rsp    ; TASK_POINTER->ret_sp_val
+    mov [0x10024], r11    ; TASK_POINTER->ret_flags
+    mov rsp, [0x10008]    ; TASK_POINTER->entry_ksp_val
+    mov r15, rcx ; This seems like a hack
 
+    sti
     ; Do very complicated stuff here
     call syscall_impl
 
-    mov r11, 0x10016 ; TASK_POINTER->ret_sp_val
-    mov rsp, [r11]
+    cli
     mov rcx, r15
+    mov r11, [0x10024]    ; TASK_POINTER->ret_flags
     o64 sysret
 .end:

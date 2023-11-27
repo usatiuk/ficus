@@ -46,15 +46,16 @@ struct task_pointer {
     Task *taskptr;
     uint64_t entry_ksp_val;
     uint64_t ret_sp;
+    uint64_t ret_flags;
 } __attribute__((packed));
 
 struct Task *cur_task();
 List<Task *>::Node *extract_running_task_node();
 
 void init_tasks();
-struct Task *new_ktask(void (*fn)(), const char *name);
+struct Task *new_ktask(void (*fn)(), const char *name, bool start = true);
 struct Task *new_utask(void (*entrypoint)(), const char *name);
-void start_utask(struct Task *task);
+void start_task(struct Task *task);
 void remove_self();
 void sleep_self(uint64_t diff);
 

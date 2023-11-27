@@ -40,7 +40,7 @@ void setup_syscalls() {
 
     wrmsr(0xc0000081, newstar.bytes);
     wrmsr(0xc0000082, reinterpret_cast<uint64_t>(&_syscall_entrypoint));
-    wrmsr(0xc0000084, 0);
+    wrmsr(0xc0000084, (1 << 9));// IA32_FMASK, mask interrupts
 
     wrmsr(0xC0000080, rdmsr(0xC0000080) | 0b1);
 }
@@ -55,12 +55,21 @@ uint64_t syscall_sleep(uint64_t micros) {
     return 0;
 }
 
+uint64_t syscall_readchar() {
+    Tty *tty = GlobalTtyManager.get_tty(0);
+    return tty->readchar();
+}
+
 extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
+    assert2(are_interrupts_enabled(), "why wouldn't they be?");
     switch (id_rdi) {
         case SYSCALL_PUTCHAR_ID:
             return syscall_putchar(a1_rsi);
         case SYSCALL_SLEEP_ID:
             return syscall_sleep(a1_rsi);
+        case SYSCALL_READCHAR_ID:
+            assert(a1_rsi == NULL);
+            return syscall_readchar();
         default:
             return -1;
     }

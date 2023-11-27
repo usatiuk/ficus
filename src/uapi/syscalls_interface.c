@@ -7,12 +7,16 @@
 
 uint64_t do_syscall(uint64_t num, uint64_t a1_rsi) {
     uint64_t res;
-    asm volatile("syscall"
+    asm volatile("syscall; mov (0x10016), %%rsp"// TASK_POINTER->ret_sp_val
                  : "=r"(res)
                  : "D"(num), "S"(a1_rsi)
                  : "cc", "rdx", "rcx", "r8",
                    "r9", "r10", "r11", "r15", "memory");
     return res;
+}
+
+uint64_t readchar() {
+    return do_syscall(SYSCALL_READCHAR_ID, 0);
 }
 
 uint64_t putchar(char c) {

@@ -224,7 +224,7 @@ void ktask_main() {
         assert(saved_modules_size > 0);
         utask->vma->mmap_phys((void *) 0x00020000, (void *) KERN_V2P(saved_modules_data[i]),
                               max_saved_module_file_size, PAGE_USER | PAGE_RW);
-        start_utask(utask);
+        start_task(utask);
     }
 
     remove_self();

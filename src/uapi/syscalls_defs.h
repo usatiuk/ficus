@@ -14,6 +14,7 @@ extern "C" {
 
 #define SYSCALL_PUTCHAR_ID 1
 #define SYSCALL_SLEEP_ID 2
+#define SYSCALL_READCHAR_ID 3
 
 #ifdef __cplusplus
 }

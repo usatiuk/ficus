@@ -163,6 +163,9 @@ uint16_t pic_get_isr(void) {
     return __pic_get_irq_reg(PIC_READ_ISR);
 }
 
+static int_handler_t handlers[256];
+static void *handlers_args[256];
+
 extern "C" void pic1_irq_real_0(struct task_frame *frame) {
     timer_tick();
     switch_task(frame);
@@ -179,6 +182,9 @@ extern "C" void pic1_irq_real_3() {
     PIC_sendEOI(3);
 }
 extern "C" void pic1_irq_real_4() {
+    if (handlers[4] != nullptr) {
+        handlers[4](handlers_args[4]);
+    }
     PIC_sendEOI(4);
 }
 extern "C" void pic1_irq_real_5() {
@@ -223,4 +229,9 @@ extern "C" void pic2_irq_real_7() {
     }
 
     PIC_sendEOI(15);
+}
+
+void attach_interrupt(unsigned num, int_handler_t handler, void *firstarg) {
+    handlers[num] = handler;
+    handlers_args[num] = firstarg;
 }

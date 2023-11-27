@@ -90,7 +90,7 @@ static void task_freer() {
     }
 }
 
-struct Task *new_ktask(void (*fn)(), const char *name) {
+struct Task *new_ktask(void (*fn)(), const char *name, bool start) {
     struct Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
     newt->kstack = static_cast<uint64_t *>(kmalloc(TASK_SS));
     newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
@@ -110,18 +110,19 @@ struct Task *new_ktask(void (*fn)(), const char *name) {
     newt->frame.flags = flags();
     newt->frame.guard = IDT_GUARD;
     newt->addressSpace = KERN_AddressSpace;
-    newt->state = TS_RUNNING;
+    newt->state = start ? TS_RUNNING : TS_BLOCKED;
     newt->mode = TASKMODE_KERN;
     newt->pid = max_pid.fetch_add(1);
     newt->used_time = 0;
 
     sanity_check_frame(&newt->frame);
+    if (start) {
+        auto new_node = NextTasks.create_node(newt);
 
-    auto new_node = NextTasks.create_node(newt);
-
-    {
-        LockGuard l(NextTasks_lock);
-        NextTasks.emplace_front(new_node);
+        {
+            LockGuard l(NextTasks_lock);
+            NextTasks.emplace_front(new_node);
+        }
     }
 
     {
@@ -152,7 +153,9 @@ struct Task *new_utask(void (*entrypoint)(), const char *name) {
     newt->pid = max_pid.fetch_add(1);
     newt->used_time = 0;
 
-    task_pointer *taskptr = static_cast<task_pointer *>(newt->vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER), sizeof(task_pointer), 0, PAGE_RW));
+    task_pointer *taskptr = static_cast<task_pointer *>(
+            newt->vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
+                                sizeof(task_pointer), 0, PAGE_RW | PAGE_USER));// FIXME: this is probably unsafe
     assert((uintptr_t) taskptr == TASK_POINTER);
 
     task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(newt->addressSpace->virt2real(taskptr)));
@@ -182,7 +185,8 @@ struct Task *new_utask(void (*entrypoint)(), const char *name) {
     return newt;
 }
 
-void start_utask(struct Task *task) {
+void start_task(struct Task *task) {
+    assert(task->state != TS_RUNNING);
     task->state = TS_RUNNING;
     auto new_node = NextTasks.create_node(task);
     {
@@ -340,18 +344,24 @@ void self_block(Spinlock &to_unlock) {
 }
 
 void unblock(Task *what) {
-    what->state = TS_RUNNING;
+    assert(what != nullptr);
+    assert(what->state != TS_RUNNING);
+    sanity_check_frame(&what->frame);
     auto new_node = NextTasks.create_node(what);
     {
         LockGuard l(NextTasks_lock);
+        what->state = TS_RUNNING;
         NextTasks.emplace_front(new_node);
     }
 };
 
 void unblock(List<Task *>::Node *what) {
-    what->val->state = TS_RUNNING;
+    assert(what != nullptr);
+    assert(what->val->state != TS_RUNNING);
+    sanity_check_frame(&what->val->frame);
     {
         LockGuard l(NextTasks_lock);
+        what->val->state = TS_RUNNING;
         NextTasks.emplace_front(what);
     }
 };
