@@ -50,6 +50,7 @@ List<List<Task *>::Node *> TasksToFree;
 
 // Waiting
 Mutex WaitingTasks_mlock;
+CV WaitingTasks_cv;
 SkipList<uint64_t, List<Task *>::Node *> WaitingTasks;
 
 static std::atomic<bool> initialized = false;
@@ -292,7 +293,12 @@ static void task_waker() {
             }
             WaitingTasks_mlock.unlock();
         }
-        yield_self();
+        {
+            // TODO: this is ugly
+            WaitingTasks_mlock.lock();
+            WaitingTasks_cv.wait(WaitingTasks_mlock);
+            WaitingTasks_mlock.unlock();
+        }
     }
 }
 
@@ -310,6 +316,14 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
     sanity_check_frame(cur_frame);
 
     assert(!NextTasks_lock.test());
+
+    {
+        static uint64_t lastWaitingWakeupMicros = 0;
+        if (micros - lastWaitingWakeupMicros > 10000) {
+            lastWaitingWakeupMicros = micros;
+            WaitingTasks_cv.notify_one();
+        }
+    }
 
     AddressSpace *oldspace = nullptr;
     List<Task *>::Node *next;
