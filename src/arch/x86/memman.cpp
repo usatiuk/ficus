@@ -7,6 +7,7 @@
 #include "Spinlock.hpp"
 #include "asserts.hpp"
 #include "misc.hpp"
+#include "mutex.hpp"
 #include "paging.hpp"
 #include <stddef.h>
 
@@ -17,7 +18,7 @@
 // Expected to be nulled by the bootloader
 static struct FourPages used_bitmap[BITMAP_SIZE];
 
-static Spinlock memman_lock;
+static Mutex memman_lock;
 
 static uint64_t maxPid = 0;// Past the end
 static uint64_t minPid = 0;

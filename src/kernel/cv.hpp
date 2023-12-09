@@ -17,39 +17,38 @@ struct Task;
 
 // This is probably broken in some way
 class CV {
-    List<List<Task *>::Node *> waiters;
+    List<Task *> waiters;
     Spinlock waiters_lock;
 
 public:
     template<typename Lockable>
     void wait(Lockable &l) {
-        l.unlock();
-        waiters_lock.lock();
-        waiters.emplace_front(extract_running_task_node());
-        self_block(waiters_lock);
+        NO_INT(
+                l.unlock();
+                // TODO: recheck this is correct
+                waiters_lock.spinlock();
+                waiters.emplace_front(extract_running_task_node());
+                self_block(waiters_lock);)
         l.lock();
     }
     void notify_one() {
         List<Task *>::Node *t = nullptr;
         {
-            LockGuard l(waiters_lock);
+            SpinlockLockNoInt l(waiters_lock);
             if (!waiters.empty()) {
-                t = waiters.back();
-                waiters.pop_back();
+                t = waiters.extract_back();
             }
         }
         if (t) unblock(t);
     }
     void notify_all() {
-        assert(false);
-        List<List<Task *>::Node *> waiters_new;
+        List<Task *> waiters_new;
         {
-            LockGuard l(waiters_lock);
+            SpinlockLockNoInt l(waiters_lock);
             std::swap(waiters_new, waiters);
         }
         while (!waiters_new.empty()) {
-            auto t = waiters_new.back();
-            waiters_new.pop_back();
+            auto t = waiters_new.extract_back();
             unblock(t);
         }
     }

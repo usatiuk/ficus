@@ -24,21 +24,20 @@ static int read() {
 }
 
 void SerialTty::this_pooler() {
+    mutex.lock();
     while (true) {
-        sleep_self(10000);
-        if (intflag != 0) {
-            if (mutex.try_lock()) {
-                intflag = 0;
-                int r = read();
-                while (r != -1) {
-                    buf.push_back((char) r);
-                    r = read();
-                }
-                cv.notify_one();
-                mutex.unlock();
-            }
+        bool read_something = false;
+        int r = read();
+        while (r != -1) {
+            read_something = true;
+            buf.push_back((char) r);
+            r = read();
         }
+        if (read_something)
+            readercv.notify_all();
+        isrcv.wait(mutex);
     }
+    mutex.unlock();
 }
 
 SerialTty::SerialTty() : Tty() {
@@ -58,14 +57,13 @@ void SerialTty::isr(void *tty) {
 
 
 void SerialTty::this_isr() {
-    intflag.fetch_add(1);
+    isrcv.notify_one();
 }
-
 
 char SerialTty::readchar() {
     mutex.lock();
     if (buf.empty()) {
-        cv.wait(mutex);
+        readercv.wait(mutex);
     }
     assert(!buf.empty());
     char ret = buf.pop_back();

@@ -9,6 +9,7 @@
 #include "TtyManager.hpp"
 #include "VMA.hpp"
 #include "asserts.hpp"
+#include "cv.hpp"
 #include "gdt.hpp"
 #include "globals.hpp"
 #include "kmem.hpp"
@@ -34,20 +35,21 @@ void sanity_check_frame(struct task_frame *cur_frame) {
 }
 
 std::atomic<uint64_t> max_pid = 0;
-Spinlock AllTasks_lock;
+Mutex AllTasks_lock;
 SkipList<uint64_t, Task *> AllTasks;
 
-List<Task *>::Node *RunningTask;
+static List<Task *>::Node *RunningTask;
 
-Spinlock NextTasks_lock;
-List<Task *> NextTasks;
+static Spinlock NextTasks_lock;
+static List<Task *> NextTasks;
 
 // Task freer
-Spinlock TasksToFree_lock;
+Mutex TasksToFree_lock;
+CV TasksToFree_cv;
 List<List<Task *>::Node *> TasksToFree;
 
 // Waiting
-Spinlock WaitingTasks_lock;
+Mutex WaitingTasks_mlock;
 SkipList<uint64_t, List<Task *>::Node *> WaitingTasks;
 
 static std::atomic<bool> initialized = false;
@@ -72,20 +74,35 @@ SkipList<uint64_t, std::pair<String, uint64_t>> getTaskTimePerPid() {
 
 static void task_freer() {
     while (true) {
-        sleep_self(10000);
         {
-            LockGuard l(TasksToFree_lock);
-            while (!TasksToFree.empty()) {
-                List<Task *>::Node *t = TasksToFree.back();
-                TasksToFree.pop_back();
-                uint64_t pid = t->val->pid;
+            while (true) {
                 {
-                    LockGuard l(AllTasks_lock);
-                    AllTasks.erase(pid);
+                    LockGuard l(TasksToFree_lock);
+                    if (TasksToFree.empty()) break;
                 }
-                free_task(t->val);
-                delete t;
+                List<Task *>::Node *t;
+                {
+                    LockGuard l(TasksToFree_lock);
+                    t = TasksToFree.back();
+                    if (t->val->state == TS_RUNNING) break;
+                    TasksToFree.pop_back();
+                }
+                {
+                    uint64_t pid = t->val->pid;
+                    {
+                        LockGuard l(AllTasks_lock);
+                        AllTasks.erase(pid);
+                    }
+                    free_task(t->val);
+                    delete t;
+                }
             }
+        }
+        {
+            // TODO: this is kinda ugly
+            TasksToFree_lock.lock();
+            TasksToFree_cv.wait(TasksToFree_lock);
+            TasksToFree_lock.unlock();
         }
     }
 }
@@ -120,7 +137,7 @@ struct Task *new_ktask(void (*fn)(), const char *name, bool start) {
         auto new_node = NextTasks.create_node(newt);
 
         {
-            LockGuard l(NextTasks_lock);
+            SpinlockLockNoInt l(NextTasks_lock);
             NextTasks.emplace_front(new_node);
         }
     }
@@ -185,27 +202,31 @@ struct Task *new_utask(void (*entrypoint)(), const char *name) {
     return newt;
 }
 
-void start_task(struct Task *task) {
+List<Task *>::Node *start_task(struct Task *task) {
     assert(task->state != TS_RUNNING);
     task->state = TS_RUNNING;
     auto new_node = NextTasks.create_node(task);
     {
-        LockGuard l(NextTasks_lock);
+        SpinlockLockNoInt l(NextTasks_lock);
         NextTasks.emplace_front(new_node);
     }
+    return new_node;
 }
 
 
 void remove_self() {
+    assert(RunningTask != nullptr);
     {
         LockGuard l(TasksToFree_lock);
-        assert(RunningTask != nullptr);
+        // TasksToFree is expected to do nothing with TS_RUNNING tasks
         TasksToFree.emplace_front(RunningTask);
-        NextTasks_lock.lock();
-        RunningTask->val->state = TS_BLOCKED;
     }
-    NextTasks_lock.unlock();
-    yield_self();
+    // This might not cause freeing of this task, as it might be preempted
+    // and still be running and task freer won't delete it
+    // But eventually it will get cleaned
+    TasksToFree_cv.notify_one();
+
+    self_block();
     assert2(0, "should be removed!");
 }
 
@@ -213,24 +234,22 @@ void sleep_self(uint64_t diff) {
     uint64_t wake_time = micros + diff;
     while (micros <= wake_time) {
         {
-            LockGuard l(WaitingTasks_lock);
+            LockGuard lm(WaitingTasks_mlock);
 
             // TODO this is all ugly
-            uint64_t l1 = 0;
-            for (auto cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) l1++;
+            // TODO: also maybe it breaks if it wakes before self_block?
+            uint64_t len1 = 0;
+            for (auto cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) len1++;
 
             assert(RunningTask != nullptr);
             assert(WaitingTasks.add(wake_time, RunningTask) != nullptr);
 
-            uint64_t l2 = 0;
-            for (auto cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) l2++;
+            uint64_t len2 = 0;
+            for (auto cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) len2++;
 
-            assert(l2 - l1 == 1);
-            NextTasks_lock.lock();
-            RunningTask->val->state = TS_BLOCKED;
+            assert(len2 - len1 == 1);
         }
-        NextTasks_lock.unlock();
-        yield_self();
+        self_block();
     }
 }
 
@@ -243,7 +262,7 @@ void yield_self() {
 static void task_waker() {
     while (true) {
         {
-            LockGuard l(WaitingTasks_lock);
+            WaitingTasks_mlock.lock();
 
             while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->key <= micros && WaitingTasks.begin()->data->val->state != TS_RUNNING) {
                 auto *node = &*WaitingTasks.begin();
@@ -258,23 +277,29 @@ static void task_waker() {
                 uint64_t l2 = 0;
                 for (auto *cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) l2++;
 
+                WaitingTasks_mlock.unlock();
+
                 assert(l1 - l2 == 1);
                 task->val->sleep_until = 0;
                 task->val->state = TS_RUNNING;
 
                 {
-                    LockGuard l(NextTasks_lock);
+                    SpinlockLockNoInt l(NextTasks_lock);
                     NextTasks.emplace_front(task);
                 }
+
+                WaitingTasks_mlock.lock();
             }
+            WaitingTasks_mlock.unlock();
         }
+        yield_self();
     }
 }
 
 void init_tasks() {
     // FIXME: not actually thread-safe, but it probably doesn't matter
     assert2(!atomic_load(&initialized), "Tasks should be initialized once!");
-    new_ktask(task_freer, "freer");
+    start_task(new_ktask(task_freer, "freer", false));
     new_ktask(task_waker, "waker");
     atomic_store(&initialized, true);
 }
@@ -284,30 +309,33 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
     if (!atomic_load(&initialized)) return;
     sanity_check_frame(cur_frame);
 
-    if (!NextTasks_lock.try_lock()) return;
-
-    static uint64_t lastSwitchMicros = 0;
-    uint64_t prevSwitchMicros = lastSwitchMicros;
-    lastSwitchMicros = micros;
+    assert(!NextTasks_lock.test());
 
     AddressSpace *oldspace = nullptr;
+    List<Task *>::Node *next;
 
-    if (RunningTask) {
-        RunningTask->val->frame = *cur_frame;
-        __builtin_memcpy(RunningTask->val->fxsave, temp_fxsave, 512);
-        oldspace = RunningTask->val->addressSpace;
-        RunningTask->val->used_time.fetch_add(lastSwitchMicros - prevSwitchMicros);
-        if (RunningTask->val->state == TS_RUNNING) {
-            NextTasks.emplace_front(RunningTask);
+    {
+        SpinlockLockNoIntAssert ntl(NextTasks_lock);
+
+        static uint64_t lastSwitchMicros = 0;
+        uint64_t prevSwitchMicros = lastSwitchMicros;
+        lastSwitchMicros = micros;
+
+        if (RunningTask) {
+            RunningTask->val->frame = *cur_frame;
+            __builtin_memcpy(RunningTask->val->fxsave, temp_fxsave, 512);
+            oldspace = RunningTask->val->addressSpace;
+            RunningTask->val->used_time.fetch_add(lastSwitchMicros - prevSwitchMicros);
+            if (RunningTask->val->state == TS_RUNNING) {
+                NextTasks.emplace_front(RunningTask);
+            }
         }
+
+        next = NextTasks.extract_back();
+        assert2(next != NULL, "Kernel left with no tasks!");
+        assert2(next->val != NULL, "Kernel left with no tasks!");
+        assert2(next->val->state == TS_RUNNING, "Blocked task in run queue!");
     }
-
-    List<Task *>::Node *next = NextTasks.extract_back();
-    assert2(next != NULL, "Kernel left with no tasks!");
-    assert2(next->val != NULL, "Kernel left with no tasks!");
-    assert2(next->val->state == TS_RUNNING, "Blocked task in run queue!");
-
-    NextTasks_lock.unlock();
 
     RunningTask = next;
     *cur_frame = RunningTask->val->frame;
@@ -327,16 +355,22 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
 }
 
 void self_block() {
-    {
-        LockGuard l(NextTasks_lock);
-        RunningTask->val->state = TS_BLOCKED;
-    }
-    yield_self();
+    // TODO: clarify this function
+    NO_INT(
+            {
+                {
+                    SpinlockLockNoInt l(NextTasks_lock);
+                    RunningTask->val->state = TS_BLOCKED;
+                }
+                yield_self();
+            })
 }
 
 void self_block(Spinlock &to_unlock) {
+    assert2(!are_interrupts_enabled(), "Self blocking with enabled interrupts!");
+
     {
-        LockGuard l(NextTasks_lock);
+        SpinlockLockNoInt l(NextTasks_lock);
         to_unlock.unlock();
         RunningTask->val->state = TS_BLOCKED;
     }
@@ -344,12 +378,13 @@ void self_block(Spinlock &to_unlock) {
 }
 
 void unblock(Task *what) {
+    assert(false);
     assert(what != nullptr);
     assert(what->state != TS_RUNNING);
     sanity_check_frame(&what->frame);
     auto new_node = NextTasks.create_node(what);
     {
-        LockGuard l(NextTasks_lock);
+        SpinlockLockNoInt l(NextTasks_lock);
         what->state = TS_RUNNING;
         NextTasks.emplace_front(new_node);
     }
@@ -360,7 +395,7 @@ void unblock(List<Task *>::Node *what) {
     assert(what->val->state != TS_RUNNING);
     sanity_check_frame(&what->val->frame);
     {
-        LockGuard l(NextTasks_lock);
+        SpinlockLockNoInt l(NextTasks_lock);
         what->val->state = TS_RUNNING;
         NextTasks.emplace_front(what);
     }

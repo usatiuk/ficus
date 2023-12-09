@@ -7,6 +7,7 @@
 
 #include "SkipList.hpp"
 #include "Spinlock.hpp"
+#include "mutex.hpp"
 #include <cstddef>
 #include <cstdint>
 
@@ -27,7 +28,7 @@ public:
 
 private:
     AddressSpace *space = nullptr;
-    Spinlock space_lock;
+    Mutex space_lock;
 
     struct ListEntry {
         uintptr_t begin;
@@ -36,7 +37,7 @@ private:
     };
 
     SkipList<uintptr_t, ListEntry> regions;
-    Spinlock regions_lock;
+    Mutex regions_lock;
 };
 
 

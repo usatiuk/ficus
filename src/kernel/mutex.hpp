@@ -24,14 +24,15 @@ public:
     bool try_lock();
     void unlock();
     bool test();
+    Task *owner() { return _owner; }
 
 private:
     std::atomic<bool> locked = false;
 
-    List<List<Task *>::Node *> waiters;
+    List<Task *> waiters;
     Spinlock waiters_lock;
 
-    Task *owner = nullptr;
+    Task *_owner = nullptr;
     uint8_t spin_success = 127;
 };
 

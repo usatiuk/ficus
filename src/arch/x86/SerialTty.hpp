@@ -10,13 +10,14 @@
 #include "cv.hpp"
 
 class SerialTty : public Tty {
+    // TODO: Possibly there should be 2 mutexes?
     Mutex mutex;
-    CV cv;
+    CV readercv;
+    CV isrcv;
     static void isr(void *tty);
 
     void this_isr();
     void this_pooler();
-    std::atomic<int> intflag = 0;
     CircularBuffer<char, 512> buf;
 
 public:

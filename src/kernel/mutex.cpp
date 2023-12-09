@@ -14,7 +14,7 @@ bool Mutex::try_lock() {
     if (!locked.compare_exchange_strong(expected, true)) {
         return false;
     }
-    owner = cur_task();
+    _owner = cur_task();
     return true;
 }
 
@@ -40,6 +40,7 @@ void Mutex::lock() {
                 break;
             }
 
+            // TODO: this isn't really a spinlock, but for now we don't have SMP
             yield_self();
         }
     }
@@ -52,24 +53,29 @@ void Mutex::lock() {
         if (spin_success > 0)
             spin_success--;
 
+        //        for (int i = 0; i < 100000; i++) {
+        //            __builtin_ia32_pause();
+        //        }
+
         while (!Mutex::try_lock()) {
-            waiters_lock.lock();
-            waiters.emplace_front(extract_running_task_node());
-            self_block(waiters_lock);
+            NO_INT(
+                    waiters_lock.spinlock();
+                    waiters.emplace_front(extract_running_task_node());
+                    self_block(waiters_lock););
         }
     }
 }
 
 void Mutex::unlock() {
     bool expected = true;
+    _owner = nullptr;
     if (!locked.compare_exchange_strong(expected, false))
         assert2(false, "Unlocking an unlocked mutex!\n");
     List<Task *>::Node *t = nullptr;
     {
-        LockGuard l(waiters_lock);
+        SpinlockLockNoInt l(waiters_lock);
         if (!waiters.empty()) {
-            t = waiters.back();
-            waiters.pop_back();
+            t = waiters.extract_back();
         }
     }
     if (t) unblock(t);

@@ -8,6 +8,7 @@
 #include "paging.hpp"
 #include "task.hpp"
 
+#include "mutex.hpp"
 #include "string.h"
 
 struct HeapEntry *KERN_HeapBegin;
@@ -25,7 +26,7 @@ uint64_t get_heap_used() {
     return used;
 }
 
-static Spinlock kmem_lock;
+static Mutex kmem_lock;
 
 void init_kern_heap() {
     KERN_HeapBegin = static_cast<HeapEntry *>(get4k());

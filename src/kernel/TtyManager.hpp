@@ -10,7 +10,7 @@
 #include "Vector.hpp"
 
 class TtyManager {
-    Spinlock lock;
+    Mutex lock;
     Vector<Tty *> ttys;
 
 public:
