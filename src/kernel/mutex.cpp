@@ -18,9 +18,9 @@ bool Mutex::try_lock() {
     return true;
 }
 
-void Mutex::spin_lock() {
-    while (!Mutex::try_lock()) { yield_self(); }
-}
+//void Mutex::spin_lock() {
+//    while (!Mutex::try_lock()) { yield_self(); }
+//}
 
 void Mutex::lock() {
     bool spinned = false;

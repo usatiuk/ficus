@@ -20,7 +20,7 @@ public:
     Mutex() = default;
 
     void lock();
-    void spin_lock();
+    //    void spin_lock();
     bool try_lock();
     void unlock();
     bool test();
