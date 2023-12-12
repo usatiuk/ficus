@@ -12,11 +12,12 @@ class String {
 public:
     String() noexcept {
         data = static_cast<char *>(kmalloc(1 * sizeof(char)));
+        curLen = 0;
         data[0] = '\0';
     }
 
     String(const char *in) noexcept {
-        unsigned int curLen = strlen(in);
+        curLen = strlen(in);
 
         data = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
         data[0] = '\0';
@@ -25,7 +26,7 @@ public:
     }
 
     String(String const &str) noexcept {
-        unsigned int curLen = strlen(str.data);
+        curLen = str.curLen;
 
         data = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
         data[0] = '\0';
@@ -35,11 +36,13 @@ public:
 
     String(String &&str) noexcept {
         data = str.data;
+        curLen = str.curLen;
         str.data = nullptr;
     }
 
     String &operator=(String str) noexcept {
         std::swap(data, str.data);
+        std::swap(curLen, str.curLen);
         return *this;
     }
 
@@ -47,13 +50,15 @@ public:
         if (data == nullptr) return;
         kfree(data);
         data = nullptr;
+        curLen = 0;
     }
 
     String &operator+=(String const &rhs) {
-        data = static_cast<char *>(krealloc(data, sizeof(char) * (strlen(data) + strlen(rhs.data) + 1)));
+        data = static_cast<char *>(krealloc(data, sizeof(char) * (curLen + rhs.curLen + 1)));
         assert(data != nullptr);
 
         strcat(data, rhs.data);
+        curLen += rhs.curLen;
 
         return *this;
     }
@@ -67,8 +72,16 @@ public:
         return *this;
     }
 
-    const char *c_str() {
+    const char *c_str() const {
         return data;
+    }
+
+    size_t length() const {
+        return curLen;
+    }
+
+    bool empty() const {
+        return curLen == 0;
     }
 
     bool operator==(String const &rhs) const {
@@ -92,7 +105,7 @@ public:
     }
 
 private:
-    //        unsigned int curLen = 0;
+    size_t curLen = 0;
     char *data;
 };
 

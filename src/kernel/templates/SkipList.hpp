@@ -142,40 +142,40 @@ public:
         return *this;
     }
 
-    void add(V *p, size_t n, bool reuseUpdate = false) {
-        if (!reuseUpdate) {
-            Node *cur = root;
-            for (int i = curL; i >= 0; i--) {
-                while (cur->next[i]->key < p->l && !cur->next[i]->end)
-                    cur = cur->next[i];
-                toUpdate[i] = cur;
-            }
-        }
-
-        for (size_t i = 0; i < n; i++, p++) {
-            size_t newLevel = randomL();
-
-            if (newLevel > curL) {
-                for (size_t j = curL + 1; j <= newLevel; j++)
-                    toUpdate[j] = root;
-
-                curL = newLevel;
-            }
-
-            auto newNode = (Node *) nodeAllocator.get();
-            newNode->key = p->l;
-            newNode->data = *p;
-
-            newNode->before = toUpdate[0];
-            if (toUpdate[0]->next[0] != nullptr) toUpdate[0]->next[0]->before = newNode;
-
-            for (size_t j = 0; j <= newLevel; j++) {
-                newNode->next[j] = toUpdate[j]->next[j];
-                toUpdate[j]->next[j] = newNode;
-                toUpdate[j] = newNode;
-            }
-        }
-    }
+    //    void add(V *p, size_t n, bool reuseUpdate = false) {
+    //        if (!reuseUpdate) {
+    //            Node *cur = root;
+    //            for (int i = curL; i >= 0; i--) {
+    //                while (cur->next[i]->key < p->l && !cur->next[i]->end)
+    //                    cur = cur->next[i];
+    //                toUpdate[i] = cur;
+    //            }
+    //        }
+    //
+    //        for (size_t i = 0; i < n; i++, p++) {
+    //            size_t newLevel = randomL();
+    //
+    //            if (newLevel > curL) {
+    //                for (size_t j = curL + 1; j <= newLevel; j++)
+    //                    toUpdate[j] = root;
+    //
+    //                curL = newLevel;
+    //            }
+    //
+    //            auto newNode = (Node *) nodeAllocator.get();
+    //            newNode->key = p->l;
+    //            newNode->data = *p;
+    //
+    //            newNode->before = toUpdate[0];
+    //            if (toUpdate[0]->next[0] != nullptr) toUpdate[0]->next[0]->before = newNode;
+    //
+    //            for (size_t j = 0; j <= newLevel; j++) {
+    //                newNode->next[j] = toUpdate[j]->next[j];
+    //                toUpdate[j]->next[j] = newNode;
+    //                toUpdate[j] = newNode;
+    //            }
+    //        }
+    //    }
 
     bool erase(Node *begin, Node *end, bool reuseUpdate = false) {
         if (begin == end) return false;
@@ -214,7 +214,7 @@ public:
         return true;
     }
 
-    Node *add(K const &k, V const &v, bool reuseUpdate = false) {
+    Node *add(K const &k, V v, bool reuseUpdate = false) {
         if (!reuseUpdate) {
             Node *cur = root;
 
@@ -239,7 +239,7 @@ public:
 
         auto newNode = (Node *) nodeAllocator.get();
         newNode->key = k;
-        newNode->data = v;
+        newNode->data = std::move(v);
 
         newNode->before = toUpdate[0];
         if (toUpdate[0]->next[0] != nullptr) toUpdate[0]->next[0]->before = newNode;

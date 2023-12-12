@@ -130,14 +130,19 @@ public:
     bool test() {
         String str1("hello");
         assert(str1 == "hello");
+        assert(str1.length() == 5);
         str1 += "Hello!";
         assert(str1 == "helloHello!");
+        assert(str1.length() == 11);
         str1 = String("abcd");
+        assert(str1.length() == 4);
         String str2("dcba");
+        assert(str2.length() == 4);
         assert(str2 > str1);
         assert(str1 < str2);
         assert(str1 <= str2);
         str2 = "abcd";
+        assert(str2.length() == 4);
         assert(str1 <= str2);
 
         // GlobalTtyManager.all_tty_putstr("String tests ok!\n");
@@ -208,6 +213,16 @@ public:
 void test_unique_ptr() {
     UniquePtr<String> ptr("Hello");
     assert(*ptr == "Hello");
+
+    UniquePtr<String> ptr2(std::move(ptr));
+    assert(*ptr2 == "Hello");
+    assert(ptr.get() == nullptr);
+
+    UniquePtr<String> ptr3;
+    ptr3 = std::move(ptr2);
+    assert(ptr2.get() == nullptr);
+
+    assert(*ptr3 == "Hello");
 }
 
 void test_list() {

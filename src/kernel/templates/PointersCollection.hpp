@@ -23,11 +23,17 @@ public:
     }
 
     UniquePtr(UniquePtr const &other) = delete;
-    UniquePtr &operator=(UniquePtr other) = delete;
+    UniquePtr &operator=(UniquePtr const &other) = delete;
 
     UniquePtr(UniquePtr &&other) {
         ptr = other.ptr;
         other.ptr = nullptr;
+    }
+
+    UniquePtr &operator=(UniquePtr &&other) {
+        ptr = other.ptr;
+        other.ptr = nullptr;
+        return *this;
     }
 
     T *operator->() const { return ptr; }
@@ -35,7 +41,7 @@ public:
     T &operator*() const { return *ptr; }
 
     T *get() const noexcept { return ptr; }
-    
+
     T *release() noexcept {
         auto b = ptr;
         ptr = nullptr;

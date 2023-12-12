@@ -116,6 +116,10 @@ public:
         return curSize;
     }
 
+    bool empty() const {
+        return curSize == 0;
+    }
+
 private:
     size_t capacity = 2;
     size_t curSize = 0;
