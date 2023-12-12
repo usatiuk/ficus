@@ -68,8 +68,10 @@ void unblock(List<Task *>::Node *what);
 
 extern "C" void switch_task(struct task_frame *cur_frame);
 
+using TaskPID = uint64_t;
+
 // TODO: that's quite inefficient!
-SkipList<uint64_t, std::pair<String, uint64_t>> getTaskTimePerPid();
+SkipList<uint64_t, std::pair<String, TaskPID>> getTaskTimePerPid();
 
 void yield_self();
 

@@ -62,8 +62,8 @@ static void free_task(struct Task *t) {
     kfree(t);
 }
 
-SkipList<uint64_t, std::pair<String, uint64_t>> getTaskTimePerPid() {
-    SkipList<uint64_t, std::pair<String, uint64_t>> ret;
+SkipList<uint64_t, std::pair<String, TaskPID>> getTaskTimePerPid() {
+    SkipList<uint64_t, std::pair<String, TaskPID>> ret;
     {
         LockGuard l(AllTasks_lock);
         for (const auto &t: AllTasks) {
