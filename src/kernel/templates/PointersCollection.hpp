@@ -26,11 +26,13 @@ public:
     UniquePtr &operator=(UniquePtr const &other) = delete;
 
     UniquePtr(UniquePtr &&other) {
+        delete ptr;
         ptr = other.ptr;
         other.ptr = nullptr;
     }
 
     UniquePtr &operator=(UniquePtr &&other) {
+        delete ptr;
         ptr = other.ptr;
         other.ptr = nullptr;
         return *this;

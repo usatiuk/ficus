@@ -8,6 +8,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "PointersCollection.hpp"
+
 #define PAGE_SIZE 4096
 
 #define KERN_V2P(a) ((((uintptr_t) (a) + kernel_phys_base) & ~kernel_virt_base))
@@ -17,6 +19,8 @@
 #define HHDM_SIZE 32ULL// In GB
 #define HHDM_V2P(a) ((((uintptr_t) (a)) & ~HHDM_BEGIN))
 #define HHDM_P2V(a) ((((uintptr_t) (a)) | HHDM_BEGIN))
+
+class FDT;
 
 class AddressSpace {
 public:
@@ -36,9 +40,13 @@ public:
         return (uint64_t *) HHDM_V2P(PML4);
     }
 
+    FDT *getFdt();
+
 private:
     // Pointer to PML4 in HDDM
     uint64_t *PML4;
+
+    FDT *_fdt = nullptr;
 };
 
 extern AddressSpace *KERN_AddressSpace;

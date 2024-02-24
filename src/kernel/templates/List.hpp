@@ -60,7 +60,20 @@ public:
         size++;
     }
 
+    bool empty() const {
+        return tail == nullptr;
+    }
+    
     T &back() {
+        if (tail != nullptr) {
+            assert(size > 0);
+            return tail->val;
+        }
+
+        assert(false);
+    }
+
+    const T &back() const {
         if (tail != nullptr) {
             assert(size > 0);
             return tail->val;

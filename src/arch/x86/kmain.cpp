@@ -4,11 +4,15 @@
 #include <cstddef>
 
 #include "LockGuard.hpp"
+#include "MemFs.hpp"
+#include "MountTable.hpp"
 #include "SerialTty.hpp"
 #include "SkipList.hpp"
 #include "String.hpp"
 #include "TestTemplates.hpp"
 #include "TtyManager.hpp"
+#include "VFSGlobals.hpp"
+#include "VFSTester.hpp"
 #include "VMA.hpp"
 #include "asserts.hpp"
 #include "globals.hpp"
@@ -202,6 +206,12 @@ void user_task() {
     }
 }
 
+void vfs_tester() {
+    VFSTester vfsTester;
+    vfsTester.test();
+    remove_self();
+}
+
 void ktask_main() {
     GlobalTtyManager.add_tty(new SerialTty());
 
@@ -214,6 +224,8 @@ void ktask_main() {
     new_ktask(templates_tester, "templates_tester");
     new_ktask(templates_tester, "templates_tester2");
     new_ktask(stress_tester, "stress_tester");
+    VFSGlobals::mounts.add_mount(new MemFs(&VFSGlobals::root));
+    new_ktask(vfs_tester, "vfs_tester");
 
     for (int i = 0; i < saved_modules_size; i++) {
         GlobalTtyManager.all_tty_putstr("Starting ");

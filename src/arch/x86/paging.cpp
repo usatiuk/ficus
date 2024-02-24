@@ -8,6 +8,8 @@
 #include "memman.hpp"
 #include "misc.hpp"
 
+#include "FDT.hpp"
+
 // Returns a free page frame in HHDM
 static uint64_t *get_free_frame() {
     uint64_t *res = static_cast<uint64_t *>(get4k());
@@ -159,6 +161,10 @@ int AddressSpace::unmap(void *virt) {
     *ptse = (*ptse) & (~PAGE_PRESENT);
     invlpg((void *) ((uint64_t) virt & 0x000FFFFFFFFFF000ULL));
     return 1;
+}
+FDT *AddressSpace::getFdt() {
+    if (!_fdt) _fdt = new FDT();
+    return _fdt;
 }
 
 static volatile struct limine_kernel_address_request kernel_address_request = {

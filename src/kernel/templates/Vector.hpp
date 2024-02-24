@@ -119,6 +119,25 @@ public:
     bool empty() const {
         return curSize == 0;
     }
+    T &back() {
+        assert(size() != 0);
+        return data[size() - 1];
+    }
+
+    const T &back() const {
+        assert(size() != 0);
+        return data[size() - 1];
+    }
+
+    Vector subvector(size_t start, size_t end) const {
+        Vector out;
+        if (start >= size()) return out;
+        end = end > size() ? size() : end;
+        for (size_t i = start; i < end; i++) {
+            out.emplace_back(data[i]);
+        }
+        return out;
+    }
 
 private:
     size_t capacity = 2;

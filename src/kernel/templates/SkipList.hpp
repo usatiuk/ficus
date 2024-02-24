@@ -276,6 +276,7 @@ public:
         while (curL > 0 &&
                root->next[curL] == nullptr)
             curL--;
+        cur->data = V();
         nodeAllocator.push(cur);
         return true;
     };

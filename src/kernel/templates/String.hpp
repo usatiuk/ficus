@@ -11,59 +11,62 @@
 class String {
 public:
     String() noexcept {
-        data = static_cast<char *>(kmalloc(1 * sizeof(char)));
+        _data = static_cast<char *>(kmalloc(1 * sizeof(char)));
         curLen = 0;
-        data[0] = '\0';
+        _data[0] = '\0';
     }
 
     String(const char *in) noexcept {
         curLen = strlen(in);
 
-        data = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
-        data[0] = '\0';
+        _data = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
+        _data[0] = '\0';
 
-        strcat(data, in);
+        strcat(_data, in);
     }
 
     String(String const &str) noexcept {
         curLen = str.curLen;
 
-        data = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
-        data[0] = '\0';
+        _data = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
+        _data[0] = '\0';
 
-        strcat(data, str.data);
+        strcat(_data, str._data);
     }
 
     String(String &&str) noexcept {
-        data = str.data;
+        _data = str._data;
         curLen = str.curLen;
-        str.data = nullptr;
+
+        str._data = static_cast<char *>(kmalloc(1 * sizeof(char)));
+        str.curLen = 0;
+        str._data[0] = '\0';
     }
 
     String &operator=(String str) noexcept {
-        std::swap(data, str.data);
+        std::swap(_data, str._data);
         std::swap(curLen, str.curLen);
         return *this;
     }
 
     ~String() noexcept {
-        if (data == nullptr) return;
-        kfree(data);
-        data = nullptr;
+        if (_data == nullptr) return;
+        kfree(_data);
+        _data = nullptr;
         curLen = 0;
     }
 
     String &operator+=(String const &rhs) {
-        data = static_cast<char *>(krealloc(data, sizeof(char) * (curLen + rhs.curLen + 1)));
-        assert(data != nullptr);
+        _data = static_cast<char *>(krealloc(_data, sizeof(char) * (curLen + rhs.curLen + 1)));
+        assert(_data != nullptr);
 
-        strcat(data, rhs.data);
+        strcat(_data, rhs._data);
         curLen += rhs.curLen;
 
         return *this;
     }
 
-    String &operator+=(int value) {
+    String &operator+=(unsigned long value) {
         char buf[20];
         itoa(value, buf, 10);
 
@@ -71,9 +74,31 @@ public:
 
         return *this;
     }
+    String &operator+=(unsigned long long value) {
+        char buf[32];
+        itoa(value, buf, 10);
+
+        *this += buf;
+
+        return *this;
+    }
+
+    String &operator+=(char c) {
+        _data = static_cast<char *>(krealloc(_data, sizeof(char) * (curLen + 2)));
+        assert(_data != nullptr);
+
+        _data[curLen] = c;
+        _data[curLen + 1] = '\0';
+        curLen++;
+        return *this;
+    }
 
     const char *c_str() const {
-        return data;
+        return _data;
+    }
+    
+    char *data() {
+        return _data;
     }
 
     size_t length() const {
@@ -85,28 +110,28 @@ public:
     }
 
     bool operator==(String const &rhs) const {
-        return strcmp(data, rhs.data) == 0;
+        return strcmp(_data, rhs._data) == 0;
     }
 
     bool operator!=(String const &rhs) const {
-        return strcmp(data, rhs.data) != 0;
+        return strcmp(_data, rhs._data) != 0;
     }
 
     bool operator<(String const &rhs) const {
-        return strcmp(data, rhs.data) < 0;
+        return strcmp(_data, rhs._data) < 0;
     }
 
     bool operator<=(String const &rhs) const {
-        return strcmp(data, rhs.data) <= 0;
+        return strcmp(_data, rhs._data) <= 0;
     }
 
     bool operator>(String const &rhs) const {
-        return strcmp(data, rhs.data) > 0;
+        return strcmp(_data, rhs._data) > 0;
     }
 
 private:
     size_t curLen = 0;
-    char *data;
+    char *_data;
 };
 
 #endif
