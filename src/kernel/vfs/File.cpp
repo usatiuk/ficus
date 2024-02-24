@@ -25,12 +25,21 @@ NodeFile *File::file() {
 }
 uint64_t File::seek(uint64_t pos) {
     _pos = pos;
+    return pos;
 }
 uint64_t File::read(char *buf, uint64_t size) {
-    if (file()) return file()->read(buf, _pos, size);
+    if (file()) {
+        file()->read(buf, _pos, size);
+        _pos += size;
+        return size;
+    }
 }
 uint64_t File::write(const char *buf, uint64_t size) {
-    if (file()) return file()->write(buf, _pos, size);
+    if (file()) {
+        file()->write(buf, _pos, size);
+        _pos += size;
+        return size;
+    }
 }
 uint64_t File::size() {
     if (file()) return file()->size();

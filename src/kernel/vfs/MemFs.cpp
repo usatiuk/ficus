@@ -5,7 +5,7 @@
 #include "MemFs.hpp"
 #include "LockGuard.hpp"
 Vector<Node *> MemFs::MemFsNodeDir::children() {
-    //    assert(_lock.owner() == cur_task());
+    assert(_lock.owner() == cur_task());
 
     Vector<Node *> out;
     for (auto c: _children) {

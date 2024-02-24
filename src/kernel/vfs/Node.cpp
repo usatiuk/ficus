@@ -9,7 +9,11 @@
 
 Node::~Node() = default;
 Node *Node::traverse(const Path &path) {
-    // lock
+    LockGuardTry l(_lock);
+    // FIXME: This is bad
+    if (!l.locked() && _lock.owner() != cur_task())
+        l.lock();
+
     NodeDir &nodeDir = static_cast<NodeDir &>(*this);
     if (nodeDir._mount) return nodeDir._mount->root()->traverse(path);
     if (path.empty()) return this;

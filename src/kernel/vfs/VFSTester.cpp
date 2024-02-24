@@ -39,4 +39,12 @@ void VFSTester::test() {
         cf->read(t.data(), cf->size());
         assert(t == "hello wooooorld");
     }
+    {
+        String t("aaaaaaaaaaaaaaaaaaaa");
+        File *cf = VFSApi::get(c);
+        cf->seek(0);
+        cf->read(t.data(), 9);
+        cf->read(t.data() + 9, cf->size() - 9);
+        assert(t == "hello wooooorld");
+    }
 }
