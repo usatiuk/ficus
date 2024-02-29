@@ -24,7 +24,7 @@ public:
 
     void spinlock() {
         assert2(!are_interrupts_enabled(), "Assuming all spinlocks are without interrupts");
-        while (!try_lock()) { yield_self(); }
+        while (!try_lock()) { yield_self(); }// FIXME: Should be pause!
     }
 
     void unlock() {
