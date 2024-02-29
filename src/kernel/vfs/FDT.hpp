@@ -5,18 +5,17 @@
 #ifndef OS2_FDT_HPP
 #define OS2_FDT_HPP
 
+#include "File.hpp"
+#include "Node.hpp"
 #include "Path.hpp"
 #include "PointersCollection.hpp"
 #include "SkipList.hpp"
 #include "mutex.hpp"
 
-class File;
-class Node;
-
 class FDT {
 public:
     using FD = int64_t;
-    FD open(const Path &p);
+    FD open(const Path &p, File::OptsT opts);
     void close(FD fd);
     File *get(FD fd);
 

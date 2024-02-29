@@ -10,9 +10,9 @@
 #include "VFSGlobals.hpp"
 #include "paging.hpp"
 
-FDT::FD FDT::open(const Path &p) {
+FDT::FD FDT::open(const Path &p, File::OptsT opts) {
     if (auto n = VFSGlobals::root.traverse(p)) {
-        _files.add(_cur_fd++, UniquePtr<File>(new File(n)));
+        _files.add(_cur_fd++, UniquePtr<File>(new File(n, opts)));
         return _cur_fd - 1;
     }
     return -1;

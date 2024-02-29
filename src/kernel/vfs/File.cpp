@@ -6,11 +6,18 @@
 
 #include "Node.hpp"
 
-File::File(Node *node) : _n(node) {
-    _n->lock();
+File::File(Node *node, OptsT opts) : _n(node), _opts(opts) {
+    if (opts & (OptsT) Opts::W) assert(opts & (OptsT) Opts::R);
+    if (opts & (OptsT) Opts::W)
+        _n->lock_rw();
+    else
+        _n->lock_r();
 }
 File::~File() {
-    _n->unlock();
+    if (_opts & (OptsT) Opts::W)
+        _n->lock_rw();
+    else
+        _n->lock_r();
 }
 Node *File::node() {
     return _n;
@@ -35,6 +42,7 @@ uint64_t File::read(char *buf, uint64_t size) {
     }
 }
 uint64_t File::write(const char *buf, uint64_t size) {
+    assert(_opts & (OptsT) Opts::W);
     if (file()) {
         file()->write(buf, _pos, size);
         _pos += size;

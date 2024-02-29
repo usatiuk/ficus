@@ -26,8 +26,10 @@ public:
     const String &name() const { return _name; }
     virtual Node *traverse(const Path &path);
 
-    void lock() { _lock.lock(); }
-    void unlock() { _lock.unlock(); }
+    bool lock_r();
+    bool lock_rw();
+    void unlock_r();
+    void unlock_rw();
 
 protected:
     Node(Type type) : _type(type) {}
@@ -36,6 +38,9 @@ protected:
 
     // This is uuugly
     Mutex _lock;
+    uint64_t _r_lock_count = 0;
+    Mutex _rw_lock;
+
     String _name;
     Filesystem *_mount = nullptr;
 };
