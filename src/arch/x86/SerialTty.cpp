@@ -30,7 +30,8 @@ void SerialTty::this_pooler() {
         int  r              = read();
         while (r != -1) {
             read_something = true;
-            buf.push_back((char) r);
+            if (!buf.full())
+                buf.push_back((char) r);
             r = read();
         }
         if (read_something)
