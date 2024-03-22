@@ -31,4 +31,4 @@ uint64_t lseek(uint64_t fd, uint64_t off, uint64_t whence);
 }
 #endif
 
-#endif//OS2_SYSCALLS_INTERFACE_H
+#endif //OS2_SYSCALLS_INTERFACE_H

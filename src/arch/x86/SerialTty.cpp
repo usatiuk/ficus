@@ -7,7 +7,7 @@
 #include "idt.hpp"
 #include "io.hpp"
 
-#define PORT 0x3f8// COM1
+#define PORT 0x3f8 // COM1
 
 void SerialTty::putchar(char c) {
     LockGuard guard(mutex);
@@ -27,7 +27,7 @@ void SerialTty::this_pooler() {
     mutex.lock();
     while (true) {
         bool read_something = false;
-        int r = read();
+        int  r              = read();
         while (r != -1) {
             read_something = true;
             buf.push_back((char) r);
@@ -41,10 +41,10 @@ void SerialTty::this_pooler() {
 }
 
 SerialTty::SerialTty() : Tty() {
-    outb(PORT + 3, 0x00);// Disable DLAB
-    outb(PORT + 1, 0x01);// Enable data available interrupt
+    outb(PORT + 3, 0x00); // Disable DLAB
+    outb(PORT + 1, 0x01); // Enable data available interrupt
 
-    Task *task = new_ktask((void (*)(void))(&SerialTty::this_pooler), "serialpooler", false);
+    Task *task      = new_ktask((void (*)(void))(&SerialTty::this_pooler), "serialpooler", false);
     task->frame.rdi = reinterpret_cast<uint64_t>(this);
     start_task(task);
 

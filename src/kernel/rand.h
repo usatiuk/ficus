@@ -11,11 +11,11 @@ extern "C" {
 
 // The following functions define a portable implementation of rand and srand.
 #define RAND_MAX 32767
-int rand(void);
+int  rand(void);
 void srand(unsigned int seed);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif//OS2_RAND_H
+#endif //OS2_RAND_H

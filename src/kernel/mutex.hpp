@@ -21,20 +21,20 @@ public:
 
     void lock();
     //    void spin_lock();
-    bool try_lock();
-    void unlock();
-    bool test();
+    bool  try_lock();
+    void  unlock();
+    bool  test();
     Task *owner() { return _owner; }
 
 private:
     std::atomic<bool> locked = false;
 
-    List<Task *> waiters;
-    Spinlock waiters_lock;
+    List<Task *>      waiters;
+    Spinlock          waiters_lock;
 
-    Task *_owner = nullptr;
-    uint8_t spin_success = 127;
+    Task             *_owner       = nullptr;
+    uint8_t           spin_success = 127;
 };
 
 
-#endif//OS1_MUTEX_H
+#endif //OS1_MUTEX_H

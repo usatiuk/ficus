@@ -12,8 +12,8 @@ class BytesFormatter {
 public:
     /// Structure for returning the processed byte value
     struct BytesFormat {
-        String number;///< Number part of the value
-        String prefix;///< Unit of measure
+        String number; ///< Number part of the value
+        String prefix; ///< Unit of measure
     };
 
     /// Formats the bytes in BytesFormat format
@@ -28,4 +28,4 @@ public:
 };
 
 
-#endif//OS2_BYTESFORMATTER_HPP
+#endif //OS2_BYTESFORMATTER_HPP

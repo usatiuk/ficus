@@ -36,7 +36,7 @@ BytesFormatter::BytesFormat BytesFormatter::format(unsigned long long int bytes)
 }
 
 String BytesFormatter::formatStr(unsigned long long int bytes) {
-    auto fmt = format(bytes);
+    auto   fmt = format(bytes);
     String out;
     out += fmt.number;
     out += " ";

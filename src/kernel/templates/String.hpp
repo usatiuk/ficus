@@ -11,35 +11,35 @@
 class String {
 public:
     String() noexcept {
-        _data = static_cast<char *>(kmalloc(1 * sizeof(char)));
-        curLen = 0;
+        _data    = static_cast<char *>(kmalloc(1 * sizeof(char)));
+        curLen   = 0;
         _data[0] = '\0';
     }
 
     String(const char *in) noexcept {
-        curLen = strlen(in);
+        curLen   = strlen(in);
 
-        _data = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
+        _data    = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
         _data[0] = '\0';
 
         strcat(_data, in);
     }
 
     String(String const &str) noexcept {
-        curLen = str.curLen;
+        curLen   = str.curLen;
 
-        _data = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
+        _data    = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
         _data[0] = '\0';
 
         strcat(_data, str._data);
     }
 
     String(String &&str) noexcept {
-        _data = str._data;
-        curLen = str.curLen;
+        _data        = str._data;
+        curLen       = str.curLen;
 
-        str._data = static_cast<char *>(kmalloc(1 * sizeof(char)));
-        str.curLen = 0;
+        str._data    = static_cast<char *>(kmalloc(1 * sizeof(char)));
+        str.curLen   = 0;
         str._data[0] = '\0';
     }
 
@@ -52,7 +52,7 @@ public:
     ~String() noexcept {
         if (_data == nullptr) return;
         kfree(_data);
-        _data = nullptr;
+        _data  = nullptr;
         curLen = 0;
     }
 
@@ -87,7 +87,7 @@ public:
         _data = static_cast<char *>(krealloc(_data, sizeof(char) * (curLen + 2)));
         assert(_data != nullptr);
 
-        _data[curLen] = c;
+        _data[curLen]     = c;
         _data[curLen + 1] = '\0';
         curLen++;
         return *this;
@@ -96,7 +96,7 @@ public:
     const char *c_str() const {
         return _data;
     }
-    
+
     char *data() {
         return _data;
     }
@@ -131,7 +131,7 @@ public:
 
 private:
     size_t curLen = 0;
-    char *_data;
+    char  *_data;
 };
 
 #endif

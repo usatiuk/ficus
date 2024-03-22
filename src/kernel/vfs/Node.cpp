@@ -9,8 +9,8 @@
 
 Node::~Node() = default;
 Node *Node::traverse(const Path &path) {
-    NodeDir &nodeDir = static_cast<NodeDir &>(*this);
-    
+    NodeDir    &nodeDir = static_cast<NodeDir &>(*this);
+
     Filesystem *mnt;
     {
         LockGuard l(_lock);

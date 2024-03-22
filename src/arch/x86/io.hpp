@@ -27,4 +27,4 @@ static inline void io_wait(void) {
     outb(0x80, 0);
 }
 
-#endif//OS1_IO_H
+#endif //OS1_IO_H

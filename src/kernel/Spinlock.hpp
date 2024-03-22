@@ -24,7 +24,7 @@ public:
 
     void spinlock() {
         assert2(!are_interrupts_enabled(), "Assuming all spinlocks are without interrupts");
-        while (!try_lock()) { yield_self(); }// FIXME: Should be pause!
+        while (!try_lock()) { yield_self(); } // FIXME: Should be pause!
     }
 
     void unlock() {
@@ -44,7 +44,7 @@ public:
 
 private:
     std::atomic<bool> locked = false;
-    Task *owner;
+    Task             *owner;
 };
 
 static_assert(std::is_trivially_copyable_v<Spinlock> == true);
@@ -80,8 +80,8 @@ public:
     SpinlockLockNoInt(SpinlockLockNoInt const &d) = delete;
 
 private:
-    Spinlock *lock;
+    Spinlock     *lock;
     unsigned long f;
 };
 
-#endif//OS2_SPINLOCK_H
+#endif //OS2_SPINLOCK_H

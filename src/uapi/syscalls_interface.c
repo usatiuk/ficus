@@ -8,7 +8,7 @@
 
 uint64_t do_syscall(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     uint64_t res;
-    asm volatile("syscall; mov (0x10016), %%rsp"// TASK_POINTER->ret_sp_val
+    asm volatile("syscall; mov (0x10016), %%rsp" // TASK_POINTER->ret_sp_val
                  : "=r"(res)
                  : "D"(id_rdi), "S"(a1_rsi), "d"(a2_rdx), "a"(a3_rcx)
                  : "cc", "rcx", "r8",

@@ -13,4 +13,4 @@ using Path = Vector<String>;
 
 Path StrToPath(const String &str);
 
-#endif//OS2_PATH_HPP
+#endif //OS2_PATH_HPP

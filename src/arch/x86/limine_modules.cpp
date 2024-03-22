@@ -8,16 +8,16 @@
 #include "string.h"
 
 static volatile struct limine_module_request module_request = {
-        .id = LIMINE_MODULE_REQUEST,
+        .id       = LIMINE_MODULE_REQUEST,
         .revision = 0};
 
 
 limine_file saved_modules[max_saved_modules];
-char saved_modules_data[max_saved_modules][max_saved_module_file_size] __attribute__((aligned(4096)));
-char saved_modules_names[max_saved_modules][max_saved_module_name] __attribute__((aligned(4096)));
-unsigned saved_modules_size = 0;
+char        saved_modules_data[max_saved_modules][max_saved_module_file_size] __attribute__((aligned(4096)));
+char        saved_modules_names[max_saved_modules][max_saved_module_name] __attribute__((aligned(4096)));
+unsigned    saved_modules_size = 0;
 
-void limine_modules_save() {
+void        limine_modules_save() {
     for (int i = 0; i < module_request.response->module_count; i++) {
         assert(i < max_saved_modules);
         saved_modules_size++;

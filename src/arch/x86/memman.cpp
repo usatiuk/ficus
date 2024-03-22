@@ -12,19 +12,19 @@
 #include <stddef.h>
 
 
-#define MAXGB 32ULL
-#define BITMAP_SIZE (((MAXGB) *1024ULL * 1024ULL) / (16ULL))
-#define MAX_PID (((BITMAP_SIZE) *4) - 4)
+#define MAXGB       32ULL
+#define BITMAP_SIZE (((MAXGB) * 1024ULL * 1024ULL) / (16ULL))
+#define MAX_PID     (((BITMAP_SIZE) * 4) - 4)
 // Expected to be nulled by the bootloader
 static struct FourPages used_bitmap[BITMAP_SIZE];
 
-static Mutex memman_lock;
+static Mutex            memman_lock;
 
-static uint64_t maxPid = 0;// Past the end
-static uint64_t minPid = 0;
-static uint64_t totalMem = 0;// Past the end
+static uint64_t         maxPid   = 0; // Past the end
+static uint64_t         minPid   = 0;
+static uint64_t         totalMem = 0; // Past the end
 
-static uint64_t roundup4k(uint64_t addr) {
+static uint64_t         roundup4k(uint64_t addr) {
     if ((addr & 0xFFF) == 0) return addr;
     else {
         return (addr + 0x1000) & (~(0xFFFULL));
@@ -40,7 +40,7 @@ static uint64_t rounddown4k(uint64_t addr) {
 
 void setSts(uint64_t pid, enum PageStatus sts) {
     uint64_t rounddown = pid & (~(0b11ULL));
-    uint64_t idx = rounddown >> 2;
+    uint64_t idx       = rounddown >> 2;
     switch (pid & 0b11ULL) {
         case 0:
             used_bitmap[idx].first = sts;
@@ -59,7 +59,7 @@ void setSts(uint64_t pid, enum PageStatus sts) {
 
 enum PageStatus getSts(uint64_t pid) {
     uint64_t rounddown = pid & (~(0b11ULL));
-    uint64_t idx = rounddown >> 2;
+    uint64_t idx       = rounddown >> 2;
     switch (pid & 0b11ULL) {
         case 0:
             return used_bitmap[idx].first;

@@ -10,7 +10,7 @@
 volatile std::atomic<uint64_t> ticks;
 volatile std::atomic<uint64_t> micros;
 
-unsigned read_pit_count(void) {
+unsigned                       read_pit_count(void) {
     unsigned count = 0;
 
     // Disable interrupts
@@ -19,8 +19,8 @@ unsigned read_pit_count(void) {
     // al = channel in bits 6 and 7, remaining bits clear
     outb(0x43, 0b0000000);
 
-    count = inb(0x40);      // Low byte
-    count |= inb(0x40) << 8;// High byte
+    count = inb(0x40);       // Low byte
+    count |= inb(0x40) << 8; // High byte
 
     return count;
 }
@@ -30,15 +30,15 @@ void set_pit_count(unsigned count) {
     //    cli();
 
     // Set low byte
-    outb(0x40, count & 0xFF);         // Low byte
-    outb(0x40, (count & 0xFF00) >> 8);// High byte
+    outb(0x40, count & 0xFF);          // Low byte
+    outb(0x40, (count & 0xFF00) >> 8); // High byte
     return;
 }
 
 // Very rough but I don't care right now
 // About 1000 HZ freq
-#define RELOAD_VAL 1193
-#define FREQ (1193182 / (RELOAD_VAL))
+#define RELOAD_VAL      1193
+#define FREQ            (1193182 / (RELOAD_VAL))
 #define MICROS_PER_TICK (1000000 / (FREQ))
 
 void init_timer() {

@@ -17,5 +17,5 @@ NodeFile *RootNode::mkfile(const String &name) {
 }
 
 
-RootNode VFSGlobals::root;
+RootNode   VFSGlobals::root;
 MountTable VFSGlobals::mounts;

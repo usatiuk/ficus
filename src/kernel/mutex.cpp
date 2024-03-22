@@ -68,7 +68,7 @@ void Mutex::lock() {
 
 void Mutex::unlock() {
     bool expected = true;
-    _owner = nullptr;
+    _owner        = nullptr;
     if (!locked.compare_exchange_strong(expected, false))
         assert2(false, "Unlocking an unlocked mutex!\n");
     List<Task *>::Node *t = nullptr;

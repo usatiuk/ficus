@@ -21,24 +21,24 @@ public:
 
     /// Map all higher-half pages into the address space
     /// By linking them to same entries as kernel
-    void map_kern();
+    void  map_kern();
     void *mmap_phys(void *v_addr, void *real_addr, size_t length, int flags);
     void *mmap_mem(void *v_addr, size_t length, int prot, int flags);
-    int munmap(void *addr, size_t length);
+    int   munmap(void *addr, size_t length);
 
 private:
     AddressSpace *space = nullptr;
-    Mutex space_lock;
+    Mutex         space_lock;
 
     struct ListEntry {
         uintptr_t begin;
-        uint64_t length;
-        bool available;
+        uint64_t  length;
+        bool      available;
     };
 
     SkipList<uintptr_t, ListEntry> regions;
-    Mutex regions_lock;
+    Mutex                          regions_lock;
 };
 
 
-#endif//OS2_VMA_HPP
+#endif //OS2_VMA_HPP

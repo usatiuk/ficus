@@ -18,7 +18,7 @@ static inline void _assert2(int val, const char *msg) {
 }
 
 #define assert2(x, y) _assert2(x, y)
-#define assert(x) _assert2(x, "Assertion failed")
+#define assert(x)     _assert2(x, "Assertion failed")
 
 
-#endif//OS2_ASSERTS_HPP
+#endif //OS2_ASSERTS_HPP

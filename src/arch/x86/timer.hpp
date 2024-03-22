@@ -11,7 +11,7 @@
 extern volatile std::atomic<uint64_t> ticks;
 extern volatile std::atomic<uint64_t> micros;
 
-void init_timer();
-void timer_tick();
+void                                  init_timer();
+void                                  timer_tick();
 
-#endif//OS1_TIMER_H
+#endif //OS1_TIMER_H

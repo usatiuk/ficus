@@ -5,7 +5,7 @@
 #include "Path.hpp"
 Path StrToPath(const String &str) {
     if (str.length() == 0) return Path();
-    Path out;
+    Path   out;
     String buf;
     for (size_t i = 0; i < str.length(); i++) {
         if (str.c_str()[i] == '/') {

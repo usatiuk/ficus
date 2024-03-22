@@ -47,10 +47,10 @@ void *AddressSpace::virt2real(void *virt) {
     assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
     assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
 
-    uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
-    uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;
-    uint64_t pdei = (uint64_t) virt >> 21 & 0x01FF;
-    uint64_t ptsi = (uint64_t) virt >> 12 & 0x01FF;
+    uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
+    uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
+    uint64_t  pdei  = (uint64_t) virt >> 21 & 0x01FF;
+    uint64_t  ptsi  = (uint64_t) virt >> 12 & 0x01FF;
 
     uint64_t *pml4e = PML4 + pml4i;
     if (!((*pml4e) & PAGE_PRESENT)) return 0;
@@ -82,10 +82,10 @@ int AddressSpace::map(void *virt, void *real, uint32_t flags) {
     assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
     assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
 
-    uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
-    uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;
-    uint64_t pdei = (uint64_t) virt >> 21 & 0x01FF;
-    uint64_t ptsi = (uint64_t) virt >> 12 & 0x01FF;
+    uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
+    uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
+    uint64_t  pdei  = (uint64_t) virt >> 21 & 0x01FF;
+    uint64_t  ptsi  = (uint64_t) virt >> 12 & 0x01FF;
 
 
     uint64_t *pml4e = PML4 + pml4i;
@@ -125,7 +125,7 @@ int AddressSpace::map(void *virt, void *real, uint32_t flags) {
 
     uint64_t *ptsb = (uint64_t *) HHDM_P2V((*pdee & 0x000FFFFFFFFFF000ULL));
     uint64_t *ptse = &ptsb[ptsi];
-    *ptse = ((uint64_t) real & 0x000FFFFFFFFFF000ULL) | (flags & 0xFFF) | PAGE_PRESENT;
+    *ptse          = ((uint64_t) real & 0x000FFFFFFFFFF000ULL) | (flags & 0xFFF) | PAGE_PRESENT;
     invlpg((void *) ((uint64_t) virt & 0x000FFFFFFFFFF000ULL));
     return 1;
 }
@@ -136,10 +136,10 @@ int AddressSpace::unmap(void *virt) {
     assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
     assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
 
-    uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
-    uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;
-    uint64_t pdei = (uint64_t) virt >> 21 & 0x01FF;
-    uint64_t ptsi = (uint64_t) virt >> 12 & 0x01FF;
+    uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
+    uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
+    uint64_t  pdei  = (uint64_t) virt >> 21 & 0x01FF;
+    uint64_t  ptsi  = (uint64_t) virt >> 12 & 0x01FF;
 
     uint64_t *pml4e = PML4 + pml4i;
 
@@ -168,7 +168,7 @@ FDT *AddressSpace::getFdt() {
 }
 
 static volatile struct limine_kernel_address_request kernel_address_request = {
-        .id = LIMINE_KERNEL_ADDRESS_REQUEST,
+        .id       = LIMINE_KERNEL_ADDRESS_REQUEST,
         .revision = 0};
 
 void limine_kern_save_response() {
@@ -180,10 +180,10 @@ void limine_kern_save_response() {
 static uint64_t early_pages[EARLY_PAGES_SIZE][512] __attribute__((aligned(PAGE_SIZE)));
 static uint64_t early_pages_used = 0;
 
-uintptr_t kernel_phys_base;
-uintptr_t kernel_virt_base;
+uintptr_t       kernel_phys_base;
+uintptr_t       kernel_virt_base;
 
-void map_hddm(uint64_t *pml4) {
+void            map_hddm(uint64_t *pml4) {
     assert2(kernel_virt_base != 0, "Kernel virt address not loaded!");
     assert2(kernel_phys_base != 0, "Kernel phys address not loaded!");
 
@@ -191,8 +191,8 @@ void map_hddm(uint64_t *pml4) {
     // Which is true if the first bytes of memory, where the kernel is are identity mapped,
     // Which is true if we're using Limine
     for (uint64_t i = 0; i < HHDM_SIZE; i++) {
-        void *virt = (void *) (HHDM_BEGIN + i * 1024ULL * 1024ULL * 1024ULL);
-        void *real = (void *) (i * 1024ULL * 1024ULL * 1024ULL);
+        void    *virt  = (void *) (HHDM_BEGIN + i * 1024ULL * 1024ULL * 1024ULL);
+        void    *real  = (void *) (i * 1024ULL * 1024ULL * 1024ULL);
 
         uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
         uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;

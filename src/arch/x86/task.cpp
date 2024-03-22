@@ -30,32 +30,32 @@ void sanity_check_frame(struct task_frame *cur_frame) {
     assert(cur_frame->ss != 0);
     assert(cur_frame->cs != 0);
     assert(cur_frame->sp != 0);
-    assert2((cur_frame->ss == GDTSEL(gdt_data) || (cur_frame->ss == GDTSEL(gdt_data_user)) | 0x3), "SS wrong!");
-    assert2((cur_frame->cs == GDTSEL(gdt_code) || (cur_frame->ss == GDTSEL(gdt_code_user)) | 0x3), "CS wrong!");
+    assert2((cur_frame->ss == Arch::GDT::gdt_data.selector() || (cur_frame->ss == Arch::GDT::gdt_data_user.selector()) | 0x3), "SS wrong!");
+    assert2((cur_frame->cs == Arch::GDT::gdt_code.selector() || (cur_frame->ss == Arch::GDT::gdt_code_user.selector()) | 0x3), "CS wrong!");
 }
 
-std::atomic<uint64_t> max_pid = 0;
-Mutex AllTasks_lock;
+std::atomic<uint64_t>      max_pid = 0;
+Mutex                      AllTasks_lock;
 SkipList<uint64_t, Task *> AllTasks;
 
 static List<Task *>::Node *RunningTask;
 
-static Spinlock NextTasks_lock;
-static List<Task *> NextTasks;
+static Spinlock            NextTasks_lock;
+static List<Task *>        NextTasks;
 
 // Task freer
-Mutex TasksToFree_lock;
-CV TasksToFree_cv;
+Mutex                      TasksToFree_lock;
+CV                         TasksToFree_cv;
 List<List<Task *>::Node *> TasksToFree;
 
 // Waiting
-Mutex WaitingTasks_mlock;
-CV WaitingTasks_cv;
+Mutex                                    WaitingTasks_mlock;
+CV                                       WaitingTasks_cv;
 SkipList<uint64_t, List<Task *>::Node *> WaitingTasks;
 
-static std::atomic<bool> initialized = false;
+static std::atomic<bool>                 initialized = false;
 
-static void free_task(struct Task *t) {
+static void                              free_task(struct Task *t) {
     kfree(t->kstack);
     kfree(t->name);
     kfree(t->fxsave);
@@ -110,28 +110,28 @@ static void task_freer() {
 
 struct Task *new_ktask(void (*fn)(), const char *name, bool start) {
     struct Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
-    newt->kstack = static_cast<uint64_t *>(kmalloc(TASK_SS));
-    newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
-    newt->fxsave = static_cast<char *>(kmalloc(512));
+    newt->kstack      = static_cast<uint64_t *>(kmalloc(TASK_SS));
+    newt->name        = static_cast<char *>(kmalloc(strlen(name) + 1));
+    newt->fxsave      = static_cast<char *>(kmalloc(512));
     strcpy(name, newt->name);
 
-    newt->frame.sp = ((((uintptr_t) newt->kstack) + (TASK_SS - 9) - 1) & (~0xFULL)) + 8;// Ensure 16byte alignment
+    newt->frame.sp = ((((uintptr_t) newt->kstack) + (TASK_SS - 9) - 1) & (~0xFULL)) + 8; // Ensure 16byte alignment
     // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
     assert((newt->frame.sp & 0xFULL) == 8);
 
     newt->frame.ip = (uint64_t) fn;
-    newt->frame.cs = GDTSEL(gdt_code);
-    newt->frame.ss = GDTSEL(gdt_data);
+    newt->frame.cs = Arch::GDT::gdt_code.selector();
+    newt->frame.ss = Arch::GDT::gdt_data.selector();
 
     for (int i = 0; i < 512; i++) newt->fxsave[i] = 0;
 
-    newt->frame.flags = flags();
-    newt->frame.guard = IDT_GUARD;
+    newt->frame.flags  = flags();
+    newt->frame.guard  = IDT_GUARD;
     newt->addressSpace = KERN_AddressSpace;
-    newt->state = start ? TS_RUNNING : TS_BLOCKED;
-    newt->mode = TASKMODE_KERN;
-    newt->pid = max_pid.fetch_add(1);
-    newt->used_time = 0;
+    newt->state        = start ? TS_RUNNING : TS_BLOCKED;
+    newt->mode         = TASKMODE_KERN;
+    newt->pid          = max_pid.fetch_add(1);
+    newt->used_time    = 0;
 
     sanity_check_frame(&newt->frame);
     if (start) {
@@ -150,45 +150,45 @@ struct Task *new_ktask(void (*fn)(), const char *name, bool start) {
     return newt;
 }
 struct Task *new_utask(void (*entrypoint)(), const char *name) {
-    Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
+    Task *newt   = static_cast<Task *>(kmalloc(sizeof(struct Task)));
     newt->kstack = static_cast<uint64_t *>(kmalloc(TASK_SS));
-    newt->name = static_cast<char *>(kmalloc(strlen(name) + 1));
+    newt->name   = static_cast<char *>(kmalloc(strlen(name) + 1));
     newt->fxsave = static_cast<char *>(kmalloc(512));
     strcpy(name, newt->name);
 
     newt->frame.ip = (uint64_t) entrypoint;
-    newt->frame.cs = GDTSEL(gdt_code_user) | 0x3;
-    newt->frame.ss = GDTSEL(gdt_data_user) | 0x3;
+    newt->frame.cs = Arch::GDT::gdt_code_user.selector() | 0x3;
+    newt->frame.ss = Arch::GDT::gdt_data_user.selector() | 0x3;
 
     for (int i = 0; i < 512; i++) newt->fxsave[i] = 0;
 
-    newt->frame.flags = flags();
-    newt->frame.guard = IDT_GUARD;
-    newt->addressSpace = new AddressSpace();
-    newt->vma = new VMA(newt->addressSpace);
-    newt->state = TS_BLOCKED;
-    newt->mode = TASKMODE_USER;
-    newt->pid = max_pid.fetch_add(1);
-    newt->used_time = 0;
+    newt->frame.flags     = flags();
+    newt->frame.guard     = IDT_GUARD;
+    newt->addressSpace    = new AddressSpace();
+    newt->vma             = new VMA(newt->addressSpace);
+    newt->state           = TS_BLOCKED;
+    newt->mode            = TASKMODE_USER;
+    newt->pid             = max_pid.fetch_add(1);
+    newt->used_time       = 0;
 
     task_pointer *taskptr = static_cast<task_pointer *>(
             newt->vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
-                                sizeof(task_pointer), 0, PAGE_RW | PAGE_USER));// FIXME: this is probably unsafe
+                                sizeof(task_pointer), 0, PAGE_RW | PAGE_USER)); // FIXME: this is probably unsafe
     assert((uintptr_t) taskptr == TASK_POINTER);
 
     task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(newt->addressSpace->virt2real(taskptr)));
 
-    newt->entry_ksp_val = ((((uintptr_t) newt->kstack) + (TASK_SS - 9) - 1) & (~0xFULL));// Ensure 16byte alignment
+    newt->entry_ksp_val        = ((((uintptr_t) newt->kstack) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
     // It should be aligned before call, therefore it actually should be aligned here
     assert((newt->entry_ksp_val & 0xFULL) == 0);
 
-    taskptr_real->taskptr = newt;
+    taskptr_real->taskptr       = newt;
     taskptr_real->entry_ksp_val = newt->entry_ksp_val;
-    taskptr_real->ret_sp = 0x0;
+    taskptr_real->ret_sp        = 0x0;
 
-    void *ustack = newt->vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
+    void *ustack                = newt->vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
 
-    newt->frame.sp = ((((uintptr_t) ustack) + (TASK_SS - 17) - 1) & (~0xFULL)) + 8;// Ensure 16byte alignment
+    newt->frame.sp              = ((((uintptr_t) ustack) + (TASK_SS - 17) - 1) & (~0xFULL)) + 8; // Ensure 16byte alignment
     // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
     assert((newt->frame.sp & 0xFULL) == 8);
 
@@ -205,7 +205,7 @@ struct Task *new_utask(void (*entrypoint)(), const char *name) {
 
 List<Task *>::Node *start_task(struct Task *task) {
     assert(task->state != TS_RUNNING);
-    task->state = TS_RUNNING;
+    task->state   = TS_RUNNING;
     auto new_node = NextTasks.create_node(task);
     {
         SpinlockLockNoInt l(NextTasks_lock);
@@ -267,7 +267,7 @@ static void task_waker() {
 
             while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->key <= micros && WaitingTasks.begin()->data->val->state != TS_RUNNING) {
                 auto *node = &*WaitingTasks.begin();
-                auto task = WaitingTasks.begin()->data;
+                auto  task = WaitingTasks.begin()->data;
 
                 // TODO this is all ugly
                 uint64_t l1 = 0;
@@ -282,7 +282,7 @@ static void task_waker() {
 
                 assert(l1 - l2 == 1);
                 task->val->sleep_until = 0;
-                task->val->state = TS_RUNNING;
+                task->val->state       = TS_RUNNING;
 
                 {
                     SpinlockLockNoInt l(NextTasks_lock);
@@ -325,15 +325,15 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
         }
     }
 
-    AddressSpace *oldspace = nullptr;
+    AddressSpace       *oldspace = nullptr;
     List<Task *>::Node *next;
 
     {
         SpinlockLockNoIntAssert ntl(NextTasks_lock);
 
-        static uint64_t lastSwitchMicros = 0;
-        uint64_t prevSwitchMicros = lastSwitchMicros;
-        lastSwitchMicros = micros;
+        static uint64_t         lastSwitchMicros = 0;
+        uint64_t                prevSwitchMicros = lastSwitchMicros;
+        lastSwitchMicros                         = micros;
 
         if (RunningTask) {
             RunningTask->val->frame = *cur_frame;
@@ -352,7 +352,7 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
     }
 
     RunningTask = next;
-    *cur_frame = RunningTask->val->frame;
+    *cur_frame  = RunningTask->val->frame;
     __builtin_memcpy(temp_fxsave, RunningTask->val->fxsave, 512);
 
     AddressSpace *newspace = RunningTask->val->addressSpace;

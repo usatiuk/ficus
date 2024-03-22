@@ -18,7 +18,7 @@ struct Task;
 // This is probably broken in some way
 class CV {
     List<Task *> waiters;
-    Spinlock waiters_lock;
+    Spinlock     waiters_lock;
 
 public:
     template<typename Lockable>
@@ -55,4 +55,4 @@ public:
 };
 
 
-#endif//OS2_CV_HPP
+#endif //OS2_CV_HPP

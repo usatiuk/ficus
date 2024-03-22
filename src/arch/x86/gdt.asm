@@ -74,16 +74,19 @@ gdt_code_user:
     db PRESENT | USER | NOT_SYS | EXEC | RW     ; Access
     db GRAN_4K | LONG_MODE | 0xF                ; Flags & Limit (high, bits 16-19)
     db 0                                        ; Base (high, bits 24-31)
+
 global gdt_tss:data
 gdt_tss:
-    dq 0x00000000 ;TODO
+    dq 0x00000000
     dq 0x00000000
 global gdt_tss_user:data
 gdt_tss_user:
-    dq 0x00000000 ;TODO
     dq 0x00000000
+    dq 0x00000000
+
 global gdt_end:data
 gdt_end:
+
 global gdtr:data
 gdtr:
     dw gdt_end - gdt_null - 1
@@ -93,20 +96,23 @@ section .text
 global _gdt_setup:function (_gdt_setup.end - _gdt_setup)
 _gdt_setup:
     LGDT [gdtr]
-    ; Reload CS register:
-    PUSH (gdt_code - gdt_null); Push code segment to stack, 0x08 is a stand-in for your code segment
-    LEA RAX, [rel .flush]     ; Load address of .reload_CS into RAX
-    PUSH RAX                  ; Push this value to the stack
-    RETFQ                     ; Perform a far return, RETFQ or LRETQ depending on syntax
+    ; Reload CS register
+    PUSH (gdt_code - gdt_null) ; Push code segment to stack
+    LEA  RAX, [rel .flush]     ; Load address of .flush into RAX
+    PUSH RAX                   ; Push this value to the stack
+    RETFQ                      ; Perform a far return, RETFQ or LRETQ depending on syntax
+
 .flush:
+
     ; Reload data segment registers
-    MOV   AX, (gdt_data - gdt_null) ; 0x10 is a stand-in for your data segment
+    MOV   AX, (gdt_data - gdt_null)
     MOV   DS, AX
     MOV   ES, AX
     MOV   FS, AX
     MOV   GS, AX
     MOV   SS, AX
     MOV   AX, (gdt_tss - gdt_null)
+
     ltr AX
     RET
 .end:

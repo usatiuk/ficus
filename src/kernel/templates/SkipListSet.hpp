@@ -8,16 +8,16 @@ class SkipListSet {
 public:
     struct Node {
         Node *next[maxL + 1] = {nullptr};
-        Node *before = nullptr;
-        bool end = false;
-        K key = K();
+        Node *before         = nullptr;
+        bool  end            = false;
+        K     key            = K();
     };
 
 private:
     class NodeAllocator {
         static constexpr int size{64};
-        Node *nodes[size];
-        int top = -1;
+        Node                *nodes[size];
+        int                  top = -1;
 
     public:
         NodeAllocator() noexcept = default;
@@ -42,12 +42,12 @@ private:
                 return new Node;
             }
 
-            Node *node = nodes[top--];
+            Node *node    = nodes[top--];
 
-            node->end = false;
-            node->before = nullptr;
+            node->end     = false;
+            node->before  = nullptr;
             node->next[0] = nullptr;
-            node->key = K();
+            node->key     = K();
             //                node->data = V();
 
             return node;
@@ -57,22 +57,22 @@ private:
     static int randomL() {
         int ret = __builtin_ffs(rand());
         assert(ret >= 0);
-        return ret;// NOLINT
+        return ret; // NOLINT
     }
 
     NodeAllocator nodeAllocator;
 
-    Node *root;
-    Node *endnode;
+    Node         *root;
+    Node         *endnode;
     mutable Node *toUpdate[maxL + 1];
-    size_t curL = 0;
+    size_t        curL = 0;
 
 public:
     SkipListSet() noexcept {
-        root = (Node *) nodeAllocator.get();
-        root->end = true;
-        endnode = (Node *) nodeAllocator.get();
-        endnode->end = true;
+        root            = (Node *) nodeAllocator.get();
+        root->end       = true;
+        endnode         = (Node *) nodeAllocator.get();
+        endnode->end    = true;
         endnode->before = root;
 
         for (size_t i = 0; i <= maxL; i++) {
@@ -84,7 +84,7 @@ public:
         auto cur = root;
         while (cur != nullptr) {
             auto prev = cur;
-            cur = cur->next[0];
+            cur       = cur->next[0];
             nodeAllocator.push(prev);
         }
     }
@@ -101,27 +101,27 @@ public:
                 curL = newLevel;
             }
 
-            auto newNode = (Node *) nodeAllocator.get();
-            newNode->key = n->key;
-            newNode->data = n->data;
+            auto newNode    = (Node *) nodeAllocator.get();
+            newNode->key    = n->key;
+            newNode->data   = n->data;
             newNode->before = toUpdate[0];
             if (toUpdate[0]->next[0] != nullptr) toUpdate[0]->next[0]->before = newNode;
 
             for (size_t i = 0; i <= newLevel; i++) {
-                newNode->next[i] = toUpdate[i]->next[i];
+                newNode->next[i]     = toUpdate[i]->next[i];
                 toUpdate[i]->next[i] = newNode;
-                toUpdate[i] = newNode;
+                toUpdate[i]          = newNode;
             }
         }
     }
 
     SkipListSet(SkipListSet &&l) noexcept {
-        this->root = l.root;
-        l.root = nullptr;
+        this->root    = l.root;
+        l.root        = nullptr;
         this->endnode = l.endnode;
-        l.endnode = nullptr;
-        this->curL = l.curL;
-        l.curL = 0;
+        l.endnode     = nullptr;
+        this->curL    = l.curL;
+        l.curL        = 0;
     }
 
     SkipListSet &operator=(SkipListSet l) noexcept {
@@ -191,16 +191,16 @@ public:
             curL = newLevel;
         }
 
-        auto newNode = (Node *) nodeAllocator.get();
-        newNode->key = k;
+        auto newNode    = (Node *) nodeAllocator.get();
+        newNode->key    = k;
 
         newNode->before = toUpdate[0];
         if (toUpdate[0]->next[0] != nullptr) toUpdate[0]->next[0]->before = newNode;
 
         for (size_t i = 0; i <= newLevel; i++) {
-            newNode->next[i] = toUpdate[i]->next[i];
+            newNode->next[i]     = toUpdate[i]->next[i];
             toUpdate[i]->next[i] = newNode;
-            toUpdate[i] = newNode;
+            toUpdate[i]          = newNode;
         }
         return newNode;
     }
@@ -288,12 +288,12 @@ public:
 
 
     bool operator==(SkipListSet const &r) const {
-        auto n = root->next[0];
+        auto n  = root->next[0];
         auto n2 = r.root->next[0];
 
         while (!n->end && !n2->end) {
             if (!(n->data == n2->data)) return false;
-            n = n->next[0];
+            n  = n->next[0];
             n2 = n2->next[0];
         }
 

@@ -10,13 +10,13 @@
 // FIXME
 template<typename T, auto S>
 class CircularBuffer {
-    T data[S];
+    T   data[S];
     int front, back;
 
 public:
     CircularBuffer() {
         front = -1;
-        back = -1;
+        back  = -1;
     }
 
     bool full() {
@@ -41,7 +41,7 @@ public:
             assert(false);
         } else {
             if (front == -1) front = 0;
-            back = (back + 1) % S;
+            back       = (back + 1) % S;
             data[back] = what;
         }
     }
@@ -53,7 +53,7 @@ public:
             T ret = data[front];
             if (front == back) {
                 front = -1;
-                back = -1;
+                back  = -1;
             } else {
                 front = (front + 1) % S;
             }
@@ -62,4 +62,4 @@ public:
     }
 };
 
-#endif//OS2_CIRCULARBUFFER_HPP
+#endif //OS2_CIRCULARBUFFER_HPP

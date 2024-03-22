@@ -15,30 +15,30 @@
 class FDT {
 public:
     using FD = int64_t;
-    FD open(const Path &p, FileOpts opts);
-    void close(FD fd);
-    File *get(FD fd) const;
+    FD          open(const Path &p, FileOpts opts);
+    void        close(FD fd);
+    File       *get(FD fd) const;
 
     static FDT *current();
 
 private:
     SkipList<FD, UniquePtr<File>> _files;
-    int64_t _cur_fd = 10;
-    mutable Mutex _mtx;
+    int64_t                       _cur_fd = 10;
+    mutable Mutex                 _mtx;
 };
 
 class FDHandle {
 public:
     FDHandle(FDT::FD fd);
     ~FDHandle();
-    FDHandle(const File &f) = delete;
+    FDHandle(const File &f)            = delete;
     FDHandle &operator=(const File &o) = delete;
 
-    FDT::FD get() { return _fd; }
+    FDT::FD   get() { return _fd; }
 
 private:
     FDT::FD _fd;
 };
 
 
-#endif//OS2_FDT_HPP
+#endif //OS2_FDT_HPP

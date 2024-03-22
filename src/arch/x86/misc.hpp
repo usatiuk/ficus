@@ -71,7 +71,7 @@ static inline void irqrestore(unsigned long flags) {
     }
 
 static inline void wrmsr(uint64_t msr, uint64_t value) {
-    uint32_t low = value & 0xFFFFFFFF;
+    uint32_t low  = value & 0xFFFFFFFF;
     uint32_t high = value >> 32;
     asm volatile(
             "wrmsr"

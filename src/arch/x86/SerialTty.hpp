@@ -11,13 +11,13 @@
 
 class SerialTty : public Tty {
     // TODO: Possibly there should be 2 mutexes?
-    Mutex mutex;
-    CV readercv;
-    CV isrcv;
-    static void isr(void *tty);
+    Mutex                     mutex;
+    CV                        readercv;
+    CV                        isrcv;
+    static void               isr(void *tty);
 
-    void this_isr();
-    void this_pooler();
+    void                      this_isr();
+    void                      this_pooler();
     CircularBuffer<char, 512> buf;
 
 public:
@@ -28,4 +28,4 @@ public:
 };
 
 
-#endif//OS2_SERIALTTY_HPP
+#endif //OS2_SERIALTTY_HPP

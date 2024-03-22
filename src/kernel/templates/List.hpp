@@ -15,14 +15,14 @@ template<typename T>
 class List {
 public:
     struct Node {
-        T val;
+        T     val;
         Node *next;
         List *list;
     };
 
 private:
-    Node *head = nullptr;
-    Node *tail = nullptr;
+    Node    *head = nullptr;
+    Node    *tail = nullptr;
 
     uint64_t size = 0;
 
@@ -51,7 +51,7 @@ public:
             assert(tail != nullptr);
             assert(size > 0);
             head->next = new_node;
-            head = new_node;
+            head       = new_node;
         } else {
             assert(size == 0);
             head = new_node;
@@ -63,7 +63,7 @@ public:
     bool empty() const {
         return tail == nullptr;
     }
-    
+
     T &back() {
         if (tail != nullptr) {
             assert(size > 0);
@@ -99,7 +99,7 @@ public:
         }
 
         auto old_tail = tail;
-        tail = tail->next;
+        tail          = tail->next;
         delete old_tail;
     }
 
@@ -113,15 +113,15 @@ public:
         size--;
         if (tail == head) {
             assert(size == 0);
-            auto b = tail;
-            tail = nullptr;
-            head = nullptr;
+            auto b  = tail;
+            tail    = nullptr;
+            head    = nullptr;
             b->list = nullptr;
             return b;
         }
 
-        auto old_tail = tail;
-        tail = tail->next;
+        auto old_tail  = tail;
+        tail           = tail->next;
         old_tail->list = nullptr;
         return old_tail;
     }
@@ -133,4 +133,4 @@ public:
 };
 
 
-#endif//OS2_LIST_HPP
+#endif //OS2_LIST_HPP

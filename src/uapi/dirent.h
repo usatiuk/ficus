@@ -15,7 +15,7 @@ extern "C" {
 
 struct dirent {
     uint64_t inode_n;
-    char d_name[];
+    char     d_name[];
 };
 
 #ifdef __cplusplus
@@ -23,4 +23,4 @@ struct dirent {
 #endif
 
 
-#endif//OS2_DIRENT_H
+#endif //OS2_DIRENT_H

@@ -12,4 +12,4 @@ extern uint64_t KERN_stack[KERN_STACK_SIZE] __attribute__((aligned(16)));
 
 #define TASK_POINTER 0x10000
 
-#endif//OS1_GLOBALS_H
+#endif //OS1_GLOBALS_H

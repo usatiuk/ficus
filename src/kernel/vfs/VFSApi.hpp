@@ -10,14 +10,14 @@
 #include "Path.hpp"
 
 namespace VFSApi {
-    bool mkdir(const Path &path);
-    bool touch(const Path &path);
+    bool    mkdir(const Path &path);
+    bool    touch(const Path &path);
 
     FDT::FD open(const Path &path);
-    File *get(FDT::FD fd);
-    void close(FDT::FD fd);
+    File   *get(FDT::FD fd);
+    void    close(FDT::FD fd);
 
-};// namespace VFSApi
+};     // namespace VFSApi
 
 
-#endif//OS2_VFSAPI_HPP
+#endif //OS2_VFSAPI_HPP

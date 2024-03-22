@@ -43,7 +43,7 @@ void *VMA::mmap_mem(void *v_addr, size_t length, int prot, int flags) {
         length &= ~(PAGE_SIZE - 1);
     }
     assert((length & (PAGE_SIZE - 1)) == 0);
-    uint64_t page_len = length / PAGE_SIZE;
+    uint64_t                 page_len = length / PAGE_SIZE;
 
     std::optional<ListEntry> found;
     {

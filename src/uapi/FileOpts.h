@@ -13,10 +13,10 @@ extern "C" {
 #endif
 
 enum FileOpts : uint8_t {
-    O_RDONLY = 1 << 1,// Read
-    O_WRONLY = 1 << 2,// Write
-    O_RDWR = O_RDONLY | O_WRONLY,
-    O_CREAT = 1 << 3,// Create
+    O_RDONLY = 1 << 1, // Read
+    O_WRONLY = 1 << 2, // Write
+    O_RDWR   = O_RDONLY | O_WRONLY,
+    O_CREAT  = 1 << 3, // Create
 };
 
 #ifdef __cplusplus
@@ -24,4 +24,4 @@ enum FileOpts : uint8_t {
 #endif
 
 
-#endif//OS2_FILEOPTS_HPP
+#endif //OS2_FILEOPTS_HPP

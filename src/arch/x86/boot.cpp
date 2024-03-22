@@ -38,7 +38,7 @@ real_start() {
 extern "C" void _start(void) {
     _sse_setup();
     barrier();
-    gdt_setup();
+    Arch::GDT::gdt_setup();
     barrier();
     idt_init();
     barrier();
@@ -71,9 +71,9 @@ extern "C" void _start(void) {
         KERN_AddressSpace->map((void *) (kernel_virt_base + i * PAGE_SIZE), (void *) (kernel_phys_base + i * PAGE_SIZE), PAGE_RW | PAGE_USER);
     }
 
-    uint64_t real_new_cr3 = (uint64_t) HHDM_V2P(KERN_AddressSpace_PML4);
-    uint64_t *new_stack_top = &KERN_stack[KERN_STACK_SIZE - 1];                          // Don't forget in which direction the stack grows...
-    new_stack_top = reinterpret_cast<uint64_t *>(((uint64_t) new_stack_top) & (~0xFULL));// correct alignment for sse
+    uint64_t  real_new_cr3  = (uint64_t) HHDM_V2P(KERN_AddressSpace_PML4);
+    uint64_t *new_stack_top = &KERN_stack[KERN_STACK_SIZE - 1];                                     // Don't forget in which direction the stack grows...
+    new_stack_top           = reinterpret_cast<uint64_t *>(((uint64_t) new_stack_top) & (~0xFULL)); // correct alignment for sse
 
     barrier();
     __asm__ volatile("movq %[new_stack_top], %%rsp; movq %[real_new_cr3], %%cr3; call real_start"

@@ -22,18 +22,18 @@ public:
         delete ptr;
     }
 
-    UniquePtr(UniquePtr const &other) = delete;
+    UniquePtr(UniquePtr const &other)            = delete;
     UniquePtr &operator=(UniquePtr const &other) = delete;
 
     UniquePtr(UniquePtr &&other) {
         delete ptr;
-        ptr = other.ptr;
+        ptr       = other.ptr;
         other.ptr = nullptr;
     }
 
     UniquePtr &operator=(UniquePtr &&other) {
         delete ptr;
-        ptr = other.ptr;
+        ptr       = other.ptr;
         other.ptr = nullptr;
         return *this;
     }
@@ -46,7 +46,7 @@ public:
 
     T *release() noexcept {
         auto b = ptr;
-        ptr = nullptr;
+        ptr    = nullptr;
         return b;
     }
 
@@ -77,10 +77,10 @@ public:
     }
 
     SharedPtr(SharedPtr &&other) {
-        uses = other.uses;
-        ptr = other.ptr;
+        uses       = other.uses;
+        ptr        = other.ptr;
         other.uses = nullptr;
-        other.ptr = nullptr;
+        other.ptr  = nullptr;
     }
 
     SharedPtr &operator=(SharedPtr other) {
@@ -89,16 +89,16 @@ public:
         return *this;
     }
 
-    T *operator->() const { return ptr; }
+    T                *operator->() const { return ptr; }
 
-    T &operator*() const { return *ptr; }
+    T                &operator*() const { return *ptr; }
 
-    T *get() const noexcept { return ptr; }
+    T                *get() const noexcept { return ptr; }
 
     [[nodiscard]] int useCount() const { return *uses; }
 
 private:
-    T *ptr = nullptr;
+    T   *ptr  = nullptr;
     int *uses = nullptr;
 };
 
@@ -110,7 +110,7 @@ private:
     friend COWTester;
     SharedPtr<T> ptr;
 
-    void copy() {
+    void         copy() {
         if (ptr.get() && ptr.useCount() > 1) {
             ptr = SharedPtr<T>(new T(*ptr));
         }
@@ -123,7 +123,7 @@ public:
 
     explicit COWPointer(SharedPtr<T> data) : ptr(std::move(data)) {}
 
-    COWPointer(COWPointer &&other) = default;
+    COWPointer(COWPointer &&other)     = default;
 
     COWPointer(COWPointer const &data) = default;
 
@@ -143,7 +143,7 @@ public:
         return ptr.get();
     }
 
-    int useCount() { return ptr.useCount(); };
+    int      useCount() { return ptr.useCount(); };
 
     const T &operator*() const {
         return *ptr;

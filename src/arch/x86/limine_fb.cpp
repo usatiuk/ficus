@@ -9,13 +9,13 @@
 #include "string.h"
 
 static volatile struct limine_framebuffer_request framebuffer_request = {
-        .id = LIMINE_FRAMEBUFFER_REQUEST,
+        .id       = LIMINE_FRAMEBUFFER_REQUEST,
         .revision = 0};
 
-int framebuffer_count = 0;
+int                       framebuffer_count = 0;
 struct limine_framebuffer framebuffers[10];
 struct {
-    void *base;
+    void    *base;
     uint64_t len;
 } framebufferAddrs[10];
 
@@ -35,7 +35,7 @@ void limine_fb_save_response(AddressSpace *boot_address_space) {
 
 void limine_fb_remap(AddressSpace *space) {
     for (int i = 0; i < framebuffer_count; i++) {
-        void *base = framebuffers[i].address;
+        void *base     = framebuffers[i].address;
         void *realbase = framebufferAddrs[i].base;
         // TODO: Proper map
         for (int i = 0; i < 100000; i++) {

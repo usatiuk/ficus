@@ -11,14 +11,14 @@
 class RootNode : public NodeDir {
 public:
     Vector<Node *> children() override;
-    NodeDir *mkdir(const String &name) override;
-    NodeFile *mkfile(const String &name) override;
+    NodeDir       *mkdir(const String &name) override;
+    NodeFile      *mkfile(const String &name) override;
 };
 
 namespace VFSGlobals {
-    extern RootNode root;
+    extern RootNode   root;
     extern MountTable mounts;
-};// namespace VFSGlobals
+};     // namespace VFSGlobals
 
 
-#endif//OS2_VFSGLOBALS_HPP
+#endif //OS2_VFSGLOBALS_HPP

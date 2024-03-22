@@ -16,22 +16,22 @@ class File {
 public:
     File(Node *n, FileOpts opts);
     ~File();
-    File(const File &f) = delete;
-    File &operator=(const File &o) = delete;
+    File(const File &f)                = delete;
+    File     &operator=(const File &o) = delete;
 
-    Node *node();
-    NodeDir *dir();
+    Node     *node();
+    NodeDir  *dir();
     NodeFile *file() const;
 
-    uint64_t seek(uint64_t pos);
-    uint64_t read(char *buf, uint64_t size);
-    uint64_t write(const char *buf, uint64_t size);
-    uint64_t size();
+    uint64_t  seek(uint64_t pos);
+    uint64_t  read(char *buf, uint64_t size);
+    uint64_t  write(const char *buf, uint64_t size);
+    uint64_t  size();
 
 private:
     Node *const _n;
-    uint64_t _pos = 0;
-    FileOpts _opts;
+    uint64_t    _pos = 0;
+    FileOpts    _opts;
 };
 
-#endif//OS2_FILE_HPP
+#endif //OS2_FILE_HPP

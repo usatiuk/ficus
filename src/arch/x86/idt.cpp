@@ -7,10 +7,10 @@
 #include "task.hpp"
 #include "timer.hpp"
 
-__attribute__((aligned(0x10))) static idt_entry_t idt[256];// Create an array of IDT entries; aligned for performance
-static idtr_t idtr;
+__attribute__((aligned(0x10))) static idt_entry_t idt[256]; // Create an array of IDT entries; aligned for performance
+static idtr_t                                     idtr;
 
-extern "C" __attribute__((noreturn)) void exception_handler(void) {
+extern "C" __attribute__((noreturn)) void         exception_handler(void) {
     _hcf();
 }
 
@@ -33,20 +33,20 @@ extern "C" void pic2_irq_6();
 extern "C" void pic2_irq_7();
 
 
-void idt_set_descriptor(uint8_t vector, void (*isr)(), uint8_t flags) {
+void            idt_set_descriptor(uint8_t vector, void (*isr)(), uint8_t flags) {
     idt_entry_t *descriptor = &idt[vector];
 
-    descriptor->isr_low = (uint64_t) isr & 0xFFFF;
-    descriptor->kernel_cs = GDTSEL(gdt_code);
-    descriptor->ist = 1;
-    descriptor->attributes = flags;
-    descriptor->isr_mid = ((uint64_t) isr >> 16) & 0xFFFF;
-    descriptor->isr_high = ((uint64_t) isr >> 32) & 0xFFFFFFFF;
-    descriptor->reserved = 0;
+    descriptor->isr_low     = (uint64_t) isr & 0xFFFF;
+    descriptor->kernel_cs   = Arch::GDT::gdt_code.selector();
+    descriptor->ist         = 1;
+    descriptor->attributes  = flags;
+    descriptor->isr_mid     = ((uint64_t) isr >> 16) & 0xFFFF;
+    descriptor->isr_high    = ((uint64_t) isr >> 32) & 0xFFFFFFFF;
+    descriptor->reserved    = 0;
 }
 
 void idt_init() {
-    idtr.base = (uintptr_t) &idt[0];
+    idtr.base  = (uintptr_t) &idt[0];
     idtr.limit = (uint16_t) ((uint64_t) &idt[255] - (uint64_t) &idt[0]);
 
     for (uint8_t vector = 0; vector < 32; vector++) {
@@ -74,8 +74,8 @@ void idt_init() {
     barrier();
     __asm__ volatile("lidt %0"
                      :
-                     : "m"(idtr));// load the new IDT
-    __asm__ volatile("sti");      // set the interrupt flag
+                     : "m"(idtr)); // load the new IDT
+    __asm__ volatile("sti");       // set the interrupt flag
     barrier();
 
     PIC_init();
@@ -91,33 +91,33 @@ void PIC_sendEOI(unsigned char irq) {
 void PIC_init() {
     unsigned char a1, a2;
 
-    a1 = inb(PIC1_DATA);// save masks
+    a1 = inb(PIC1_DATA);                       // save masks
     a2 = inb(PIC2_DATA);
 
-    outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);// starts the initialization sequence (in cascade mode)
+    outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4); // starts the initialization sequence (in cascade mode)
     io_wait();
     outb(PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);
     io_wait();
-    outb(PIC1_DATA, PIC1_OFFSET);// ICW2: Master PIC vector offset
+    outb(PIC1_DATA, PIC1_OFFSET); // ICW2: Master PIC vector offset
     io_wait();
-    outb(PIC2_DATA, PIC2_OFFSET);// ICW2: Slave PIC vector offset
+    outb(PIC2_DATA, PIC2_OFFSET); // ICW2: Slave PIC vector offset
     io_wait();
-    outb(PIC1_DATA, 4);// ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+    outb(PIC1_DATA, 4);           // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
     io_wait();
-    outb(PIC2_DATA, 2);// ICW3: tell Slave PIC its cascade identity (0000 0010)
+    outb(PIC2_DATA, 2);           // ICW3: tell Slave PIC its cascade identity (0000 0010)
     io_wait();
 
-    outb(PIC1_DATA, ICW4_8086);// ICW4: have the PICs use 8086 mode (and not 8080 mode)
+    outb(PIC1_DATA, ICW4_8086);   // ICW4: have the PICs use 8086 mode (and not 8080 mode)
     io_wait();
     outb(PIC2_DATA, ICW4_8086);
     io_wait();
 
-    outb(PIC1_DATA, a1);// restore saved masks.
+    outb(PIC1_DATA, a1); // restore saved masks.
     outb(PIC2_DATA, a2);
 }
 void IRQ_set_mask(unsigned char IRQline) {
     uint16_t port;
-    uint8_t value;
+    uint8_t  value;
 
     if (IRQline < 8) {
         port = PIC1_DATA;
@@ -131,7 +131,7 @@ void IRQ_set_mask(unsigned char IRQline) {
 
 void IRQ_clear_mask(unsigned char IRQline) {
     uint16_t port;
-    uint8_t value;
+    uint8_t  value;
 
     if (IRQline < 8) {
         port = PIC1_DATA;
@@ -164,9 +164,9 @@ uint16_t pic_get_isr(void) {
 }
 
 static int_handler_t handlers[256];
-static void *handlers_args[256];
+static void         *handlers_args[256];
 
-extern "C" void pic1_irq_real_0(struct task_frame *frame) {
+extern "C" void      pic1_irq_real_0(struct task_frame *frame) {
     timer_tick();
     switch_task(frame);
     PIC_sendEOI(0);
@@ -232,6 +232,6 @@ extern "C" void pic2_irq_real_7() {
 }
 
 void attach_interrupt(unsigned num, int_handler_t handler, void *firstarg) {
-    handlers[num] = handler;
+    handlers[num]      = handler;
     handlers_args[num] = firstarg;
 }

@@ -16,18 +16,18 @@ class SkipList {
 public:
     struct Node {
         Node *next[maxL + 1] = {nullptr};
-        Node *before = nullptr;
-        bool end = false;
-        K key = K();
+        Node *before         = nullptr;
+        bool  end            = false;
+        K     key            = K();
 
-        V data = V();
+        V     data           = V();
     };
 
 private:
     class NodeAllocator {
         static constexpr int size{64};
-        Node *nodes[size];
-        int top = -1;
+        Node                *nodes[size];
+        int                  top = -1;
 
     public:
         NodeAllocator() noexcept = default;
@@ -52,12 +52,12 @@ private:
                 return new Node;
             }
 
-            Node *node = nodes[top--];
+            Node *node    = nodes[top--];
 
-            node->end = false;
-            node->before = nullptr;
+            node->end     = false;
+            node->before  = nullptr;
             node->next[0] = nullptr;
-            node->key = K();
+            node->key     = K();
             //                node->data = V();
 
             return node;
@@ -67,23 +67,23 @@ private:
     static int randomL() {
         int ret = __builtin_ffs(rand());
         assert(ret >= 0);
-        return ret;// NOLINT
+        return ret; // NOLINT
     }
 
     //    static inline NodeAllocator nodeAllocator;
     NodeAllocator nodeAllocator;
 
-    Node *root;
-    Node *endnode;
+    Node         *root;
+    Node         *endnode;
     mutable Node *toUpdate[maxL + 1];
-    size_t curL = 0;
+    size_t        curL = 0;
 
 public:
     SkipList() noexcept {
-        root = (Node *) nodeAllocator.get();
-        root->end = true;
-        endnode = (Node *) nodeAllocator.get();
-        endnode->end = true;
+        root            = (Node *) nodeAllocator.get();
+        root->end       = true;
+        endnode         = (Node *) nodeAllocator.get();
+        endnode->end    = true;
         endnode->before = root;
 
         for (size_t i = 0; i <= maxL; i++) {
@@ -95,7 +95,7 @@ public:
         auto cur = root;
         while (cur != nullptr) {
             auto prev = cur;
-            cur = cur->next[0];
+            cur       = cur->next[0];
             nodeAllocator.push(prev);
         }
     }
@@ -112,27 +112,27 @@ public:
                 curL = newLevel;
             }
 
-            auto newNode = (Node *) nodeAllocator.get();
-            newNode->key = n->key;
-            newNode->data = n->data;
+            auto newNode    = (Node *) nodeAllocator.get();
+            newNode->key    = n->key;
+            newNode->data   = n->data;
             newNode->before = toUpdate[0];
             if (toUpdate[0]->next[0] != nullptr) toUpdate[0]->next[0]->before = newNode;
 
             for (size_t i = 0; i <= newLevel; i++) {
-                newNode->next[i] = toUpdate[i]->next[i];
+                newNode->next[i]     = toUpdate[i]->next[i];
                 toUpdate[i]->next[i] = newNode;
-                toUpdate[i] = newNode;
+                toUpdate[i]          = newNode;
             }
         }
     }
 
     SkipList(SkipList &&l) noexcept {
-        this->root = l.root;
-        l.root = nullptr;
+        this->root    = l.root;
+        l.root        = nullptr;
         this->endnode = l.endnode;
-        l.endnode = nullptr;
-        this->curL = l.curL;
-        l.curL = 0;
+        l.endnode     = nullptr;
+        this->curL    = l.curL;
+        l.curL        = 0;
     }
 
     SkipList &operator=(SkipList l) noexcept {
@@ -237,17 +237,17 @@ public:
             curL = newLevel;
         }
 
-        auto newNode = (Node *) nodeAllocator.get();
-        newNode->key = k;
-        newNode->data = std::move(v);
+        auto newNode    = (Node *) nodeAllocator.get();
+        newNode->key    = k;
+        newNode->data   = std::move(v);
 
         newNode->before = toUpdate[0];
         if (toUpdate[0]->next[0] != nullptr) toUpdate[0]->next[0]->before = newNode;
 
         for (size_t i = 0; i <= newLevel; i++) {
-            newNode->next[i] = toUpdate[i]->next[i];
+            newNode->next[i]     = toUpdate[i]->next[i];
             toUpdate[i]->next[i] = newNode;
-            toUpdate[i] = newNode;
+            toUpdate[i]          = newNode;
         }
         return newNode;
     }
@@ -336,12 +336,12 @@ public:
 
 
     bool operator==(SkipList const &r) const {
-        auto n = root->next[0];
+        auto n  = root->next[0];
         auto n2 = r.root->next[0];
 
         while (!n->end && !n2->end) {
             if (!(n->data == n2->data)) return false;
-            n = n->next[0];
+            n  = n->next[0];
             n2 = n2->next[0];
         }
 
@@ -355,15 +355,15 @@ public:
     struct SkipListIterator {
         //        using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = Node;
-        using pointer = value_type *;
-        using reference = value_type &;
+        using value_type      = Node;
+        using pointer         = value_type *;
+        using reference       = value_type &;
 
         explicit SkipListIterator(Node *n) : n(std::move(n)){};
 
-        reference operator*() const { return *n; }
+        reference         operator*() const { return *n; }
 
-        pointer operator->() const { return n; }
+        pointer           operator->() const { return n; }
 
         SkipListIterator &operator--() {
             if (!n->end)

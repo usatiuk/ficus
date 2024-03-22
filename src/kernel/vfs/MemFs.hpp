@@ -15,8 +15,8 @@ class MemFs : public Filesystem {
     struct MemFsNodeDir : public NodeDir {
     public:
         Vector<Node *> children() override;
-        NodeDir *mkdir(const String &name) override;
-        NodeFile *mkfile(const String &name) override;
+        NodeDir       *mkdir(const String &name) override;
+        NodeFile      *mkfile(const String &name) override;
 
     private:
         SkipList<String, Node *> _children;
@@ -26,8 +26,8 @@ class MemFs : public Filesystem {
     public:
         MemFsNodeFile(const String &name) { _name = name; }
 
-        bool read(char *buf, size_t start, size_t num) override;
-        bool write(const char *buf, size_t start, size_t num) override;
+        bool   read(char *buf, size_t start, size_t num) override;
+        bool   write(const char *buf, size_t start, size_t num) override;
         size_t size() override;
 
     private:
@@ -44,4 +44,4 @@ private:
 };
 
 
-#endif//OS2_MEMFS_HPP
+#endif //OS2_MEMFS_HPP

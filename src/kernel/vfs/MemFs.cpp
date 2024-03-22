@@ -6,7 +6,7 @@
 #include "LockGuard.hpp"
 
 Vector<Node *> MemFs::MemFsNodeDir::children() {
-    LockGuard l(_lock);
+    LockGuard      l(_lock);
 
     Vector<Node *> out;
     for (auto c: _children) {
@@ -17,14 +17,14 @@ Vector<Node *> MemFs::MemFsNodeDir::children() {
 
 NodeDir *MemFs::MemFsNodeDir::mkdir(const String &name) {
     LockGuard l(_lock);
-    auto newnode = new MemFsNodeDir();
-    newnode->_name = name;
+    auto      newnode = new MemFsNodeDir();
+    newnode->_name    = name;
     _children.add(name, newnode);
     return newnode;
 }
 NodeFile *MemFs::MemFsNodeDir::mkfile(const String &name) {
     LockGuard l(_lock);
-    auto newfile = new MemFsNodeFile(name);
+    auto      newfile = new MemFsNodeFile(name);
     _children.add(name, newfile);
     return newfile;
 }

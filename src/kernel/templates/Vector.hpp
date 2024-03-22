@@ -19,10 +19,10 @@ public:
     }
 
     Vector(std::initializer_list<T> l) noexcept {
-        curSize = l.size();
+        curSize  = l.size();
         capacity = curSize > 0 ? curSize : 2;
 
-        data = static_cast<T *>(kmalloc(capacity * sizeof(T)));
+        data     = static_cast<T *>(kmalloc(capacity * sizeof(T)));
 
         size_t i = 0;
         for (auto const &el: l) {
@@ -31,20 +31,20 @@ public:
     }
 
     Vector(Vector const &vec) noexcept {
-        curSize = vec.curSize;
+        curSize  = vec.curSize;
         capacity = curSize > 0 ? curSize : 2;
 
-        data = static_cast<T *>(kmalloc(capacity * sizeof(T)));
+        data     = static_cast<T *>(kmalloc(capacity * sizeof(T)));
 
         for (size_t i = 0; i < curSize; i++)
             new (data + i) T(vec.data[i]);
     }
 
     Vector(Vector &&v) noexcept {
-        curSize = v.curSize;
+        curSize  = v.curSize;
         capacity = v.capacity;
-        data = v.data;
-        v.data = nullptr;
+        data     = v.data;
+        v.data   = nullptr;
     }
 
     Vector &operator=(Vector vec) noexcept {
@@ -74,7 +74,7 @@ public:
     }
 
     void compact() {
-        data = (T *) krealloc(reinterpret_cast<char *>(data), curSize * sizeof(T));
+        data     = (T *) krealloc(reinterpret_cast<char *>(data), curSize * sizeof(T));
         capacity = curSize;
     }
 
@@ -141,8 +141,8 @@ public:
 
 private:
     size_t capacity = 2;
-    size_t curSize = 0;
-    T *data;
+    size_t curSize  = 0;
+    T     *data;
 };
 
 #endif

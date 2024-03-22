@@ -12,4 +12,4 @@ public:
 };
 
 
-#endif//OS2_VFSTESTER_HPP
+#endif //OS2_VFSTESTER_HPP

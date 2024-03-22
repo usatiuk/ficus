@@ -5,7 +5,7 @@ void _start() {
     //    putchar('h');
     //    putchar('i');
     //    putchar('\n');
-    uint64_t test123 = open("/test123", O_CREAT | O_RDWR);
+    uint64_t    test123 = open("/test123", O_CREAT | O_RDWR);
     const char *teststr = "test str";
     write(test123, teststr, 9);
     close(test123);

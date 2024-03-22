@@ -41,7 +41,7 @@ void ktask2() {
         // Note: we assume the framebuffer model is RGB with 32-bit pixels.
         for (size_t i = 0; i < 100; i++) {
             sleep_self(25000);
-            uint32_t *fb_ptr = static_cast<uint32_t *>(framebuffer->address);
+            uint32_t *fb_ptr                               = static_cast<uint32_t *>(framebuffer->address);
             fb_ptr[i * (framebuffer->pitch / 4) + i + 100] = c ? 0 : 0xFFFFFF;
         }
     }
@@ -60,7 +60,7 @@ void ktask() {
         // Note: we assume the framebuffer model is RGB with 32-bit pixels.
         for (size_t i = 0; i < 100; i++) {
             sleep_self(25000);
-            uint32_t *fb_ptr = static_cast<uint32_t *>(framebuffer->address);
+            uint32_t *fb_ptr                         = static_cast<uint32_t *>(framebuffer->address);
             fb_ptr[i * (framebuffer->pitch / 4) + i] = c ? 0 : 0xFFFFFF;
         }
     }
@@ -94,16 +94,16 @@ void freeprinter() {
 }
 
 void statprinter() {
-    SkipList<uint64_t, std::pair<String, uint64_t>> last_times = getTaskTimePerPid();
-    std::atomic<uint64_t> last_print_time = micros;
+    SkipList<uint64_t, std::pair<String, uint64_t>> last_times      = getTaskTimePerPid();
+    std::atomic<uint64_t>                           last_print_time = micros;
     while (1) {
         sleep_self(1000000);
-        uint64_t prev_print_time = last_print_time;
-        last_print_time = micros;
+        uint64_t prev_print_time                                   = last_print_time;
+        last_print_time                                            = micros;
         SkipList<uint64_t, std::pair<String, uint64_t>> prev_times = std::move(last_times);
-        last_times = getTaskTimePerPid();
+        last_times                                                 = getTaskTimePerPid();
 
-        uint64_t slice = last_print_time - prev_print_time;
+        uint64_t slice                                             = last_print_time - prev_print_time;
         if (slice == 0) continue;
 
         for (const auto &t: prev_times) {
@@ -134,7 +134,7 @@ void statprinter() {
 
 static Mutex testmutex;
 
-void mtest1() {
+void         mtest1() {
     {
         LockGuard l(testmutex);
         GlobalTtyManager.all_tty_putstr("Locked1\n");
@@ -165,8 +165,8 @@ void mtest3() {
 }
 
 void stress() {
-    static std::atomic<int> i = 0;
-    int curi = i++;
+    static std::atomic<int> i    = 0;
+    int                     curi = i++;
     if (curi > 1500) remove_self();
 
     sleep_self(100000 - curi * 10);
@@ -252,13 +252,13 @@ void dummy_task() {
 extern void (*ctors_begin[])();
 extern void (*ctors_end[])();
 
-void kmain() {
+void        kmain() {
     for (void (**ctor)() = ctors_begin; ctor < ctors_end; ctor++)
         (*ctor)();
 
     init_timer();
 
-    srand(micros);// NOLINT
+    srand(micros); // NOLINT
 
     new_ktask(ktask_main, "ktask_main");
     new_ktask(dummy_task, "dummy");

@@ -20,30 +20,30 @@
 // even with completely broken 16-bit segments somehow
 // But what happens with something more complex is completely bonkers
 struct STAR {
-    unsigned unused : 32;
+    unsigned unused     : 32;
     unsigned call_cs_ss : 16;
-    unsigned ret_cs_ss : 16;
+    unsigned ret_cs_ss  : 16;
 } __attribute__((packed));
 
 static_assert(sizeof(STAR) == 8);
 
 void setup_syscalls() {
     union {
-        STAR star;
+        STAR     star;
         uint64_t bytes;
     } __attribute__((__packed__)) newstar{};
 
-    newstar.star.ret_cs_ss = (GDTSEL(gdt_data_user) - 8) | 0x3;
-    assert(newstar.star.ret_cs_ss + 8 == (GDTSEL(gdt_data_user) | 0x3));
-    assert(newstar.star.ret_cs_ss + 16 == (GDTSEL(gdt_code_user) | 0x3));
+    newstar.star.ret_cs_ss = (Arch::GDT::gdt_data_user.selector() - 8) | 0x3;
+    assert(newstar.star.ret_cs_ss + 8 == (Arch::GDT::gdt_data_user.selector() | 0x3));
+    assert(newstar.star.ret_cs_ss + 16 == (Arch::GDT::gdt_code_user.selector() | 0x3));
 
-    newstar.star.call_cs_ss = (GDTSEL(gdt_code));
-    assert(newstar.star.call_cs_ss == GDTSEL(gdt_code));
-    assert(newstar.star.call_cs_ss + 8 == GDTSEL(gdt_data));
+    newstar.star.call_cs_ss = (Arch::GDT::gdt_code.selector());
+    assert(newstar.star.call_cs_ss == Arch::GDT::gdt_code.selector());
+    assert(newstar.star.call_cs_ss + 8 == Arch::GDT::gdt_data.selector());
 
     wrmsr(0xc0000081, newstar.bytes);
     wrmsr(0xc0000082, reinterpret_cast<uint64_t>(&_syscall_entrypoint));
-    wrmsr(0xc0000084, (1 << 9));// IA32_FMASK, mask interrupts
+    wrmsr(0xc0000084, (1 << 9)); // IA32_FMASK, mask interrupts
 
     wrmsr(0xC0000080, rdmsr(0xC0000080) | 0b1);
 }

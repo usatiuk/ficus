@@ -12,10 +12,10 @@ public:
     Filesystem(NodeDir *mounted_on);
 
     virtual NodeDir *root() = 0;
-    virtual ~Filesystem() = 0;
+    virtual ~Filesystem()   = 0;
 
     NodeDir *_mounted_on;
 };
 
 
-#endif//OS2_FILESYSTEM_HPP
+#endif //OS2_FILESYSTEM_HPP

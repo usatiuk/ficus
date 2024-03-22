@@ -19,7 +19,7 @@ void VFSTester::test() {
     FDT::FD d = VFSApi::open(StrToPath("/hello/f2"));
     {
         String t("hello wooooorld");
-        File *cf = VFSApi::get(c);
+        File  *cf = VFSApi::get(c);
         cf->write(t.c_str(), t.length() + 1);
     }
     assert(a != -1);
@@ -35,13 +35,13 @@ void VFSTester::test() {
     assert(c != -1);
     {
         String t("aaaaaaaaaaaaaaaaaaaa");
-        File *cf = VFSApi::get(c);
+        File  *cf = VFSApi::get(c);
         cf->read(t.data(), cf->size());
         assert(t == "hello wooooorld");
     }
     {
         String t("aaaaaaaaaaaaaaaaaaaa");
-        File *cf = VFSApi::get(c);
+        File  *cf = VFSApi::get(c);
         cf->seek(0);
         cf->read(t.data(), 9);
         cf->read(t.data() + 9, cf->size() - 9);

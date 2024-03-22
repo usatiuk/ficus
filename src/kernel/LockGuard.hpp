@@ -44,9 +44,9 @@ public:
     }
 
 private:
-    T *_lock;
+    T   *_lock;
     bool suc;
 };
 
 
-#endif//OS2_LOCKGUARD_H
+#endif //OS2_LOCKGUARD_H

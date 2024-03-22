@@ -7,4 +7,4 @@
 
 int test_templates();
 
-#endif//OS2_TESTTEMPLATES_HPP
+#endif //OS2_TESTTEMPLATES_HPP
