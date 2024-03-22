@@ -5,10 +5,8 @@
 #include "MemFs.hpp"
 #include "LockGuard.hpp"
 
-//FIXME: asserts on read also make sense
 Vector<Node *> MemFs::MemFsNodeDir::children() {
-    //    assert(!_rw_lock.test() || _rw_lock.owner() == cur_task());
-    //    assert(_lock.owner() == cur_task());
+    LockGuard l(_lock);
 
     Vector<Node *> out;
     for (auto c: _children) {
@@ -18,21 +16,20 @@ Vector<Node *> MemFs::MemFsNodeDir::children() {
 }
 
 NodeDir *MemFs::MemFsNodeDir::mkdir(const String &name) {
-    assert(_rw_lock.owner() == cur_task());
+    LockGuard l(_lock);
     auto newnode = new MemFsNodeDir();
     newnode->_name = name;
     _children.add(name, newnode);
     return newnode;
 }
 NodeFile *MemFs::MemFsNodeDir::mkfile(const String &name) {
-    assert(_rw_lock.owner() == cur_task());
+    LockGuard l(_lock);
     auto newfile = new MemFsNodeFile(name);
     _children.add(name, newfile);
     return newfile;
 }
 bool MemFs::MemFsNodeFile::read(char *buf, size_t start, size_t num) {
-    assert(!_rw_lock.test() || _rw_lock.owner() == cur_task());
-    //    assert(_lock.owner() == cur_task());
+    LockGuard l(_lock);
     if (start >= _bytes.size()) return false;
     if (start + num > _bytes.size()) return false;
     for (size_t i = 0; i < num; i++) {
@@ -41,8 +38,7 @@ bool MemFs::MemFsNodeFile::read(char *buf, size_t start, size_t num) {
     return false;
 }
 bool MemFs::MemFsNodeFile::write(const char *buf, size_t start, size_t num) {
-    assert(_rw_lock.owner() == cur_task());
-    // fixme
+    LockGuard l(_lock);
     while (_bytes.size() <= start + num) _bytes.emplace_back(0);
     for (size_t i = 0; i < num; i++) {
         _bytes[start + i] = buf[i];
@@ -50,5 +46,6 @@ bool MemFs::MemFsNodeFile::write(const char *buf, size_t start, size_t num) {
     return true;
 }
 size_t MemFs::MemFsNodeFile::size() {
+    LockGuard l(_lock);
     return _bytes.size();
 }

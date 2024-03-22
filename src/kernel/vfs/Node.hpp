@@ -6,6 +6,7 @@
 #define OS2_NODE_HPP
 
 #include "List.hpp"
+#include "LockGuard.hpp"
 #include "String.hpp"
 
 #include "Path.hpp"
@@ -23,25 +24,19 @@ public:
     virtual ~Node() = 0;
 
     Type type() const { return _type; }
-    const String &name() const { return _name; }
+    const String &name() const {
+        LockGuard l(_lock);
+        return _name;
+    }
     virtual Node *traverse(const Path &path);
-
-    bool lock_r();
-    bool lock_rw();
-    void unlock_r();
-    void unlock_rw();
 
 protected:
     Node(Type type) : _type(type) {}
 
-    Type _type = Type::INVALID;
+    const Type _type = Type::INVALID;
 
     // This is uuugly
-    Mutex _lock;
-    uint64_t _r_lock_count = 0;
-    uint64_t _rw_lock_count = 0;
-    List<Task *> r_lockers;
-    Mutex _rw_lock;
+    mutable Mutex _lock;
 
     String _name;
     Filesystem *_mount = nullptr;

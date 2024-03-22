@@ -17,14 +17,14 @@ public:
     using FD = int64_t;
     FD open(const Path &p, FileOpts opts);
     void close(FD fd);
-    File *get(FD fd);
+    File *get(FD fd) const;
 
     static FDT *current();
 
 private:
     SkipList<FD, UniquePtr<File>> _files;
     int64_t _cur_fd = 10;
-    Mutex _mtx;
+    mutable Mutex _mtx;
 };
 
 class FDHandle {

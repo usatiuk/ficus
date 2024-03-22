@@ -13,6 +13,7 @@
 
 FDT::FD FDT::open(const Path &p, FileOpts opts) {
     if (auto n = VFSGlobals::root.traverse(p)) {
+        LockGuard l(_mtx);
         _files.add(_cur_fd++, UniquePtr<File>(new File(n, opts)));
         return _cur_fd - 1;
     }
@@ -24,13 +25,15 @@ FDT::FD FDT::open(const Path &p, FileOpts opts) {
 }
 
 void FDT::close(FDT::FD fd) {
+    LockGuard l(_mtx);
     if (auto f = _files.find(fd))
         if (!f->end)
             if (f->key == fd) {
                 _files.erase(fd);
             }
 }
-File *FDT::get(FDT::FD fd) {
+File *FDT::get(FDT::FD fd) const {
+    LockGuard l(_mtx);
     if (auto f = _files.find(fd))
         if (!f->end)
             if (f->key == fd)

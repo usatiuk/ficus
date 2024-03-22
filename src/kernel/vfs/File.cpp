@@ -9,16 +9,8 @@
 File::File(Node *node, FileOpts opts) : _n(node), _opts(opts) {
     if (opts & FileOpts::O_WRONLY)
         assert(opts & FileOpts::O_RDONLY);
-    if (opts & FileOpts::O_WRONLY)
-        while (!_n->lock_rw()) { yield_self(); }
-    else
-        while (!_n->lock_r()) { yield_self(); }
 }
 File::~File() {
-    if (_opts & FileOpts::O_WRONLY)
-        _n->unlock_rw();
-    else
-        _n->unlock_r();
 }
 Node *File::node() {
     return _n;
@@ -27,7 +19,7 @@ NodeDir *File::dir() {
     if (_n && _n->type() == Node::DIR) return static_cast<NodeDir *>(_n);
     return nullptr;
 }
-NodeFile *File::file() {
+NodeFile *File::file() const {
     if (_n && _n->type() == Node::FILE) return static_cast<NodeFile *>(_n);
     return nullptr;
 }

@@ -21,7 +21,7 @@ public:
 
     Node *node();
     NodeDir *dir();
-    NodeFile *file();
+    NodeFile *file() const;
 
     uint64_t seek(uint64_t pos);
     uint64_t read(char *buf, uint64_t size);
@@ -29,7 +29,7 @@ public:
     uint64_t size();
 
 private:
-    Node *_n;
+    Node *const _n;
     uint64_t _pos = 0;
     FileOpts _opts;
 };
