@@ -28,7 +28,7 @@ void setup_syscalls() {
     union {
         STAR star;
         uint64_t bytes;
-    } newstar{};
+    } __attribute__((__packed__)) newstar{};
 
     newstar.star.ret_cs_ss = (GDTSEL(gdt_data_user) - 8) | 0x3;
     assert(newstar.star.ret_cs_ss + 8 == (GDTSEL(gdt_data_user) | 0x3));

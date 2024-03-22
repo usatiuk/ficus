@@ -3,6 +3,7 @@
 //
 #include <cstddef>
 
+#include "BytesFormatter.hpp"
 #include "LockGuard.hpp"
 #include "MemFs.hpp"
 #include "MountTable.hpp"
@@ -72,19 +73,19 @@ void freeprinter() {
         String buf;
         buf += "=====\n";
         buf += "Free mem: ";
-        buf += get_free() * 1024;
+        buf += BytesFormatter::formatStr(get_free() * 1024);
         buf += "\n";
         GlobalTtyManager.all_tty_putstr(buf.c_str());
         buf = "";
 
         buf += "Heap allocated: ";
-        buf += get_heap_allocated();
+        buf += BytesFormatter::formatStr(get_heap_allocated());
         buf += "\n";
         GlobalTtyManager.all_tty_putstr(buf.c_str());
         buf = "";
 
         buf += "Heap used: ";
-        buf += get_heap_used();
+        buf += BytesFormatter::formatStr(get_heap_used());
         buf += "\n";
         buf += "=====\n";
         GlobalTtyManager.all_tty_putstr(buf.c_str());
