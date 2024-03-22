@@ -79,6 +79,7 @@ void parse_limine_memmap(struct limine_memmap_entry *entries, unsigned int num, 
         if (entry->type != what_is_considered_free) continue;
         uint64_t roundbase = roundup4k(entry->base);
         if (roundbase >= (entry->base + entry->length)) continue;
+        if (entry->length <= (roundbase - entry->base)) continue;
         uint64_t len = rounddown4k(entry->length - (roundbase - entry->base));
         if (len == 0) continue;
 
