@@ -24,9 +24,9 @@ public:
     template<typename Lockable>
     void wait(Lockable &l) {
         NO_INT(
+                waiters_lock.spinlock();
                 l.unlock();
                 // TODO: recheck this is correct
-                waiters_lock.spinlock();
                 waiters.emplace_front(extract_running_task_node());
                 self_block(waiters_lock);)
         l.lock();
