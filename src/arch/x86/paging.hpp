@@ -12,7 +12,7 @@
 
 #define PAGE_SIZE   4096
 
-#define KERN_V2P(a) ((((uintptr_t) (a) + kernel_phys_base) & ~kernel_virt_base))
+#define KERN_V2P(a) ((((uintptr_t) (a) - (uintptr_t) kernel_virt_base) + (uintptr_t) kernel_phys_base))
 #define KERN_P2V(a) ((((uintptr_t) (a) -kernel_phys_base) | kernel_virt_base))
 
 #define HHDM_BEGIN  0xfffff80000000000ULL
