@@ -6,6 +6,7 @@
 #define OS1_TASK_H
 
 #include "List.hpp"
+#include "PointersCollection.hpp"
 #include "SkipList.hpp"
 #include "String.hpp"
 #include "idt.hpp"
@@ -13,34 +14,63 @@
 #define TASK_SS 16384
 
 class Mutex;
-
-enum TaskMode {
-    TASKMODE_KERN,
-    TASKMODE_USER
-};
-
-enum TaskState {
-    TS_RUNNING,
-    TS_BLOCKED
-};
-
 struct AddressSpace;
 class VMA;
+class Spinlock;
 
-struct Task {
-    uint64_t              entry_ksp_val;
-    struct task_frame     frame;
-    uint64_t              pid;
-    std::atomic<uint64_t> used_time;
-    AddressSpace         *addressSpace;
-    VMA                  *vma;
-    uint64_t             *kstack;
-    char                 *fxsave;
-    char                 *name;
-    enum TaskMode         mode;
-    uint64_t              sleep_until;
-    enum TaskState        state;
+class Task {
+public:
+    using TaskPID = uint64_t;
+
+    enum class TaskMode {
+        TASKMODE_KERN,
+        TASKMODE_USER
+    };
+
+    enum class TaskState {
+        TS_RUNNING,
+        TS_BLOCKED
+    };
+
+    Task(TaskMode mode, void (*entrypoint)(), const char *name);
+
+    Task(const Task &)                                  = delete;
+    Task(Task &&)                                       = delete;
+    Task                       &operator=(const Task &) = delete;
+    Task                       &operator=(Task &&)      = delete;
+
+    void                        start();
+
+    [[nodiscard]] const String &name() const { return _name; }
+    [[nodiscard]] TaskPID       pid() const { return _pid; }
+    [[nodiscard]] uint64_t      used_time() const { return _used_time; }
+    [[nodiscard]] TaskState     state() const { return _state; }
+
+    ~Task();
+
+    //private:
+    struct KernStack {
+        uint64_t _ptr[TASK_SS] __attribute__((aligned(16)));
+    } __attribute__((aligned(16)));
+
+    struct FxSave {
+        uint64_t _fxsave[512] __attribute__((aligned(16)));
+    } __attribute__((aligned(16)));
+
+    uint64_t              _entry_ksp_val;
+    TaskFrame             _frame;
+    TaskPID               _pid;
+    std::atomic<uint64_t> _used_time;
+    AddressSpace         *_addressSpace;
+    VMA                  *_vma;
+    UniquePtr<KernStack>  _kstack{new KernStack()};
+    UniquePtr<FxSave>     _fxsave{new FxSave()};
+    String                _name;
+    TaskMode              _mode;
+    uint64_t              _sleep_until;
+    TaskState             _state;
 };
+
 
 struct task_pointer {
     Task    *taskptr;
@@ -49,32 +79,29 @@ struct task_pointer {
     uint64_t ret_flags;
 } __attribute__((packed));
 
-struct Task        *cur_task();
-List<Task *>::Node *extract_running_task_node();
+namespace Scheduler {
+    Task               *cur_task();
+    List<Task *>::Node *extract_running_task_node();
 
-void                init_tasks();
-struct Task        *new_ktask(void (*fn)(), const char *name, bool start = true);
-struct Task        *new_utask(void (*entrypoint)(), const char *name);
-List<Task *>::Node *start_task(struct Task *task);
-void                remove_self();
-void                sleep_self(uint64_t diff);
+    void                init_tasks();
 
-void                self_block();
+    void                sleep_self(uint64_t diff);
 
-class Spinlock;
-void            self_block(Spinlock &to_unlock);
-void            unblock(Task *what);
-void            unblock(List<Task *>::Node *what);
+    void                self_block();
 
-extern "C" void switch_task(struct task_frame *cur_frame);
+    void                self_block(Spinlock &to_unlock);
+    void                unblock(Task *what);
+    void                unblock(List<Task *>::Node *what);
 
-using TaskPID = uint64_t;
+    extern "C" void     switch_task(TaskFrame *cur_frame);
 
-// TODO: that's quite inefficient!
-SkipList<uint64_t, std::pair<String, TaskPID>> getTaskTimePerPid();
+    // TODO: that's quite inefficient!
+    SkipList<uint64_t, std::pair<String, Task::TaskPID>> getTaskTimePerPid();
 
-void                                           yield_self();
+    void                                                 yield_self();
+} // namespace Scheduler
 
-extern "C" void                                _yield_self_kern(); // Expects the caller to save interrupt state
+// Expects the caller to save interrupt state
+extern "C" void _yield_self_kern();
 
-#endif                                                             //OS1_TASK_H
+#endif //OS1_TASK_H

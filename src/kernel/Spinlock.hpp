@@ -18,18 +18,18 @@ public:
         if (!locked.compare_exchange_strong(expected, true)) {
             return false;
         }
-        owner = cur_task();
+        owner = Scheduler::cur_task();
         return true;
     }
 
     void spinlock() {
         assert2(!are_interrupts_enabled(), "Assuming all spinlocks are without interrupts");
-        while (!try_lock()) { yield_self(); } // FIXME: Should be pause!
+        while (!try_lock()) { Scheduler::yield_self(); } // FIXME: Should be pause!
     }
 
     void unlock() {
         bool expected = true;
-        assert(owner == cur_task());
+        assert(owner == Scheduler::cur_task());
         owner = nullptr;
         assert(locked.compare_exchange_strong(expected, false));
         //        if (!locked.compare_exchange_strong(expected, false))

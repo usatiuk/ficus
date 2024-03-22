@@ -166,9 +166,9 @@ uint16_t pic_get_isr(void) {
 static int_handler_t handlers[256];
 static void         *handlers_args[256];
 
-extern "C" void      pic1_irq_real_0(struct task_frame *frame) {
+extern "C" void      pic1_irq_real_0(TaskFrame *frame) {
     timer_tick();
-    switch_task(frame);
+    Scheduler::switch_task(frame);
     PIC_sendEOI(0);
 }
 extern "C" void pic1_irq_real_1() {

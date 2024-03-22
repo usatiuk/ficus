@@ -54,7 +54,7 @@ uint64_t syscall_putchar(char c) {
 }
 
 uint64_t syscall_sleep(uint64_t micros) {
-    sleep_self(micros);
+    Scheduler::sleep_self(micros);
     return 0;
 }
 

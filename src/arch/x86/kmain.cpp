@@ -40,13 +40,12 @@ void ktask2() {
     for (uint32_t c = 0; c < 2; c++) {
         // Note: we assume the framebuffer model is RGB with 32-bit pixels.
         for (size_t i = 0; i < 100; i++) {
-            sleep_self(25000);
+            Scheduler::sleep_self(25000);
             uint32_t *fb_ptr                               = static_cast<uint32_t *>(framebuffer->address);
             fb_ptr[i * (framebuffer->pitch / 4) + i + 100] = c ? 0 : 0xFFFFFF;
         }
     }
-    new_ktask(ktask, "one");
-    remove_self();
+    (new Task(Task::TaskMode::TASKMODE_KERN, ktask, "one"))->start();
 }
 
 
@@ -59,13 +58,12 @@ void ktask() {
     for (uint32_t c = 0; c < 2; c++) {
         // Note: we assume the framebuffer model is RGB with 32-bit pixels.
         for (size_t i = 0; i < 100; i++) {
-            sleep_self(25000);
+            Scheduler::sleep_self(25000);
             uint32_t *fb_ptr                         = static_cast<uint32_t *>(framebuffer->address);
             fb_ptr[i * (framebuffer->pitch / 4) + i] = c ? 0 : 0xFFFFFF;
         }
     }
-    new_ktask(ktask2, "two");
-    remove_self();
+    (new Task(Task::TaskMode::TASKMODE_KERN, ktask2, "two"))->start();
 }
 
 void freeprinter() {
@@ -89,19 +87,19 @@ void freeprinter() {
         buf += "\n";
         buf += "=====\n";
         GlobalTtyManager.all_tty_putstr(buf.c_str());
-        sleep_self(1000000);
+        Scheduler::sleep_self(1000000);
     }
 }
 
 void statprinter() {
-    SkipList<uint64_t, std::pair<String, uint64_t>> last_times      = getTaskTimePerPid();
+    SkipList<uint64_t, std::pair<String, uint64_t>> last_times      = Scheduler::getTaskTimePerPid();
     std::atomic<uint64_t>                           last_print_time = micros;
     while (1) {
-        sleep_self(1000000);
+        Scheduler::sleep_self(1000000);
         uint64_t prev_print_time                                   = last_print_time;
         last_print_time                                            = micros;
         SkipList<uint64_t, std::pair<String, uint64_t>> prev_times = std::move(last_times);
-        last_times                                                 = getTaskTimePerPid();
+        last_times                                                 = Scheduler::getTaskTimePerPid();
 
         uint64_t slice                                             = last_print_time - prev_print_time;
         if (slice == 0) continue;
@@ -138,45 +136,41 @@ void         mtest1() {
     {
         LockGuard l(testmutex);
         GlobalTtyManager.all_tty_putstr("Locked1\n");
-        sleep_self(100000);
+        Scheduler::sleep_self(100000);
     }
     GlobalTtyManager.all_tty_putstr("Unlocked1\n");
-    remove_self();
 }
 
 void mtest2() {
     {
         LockGuard l(testmutex);
         GlobalTtyManager.all_tty_putstr("Locked2\n");
-        sleep_self(100000);
+        Scheduler::sleep_self(100000);
     }
     GlobalTtyManager.all_tty_putstr("Unlocked2\n");
-    remove_self();
 }
 
 void mtest3() {
     {
         LockGuard l(testmutex);
         GlobalTtyManager.all_tty_putstr("Locked3\n");
-        sleep_self(100000);
+        Scheduler::sleep_self(100000);
     }
     GlobalTtyManager.all_tty_putstr("Unlocked3\n");
-    remove_self();
 }
 
 void stress() {
     static std::atomic<int> i    = 0;
     int                     curi = i++;
-    if (curi > 1500) remove_self();
+    if (curi > 1500) return;
 
-    sleep_self(100000 - curi * 10);
+    Scheduler::sleep_self(100000 - curi * 10);
 
     char buf[69];
     itoa(curi, buf, 10);
     //    GlobalTtyManager.all_tty_putstr("stress ");
     //    GlobalTtyManager.all_tty_putstr(buf);
     //    GlobalTtyManager.all_tty_putstr("\n");
-    remove_self();
 }
 
 void templates_tester() {
@@ -184,17 +178,13 @@ void templates_tester() {
     for (int i = 0; i < 100; i++)
         test_templates();
     GlobalTtyManager.all_tty_putstr("Testing templates OK\n");
-
-    remove_self();
 }
 
 void stress_tester() {
     for (int i = 0; i < 100; i++)
-        new_ktask(stress, "stress");
+        (new Task(Task::TaskMode::TASKMODE_KERN, stress, "stress"))->start();
 
     GlobalTtyManager.all_tty_putstr("Finished stress\n");
-
-    remove_self();
 }
 
 
@@ -210,42 +200,39 @@ void user_task() {
 void vfs_tester() {
     VFSTester vfsTester;
     vfsTester.test();
-    remove_self();
 }
 
 void ktask_main() {
     GlobalTtyManager.add_tty(new SerialTty());
 
-    new_ktask(ktask, "one");
-    new_ktask(freeprinter, "freeprinter");
-    new_ktask(statprinter, "statprinter");
-    new_ktask(mtest1, "mtest1");
-    new_ktask(mtest2, "mtest2");
-    new_ktask(mtest3, "mtest3");
-    new_ktask(templates_tester, "templates_tester");
-    new_ktask(templates_tester, "templates_tester2");
-    new_ktask(stress_tester, "stress_tester");
+    (new Task(Task::TaskMode::TASKMODE_KERN, ktask, "one"))->start();
+    (new Task(Task::TaskMode::TASKMODE_KERN, freeprinter, "freeprinter"))->start();
+    (new Task(Task::TaskMode::TASKMODE_KERN, statprinter, "statprinter"))->start();
+    (new Task(Task::TaskMode::TASKMODE_KERN, mtest1, "mtest1"))->start();
+    (new Task(Task::TaskMode::TASKMODE_KERN, mtest2, "mtest2"))->start();
+    (new Task(Task::TaskMode::TASKMODE_KERN, mtest3, "mtest3"))->start();
+    (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester"))->start();
+    (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester2"))->start();
+    (new Task(Task::TaskMode::TASKMODE_KERN, stress_tester, "stress_tester"))->start();
     VFSGlobals::mounts.add_mount(new MemFs(&VFSGlobals::root));
-    new_ktask(vfs_tester, "vfs_tester");
+    (new Task(Task::TaskMode::TASKMODE_KERN, vfs_tester, "vfs_tester"))->start();
 
     for (int i = 0; i < saved_modules_size; i++) {
         GlobalTtyManager.all_tty_putstr("Starting ");
         GlobalTtyManager.all_tty_putstr(saved_modules_names[i]);
         GlobalTtyManager.all_tty_putchar('\n');
 
-        Task *utask = new_utask((void (*)()) 0x00020000, saved_modules_names[i]);
+        Task *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) 0x00020000, saved_modules_names[i]);
         assert(saved_modules_size > 0);
-        utask->vma->mmap_phys((void *) 0x00020000, (void *) KERN_V2P(saved_modules_data[i]),
-                              max_saved_module_file_size, PAGE_USER | PAGE_RW);
-        start_task(utask);
+        utask->_vma->mmap_phys((void *) 0x00020000, (void *) KERN_V2P(saved_modules_data[i]),
+                               max_saved_module_file_size, PAGE_USER | PAGE_RW);
+        utask->start();
     }
-
-    remove_self();
 }
 
 void dummy_task() {
     for (;;) {
-        yield_self();
+        Scheduler::yield_self();
     }
 }
 
@@ -260,10 +247,10 @@ void        kmain() {
 
     srand(micros); // NOLINT
 
-    new_ktask(ktask_main, "ktask_main");
-    new_ktask(dummy_task, "dummy");
+    (new Task(Task::TaskMode::TASKMODE_KERN, ktask_main, "ktask_main"))->start();
+    (new Task(Task::TaskMode::TASKMODE_KERN, dummy_task, "dummy"))->start();
     setup_syscalls();
-    init_tasks();
+    Scheduler::init_tasks();
     for (;;) {
         __asm__ __volatile__("hlt");
     }

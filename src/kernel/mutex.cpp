@@ -14,7 +14,7 @@ bool Mutex::try_lock() {
     if (!locked.compare_exchange_strong(expected, true)) {
         return false;
     }
-    _owner = cur_task();
+    _owner = Scheduler::cur_task();
     return true;
 }
 
@@ -41,7 +41,7 @@ void Mutex::lock() {
             }
 
             // TODO: this isn't really a spinlock, but for now we don't have SMP
-            yield_self();
+            Scheduler::yield_self();
         }
     }
 
@@ -60,8 +60,8 @@ void Mutex::lock() {
         while (!Mutex::try_lock()) {
             NO_INT(
                     waiters_lock.spinlock();
-                    waiters.emplace_front(extract_running_task_node());
-                    self_block(waiters_lock););
+                    waiters.emplace_front(Scheduler::extract_running_task_node());
+                    Scheduler::self_block(waiters_lock););
         }
     }
 }
@@ -78,7 +78,7 @@ void Mutex::unlock() {
             t = waiters.extract_back();
         }
     }
-    if (t) unblock(t);
+    if (t) Scheduler::unblock(t);
 }
 
 bool Mutex::test() {

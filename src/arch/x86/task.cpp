@@ -21,7 +21,7 @@
 
 char temp_fxsave[512] __attribute__((aligned(16)));
 
-void sanity_check_frame(struct task_frame *cur_frame) {
+void sanity_check_frame(TaskFrame *cur_frame) {
     // TODO: This makes sense to check when entering, but not when switching
     //    assert((((uintptr_t) cur_frame) & 0xFULL) == 0);
     assert2((void *) cur_frame->ip != NULL, "Sanity check");
@@ -34,14 +34,14 @@ void sanity_check_frame(struct task_frame *cur_frame) {
     assert2((cur_frame->cs == Arch::GDT::gdt_code.selector() || (cur_frame->ss == Arch::GDT::gdt_code_user.selector()) | 0x3), "CS wrong!");
 }
 
-std::atomic<uint64_t>      max_pid = 0;
-Mutex                      AllTasks_lock;
-SkipList<uint64_t, Task *> AllTasks;
+std::atomic<uint64_t>               max_pid = 0;
+Mutex                               AllTasks_lock;
+SkipList<uint64_t, UniquePtr<Task>> AllTasks;
 
-static List<Task *>::Node *RunningTask;
+static List<Task *>::Node          *RunningTask;
 
-static Spinlock            NextTasks_lock;
-static List<Task *>        NextTasks;
+static Spinlock                     NextTasks_lock;
+static List<Task *>                 NextTasks;
 
 // Task freer
 Mutex                      TasksToFree_lock;
@@ -55,19 +55,103 @@ SkipList<uint64_t, List<Task *>::Node *> WaitingTasks;
 
 static std::atomic<bool>                 initialized = false;
 
-static void                              free_task(struct Task *t) {
-    kfree(t->kstack);
-    kfree(t->name);
-    kfree(t->fxsave);
-    kfree(t);
+//
+static void remove_self() {
+    assert(RunningTask != nullptr);
+    {
+        LockGuard l(TasksToFree_lock);
+        // TasksToFree is expected to do nothing with TS_RUNNING tasks
+        TasksToFree.emplace_front(RunningTask);
+    }
+    // This might not cause freeing of this task, as it might be preempted
+    // and still be running and task freer won't delete it
+    // But eventually it will get cleaned
+    TasksToFree_cv.notify_one();
+
+    Scheduler::self_block();
+    assert2(0, "should be removed!");
 }
 
-SkipList<uint64_t, std::pair<String, TaskPID>> getTaskTimePerPid() {
-    SkipList<uint64_t, std::pair<String, TaskPID>> ret;
+
+static void trampoline(void *rdi, void (*rsi_entrypoint)()) {
+    rsi_entrypoint();
+    remove_self();
+}
+
+Task::Task(Task::TaskMode mode, void (*entrypoint)(), const char *name) {
+    _name      = name;
+
+    _frame.ip  = reinterpret_cast<uint64_t>(&trampoline);
+    _frame.rsi = (uint64_t) entrypoint;
+
+    if (mode == TaskMode::TASKMODE_KERN) {
+        _frame.cs = Arch::GDT::gdt_code.selector();
+        _frame.ss = Arch::GDT::gdt_data.selector();
+    } else if (mode == TaskMode::TASKMODE_USER) {
+        _frame.cs = Arch::GDT::gdt_code_user.selector() | 0x3;
+        _frame.ss = Arch::GDT::gdt_data_user.selector() | 0x3;
+    } else {
+        assert(false);
+    }
+
+    for (int i = 0; i < 512; i++) _fxsave->_fxsave[i] = 0;
+
+    _frame.flags  = flags();
+    _frame.guard  = IDT_GUARD;
+    _addressSpace = mode == TaskMode::TASKMODE_KERN ? KERN_AddressSpace : new AddressSpace();
+    _vma          = new VMA(_addressSpace);
+    _state        = TaskState::TS_BLOCKED;
+    _mode         = mode;
+    _pid          = max_pid.fetch_add(1);
+    _used_time    = 0;
+
+    if (mode == TaskMode::TASKMODE_USER) {
+        task_pointer *taskptr = static_cast<task_pointer *>(
+                _vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
+                               sizeof(task_pointer), 0, PAGE_RW | PAGE_USER)); // FIXME: this is probably unsafe
+        assert((uintptr_t) taskptr == TASK_POINTER);
+
+        task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(_addressSpace->virt2real(taskptr)));
+
+        _entry_ksp_val             = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
+        // It should be aligned before call, therefore it actually should be aligned here
+        assert((_entry_ksp_val & 0xFULL) == 0);
+
+        taskptr_real->taskptr       = this;
+        taskptr_real->entry_ksp_val = _entry_ksp_val;
+        taskptr_real->ret_sp        = 0x0;
+    }
+
+    if (mode == TaskMode::TASKMODE_USER) {
+        void *ustack = _vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
+        _vma->map_kern();
+
+        // Ensure 16byte alignment
+        _frame.sp = ((((uintptr_t) ustack) + (TASK_SS - 17) - 1) & (~0xFULL)) + 8;
+    } else {
+        _frame.sp = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)) + 8;
+    }
+
+    // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
+    assert((_frame.sp & 0xFULL) == 8);
+
+    sanity_check_frame(&_frame);
+    {
+        LockGuard l(AllTasks_lock);
+        AllTasks.add(_pid, UniquePtr(this));
+    }
+}
+
+Task::~Task() {
+    assert(_state != TaskState::TS_RUNNING);
+}
+
+SkipList<uint64_t, std::pair<String, Task::TaskPID>> Scheduler::getTaskTimePerPid() {
+    SkipList<uint64_t, std::pair<String, Task::TaskPID>> ret;
     {
         LockGuard l(AllTasks_lock);
         for (const auto &t: AllTasks) {
-            ret.add(t.data->pid, std::make_pair(t.data->name, t.data->used_time.load()));
+            ret.add(t.data->pid(), std::make_pair(t.data->name(), t.data->used_time()));
         }
     }
     return ret;
@@ -85,17 +169,15 @@ static void task_freer() {
                 {
                     LockGuard l(TasksToFree_lock);
                     t = TasksToFree.back();
-                    if (t->val->state == TS_RUNNING) break;
+                    if (t->val->state() == Task::TaskState::TS_RUNNING) break;
                     TasksToFree.pop_back();
                 }
                 {
-                    uint64_t pid = t->val->pid;
+                    uint64_t pid = t->val->pid();
                     {
                         LockGuard l(AllTasks_lock);
                         AllTasks.erase(pid);
                     }
-                    free_task(t->val);
-                    delete t;
                 }
             }
         }
@@ -108,130 +190,18 @@ static void task_freer() {
     }
 }
 
-struct Task *new_ktask(void (*fn)(), const char *name, bool start) {
-    struct Task *newt = static_cast<Task *>(kmalloc(sizeof(struct Task)));
-    newt->kstack      = static_cast<uint64_t *>(kmalloc(TASK_SS));
-    newt->name        = static_cast<char *>(kmalloc(strlen(name) + 1));
-    newt->fxsave      = static_cast<char *>(kmalloc(512));
-    strcpy(name, newt->name);
-
-    newt->frame.sp = ((((uintptr_t) newt->kstack) + (TASK_SS - 9) - 1) & (~0xFULL)) + 8; // Ensure 16byte alignment
-    // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
-    assert((newt->frame.sp & 0xFULL) == 8);
-
-    newt->frame.ip = (uint64_t) fn;
-    newt->frame.cs = Arch::GDT::gdt_code.selector();
-    newt->frame.ss = Arch::GDT::gdt_data.selector();
-
-    for (int i = 0; i < 512; i++) newt->fxsave[i] = 0;
-
-    newt->frame.flags  = flags();
-    newt->frame.guard  = IDT_GUARD;
-    newt->addressSpace = KERN_AddressSpace;
-    newt->state        = start ? TS_RUNNING : TS_BLOCKED;
-    newt->mode         = TASKMODE_KERN;
-    newt->pid          = max_pid.fetch_add(1);
-    newt->used_time    = 0;
-
-    sanity_check_frame(&newt->frame);
-    if (start) {
-        auto new_node = NextTasks.create_node(newt);
-
-        {
-            SpinlockLockNoInt l(NextTasks_lock);
-            NextTasks.emplace_front(new_node);
-        }
-    }
-
-    {
-        LockGuard l(AllTasks_lock);
-        AllTasks.add(newt->pid, newt);
-    }
-    return newt;
-}
-struct Task *new_utask(void (*entrypoint)(), const char *name) {
-    Task *newt   = static_cast<Task *>(kmalloc(sizeof(struct Task)));
-    newt->kstack = static_cast<uint64_t *>(kmalloc(TASK_SS));
-    newt->name   = static_cast<char *>(kmalloc(strlen(name) + 1));
-    newt->fxsave = static_cast<char *>(kmalloc(512));
-    strcpy(name, newt->name);
-
-    newt->frame.ip = (uint64_t) entrypoint;
-    newt->frame.cs = Arch::GDT::gdt_code_user.selector() | 0x3;
-    newt->frame.ss = Arch::GDT::gdt_data_user.selector() | 0x3;
-
-    for (int i = 0; i < 512; i++) newt->fxsave[i] = 0;
-
-    newt->frame.flags     = flags();
-    newt->frame.guard     = IDT_GUARD;
-    newt->addressSpace    = new AddressSpace();
-    newt->vma             = new VMA(newt->addressSpace);
-    newt->state           = TS_BLOCKED;
-    newt->mode            = TASKMODE_USER;
-    newt->pid             = max_pid.fetch_add(1);
-    newt->used_time       = 0;
-
-    task_pointer *taskptr = static_cast<task_pointer *>(
-            newt->vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
-                                sizeof(task_pointer), 0, PAGE_RW | PAGE_USER)); // FIXME: this is probably unsafe
-    assert((uintptr_t) taskptr == TASK_POINTER);
-
-    task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(newt->addressSpace->virt2real(taskptr)));
-
-    newt->entry_ksp_val        = ((((uintptr_t) newt->kstack) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
-    // It should be aligned before call, therefore it actually should be aligned here
-    assert((newt->entry_ksp_val & 0xFULL) == 0);
-
-    taskptr_real->taskptr       = newt;
-    taskptr_real->entry_ksp_val = newt->entry_ksp_val;
-    taskptr_real->ret_sp        = 0x0;
-
-    void *ustack                = newt->vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
-
-    newt->frame.sp              = ((((uintptr_t) ustack) + (TASK_SS - 17) - 1) & (~0xFULL)) + 8; // Ensure 16byte alignment
-    // It should be aligned before call, therefore on function entry it should be misaligned by 8 bytes
-    assert((newt->frame.sp & 0xFULL) == 8);
-
-    newt->vma->map_kern();
-
-    sanity_check_frame(&newt->frame);
-
-    {
-        LockGuard l(AllTasks_lock);
-        AllTasks.add(newt->pid, newt);
-    }
-    return newt;
-}
-
-List<Task *>::Node *start_task(struct Task *task) {
-    assert(task->state != TS_RUNNING);
-    task->state   = TS_RUNNING;
-    auto new_node = NextTasks.create_node(task);
+void Task::start() {
+    assert(_state != TaskState::TS_RUNNING);
+    _state        = TaskState::TS_RUNNING;
+    auto new_node = NextTasks.create_node(this);
     {
         SpinlockLockNoInt l(NextTasks_lock);
         NextTasks.emplace_front(new_node);
     }
-    return new_node;
 }
 
 
-void remove_self() {
-    assert(RunningTask != nullptr);
-    {
-        LockGuard l(TasksToFree_lock);
-        // TasksToFree is expected to do nothing with TS_RUNNING tasks
-        TasksToFree.emplace_front(RunningTask);
-    }
-    // This might not cause freeing of this task, as it might be preempted
-    // and still be running and task freer won't delete it
-    // But eventually it will get cleaned
-    TasksToFree_cv.notify_one();
-
-    self_block();
-    assert2(0, "should be removed!");
-}
-
-void sleep_self(uint64_t diff) {
+void Scheduler::sleep_self(uint64_t diff) {
     uint64_t wake_time = micros + diff;
     while (micros <= wake_time) {
         {
@@ -250,11 +220,11 @@ void sleep_self(uint64_t diff) {
 
             assert(len2 - len1 == 1);
         }
-        self_block();
+        Scheduler::self_block();
     }
 }
 
-void yield_self() {
+void Scheduler::yield_self() {
     if (!RunningTask) return;
     NO_INT(
             _yield_self_kern();)
@@ -265,7 +235,7 @@ static void task_waker() {
         {
             WaitingTasks_mlock.lock();
 
-            while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->key <= micros && WaitingTasks.begin()->data->val->state != TS_RUNNING) {
+            while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->key <= micros && WaitingTasks.begin()->data->val->state() != Task::TaskState::TS_RUNNING) {
                 auto *node = &*WaitingTasks.begin();
                 auto  task = WaitingTasks.begin()->data;
 
@@ -281,8 +251,8 @@ static void task_waker() {
                 WaitingTasks_mlock.unlock();
 
                 assert(l1 - l2 == 1);
-                task->val->sleep_until = 0;
-                task->val->state       = TS_RUNNING;
+                task->val->_sleep_until = 0;
+                task->val->_state       = Task::TaskState::TS_RUNNING;
 
                 {
                     SpinlockLockNoInt l(NextTasks_lock);
@@ -302,15 +272,15 @@ static void task_waker() {
     }
 }
 
-void init_tasks() {
+void Scheduler::init_tasks() {
     // FIXME: not actually thread-safe, but it probably doesn't matter
     assert2(!atomic_load(&initialized), "Tasks should be initialized once!");
-    start_task(new_ktask(task_freer, "freer", false));
-    new_ktask(task_waker, "waker");
+    (new Task(Task::TaskMode::TASKMODE_KERN, task_freer, "freer"))->start();
+    (new Task(Task::TaskMode::TASKMODE_KERN, task_waker, "waker"))->start();
     atomic_store(&initialized, true);
 }
 
-extern "C" void switch_task(struct task_frame *cur_frame) {
+extern "C" void Scheduler::switch_task(TaskFrame *cur_frame) {
     assert2(!are_interrupts_enabled(), "Switching tasks with enabled interrupts!");
     if (!atomic_load(&initialized)) return;
     sanity_check_frame(cur_frame);
@@ -336,11 +306,11 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
         lastSwitchMicros                         = micros;
 
         if (RunningTask) {
-            RunningTask->val->frame = *cur_frame;
-            __builtin_memcpy(RunningTask->val->fxsave, temp_fxsave, 512);
-            oldspace = RunningTask->val->addressSpace;
-            RunningTask->val->used_time.fetch_add(lastSwitchMicros - prevSwitchMicros);
-            if (RunningTask->val->state == TS_RUNNING) {
+            RunningTask->val->_frame = *cur_frame;
+            __builtin_memcpy(RunningTask->val->_fxsave->_fxsave, temp_fxsave, 512);
+            oldspace = RunningTask->val->_addressSpace;
+            RunningTask->val->_used_time.fetch_add(lastSwitchMicros - prevSwitchMicros);
+            if (RunningTask->val->_state == Task::TaskState::TS_RUNNING) {
                 NextTasks.emplace_front(RunningTask);
             }
         }
@@ -348,14 +318,14 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
         next = NextTasks.extract_back();
         assert2(next != NULL, "Kernel left with no tasks!");
         assert2(next->val != NULL, "Kernel left with no tasks!");
-        assert2(next->val->state == TS_RUNNING, "Blocked task in run queue!");
+        assert2(next->val->_state == Task::TaskState::TS_RUNNING, "Blocked task in run queue!");
     }
 
     RunningTask = next;
-    *cur_frame  = RunningTask->val->frame;
-    __builtin_memcpy(temp_fxsave, RunningTask->val->fxsave, 512);
+    *cur_frame  = RunningTask->val->_frame;
+    __builtin_memcpy(temp_fxsave, RunningTask->val->_fxsave->_fxsave, 512);
 
-    AddressSpace *newspace = RunningTask->val->addressSpace;
+    AddressSpace *newspace = RunningTask->val->_addressSpace;
 
     if (newspace != oldspace) {
         uint64_t real_new_cr3 = (uint64_t) HHDM_V2P(newspace->get_cr3());
@@ -368,59 +338,59 @@ extern "C" void switch_task(struct task_frame *cur_frame) {
     sanity_check_frame(cur_frame);
 }
 
-void self_block() {
+void Scheduler::self_block() {
     // TODO: clarify this function
     NO_INT(
             {
                 {
                     SpinlockLockNoInt l(NextTasks_lock);
-                    RunningTask->val->state = TS_BLOCKED;
+                    RunningTask->val->_state = Task::TaskState::TS_BLOCKED;
                 }
-                yield_self();
+                Scheduler::yield_self();
             })
 }
 
-void self_block(Spinlock &to_unlock) {
+void Scheduler::self_block(Spinlock &to_unlock) {
     assert2(!are_interrupts_enabled(), "Self blocking with enabled interrupts!");
 
     {
         SpinlockLockNoInt l(NextTasks_lock);
         to_unlock.unlock();
-        RunningTask->val->state = TS_BLOCKED;
+        RunningTask->val->_state = Task::TaskState::TS_BLOCKED;
     }
-    yield_self();
+    Scheduler::yield_self();
 }
 
-void unblock(Task *what) {
+void Scheduler::unblock(Task *what) {
     assert(false);
     assert(what != nullptr);
-    assert(what->state != TS_RUNNING);
-    sanity_check_frame(&what->frame);
+    assert(what->_state != Task::TaskState::TS_RUNNING);
+    sanity_check_frame(&what->_frame);
     auto new_node = NextTasks.create_node(what);
     {
         SpinlockLockNoInt l(NextTasks_lock);
-        what->state = TS_RUNNING;
+        what->_state = Task::TaskState::TS_RUNNING;
         NextTasks.emplace_front(new_node);
     }
 };
 
-void unblock(List<Task *>::Node *what) {
+void Scheduler::unblock(List<Task *>::Node *what) {
     assert(what != nullptr);
-    assert(what->val->state != TS_RUNNING);
-    sanity_check_frame(&what->val->frame);
+    assert(what->val->_state != Task::TaskState::TS_RUNNING);
+    sanity_check_frame(&what->val->_frame);
     {
         SpinlockLockNoInt l(NextTasks_lock);
-        what->val->state = TS_RUNNING;
+        what->val->_state = Task::TaskState::TS_RUNNING;
         NextTasks.emplace_front(what);
     }
 };
 
-struct Task *cur_task() {
+Task *Scheduler::cur_task() {
     if (!RunningTask) return NULL;
     return RunningTask->val;
 }
 
-List<Task *>::Node *extract_running_task_node() {
+List<Task *>::Node *Scheduler::extract_running_task_node() {
     if (!RunningTask) return nullptr;
     return RunningTask;
 }

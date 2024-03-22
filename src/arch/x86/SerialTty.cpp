@@ -44,9 +44,9 @@ SerialTty::SerialTty() : Tty() {
     outb(PORT + 3, 0x00); // Disable DLAB
     outb(PORT + 1, 0x01); // Enable data available interrupt
 
-    Task *task      = new_ktask((void (*)(void))(&SerialTty::this_pooler), "serialpooler", false);
-    task->frame.rdi = reinterpret_cast<uint64_t>(this);
-    start_task(task);
+    Task *task       = new Task(Task::TaskMode::TASKMODE_KERN, (void (*)(void))(&SerialTty::this_pooler), "serialpooler");
+    task->_frame.rdi = reinterpret_cast<uint64_t>(this);
+    task->start();
 
     attach_interrupt(4, &SerialTty::isr, this);
     IRQ_clear_mask(4);

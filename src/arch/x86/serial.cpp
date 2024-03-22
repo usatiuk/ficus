@@ -39,7 +39,7 @@ int serial_received() {
 
 char read_serial() {
     while (serial_received() == 0) {
-        yield_self();
+        Scheduler::yield_self();
     }
 
     return inb(PORT);
@@ -51,7 +51,7 @@ int is_transmit_empty() {
 
 void write_serial(char a) {
     while (is_transmit_empty() == 0) {
-        yield_self();
+        Scheduler::yield_self();
     }
 
     outb(PORT, a);

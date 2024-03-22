@@ -27,8 +27,8 @@ public:
                 waiters_lock.spinlock();
                 l.unlock();
                 // TODO: recheck this is correct
-                waiters.emplace_front(extract_running_task_node());
-                self_block(waiters_lock);)
+                waiters.emplace_front(Scheduler::extract_running_task_node());
+                Scheduler::self_block(waiters_lock);)
         l.lock();
     }
     void notify_one() {
@@ -39,7 +39,7 @@ public:
                 t = waiters.extract_back();
             }
         }
-        if (t) unblock(t);
+        if (t) Scheduler::unblock(t);
     }
     void notify_all() {
         List<Task *> waiters_new;
@@ -49,7 +49,7 @@ public:
         }
         while (!waiters_new.empty()) {
             auto t = waiters_new.extract_back();
-            unblock(t);
+            Scheduler::unblock(t);
         }
     }
 };

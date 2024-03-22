@@ -55,7 +55,7 @@ typedef struct {
 #define IDT_GUARD 0xdeadbe3fdeadb3efULL
 
 // Assuming the compiler understands that this is pushed on the stack in the correct order
-struct task_frame {
+struct TaskFrame {
     uint64_t guard;
     uint64_t guard2; // To keep stack aligned after pushaq
 
@@ -81,8 +81,8 @@ struct task_frame {
     uint64_t flags;
     uint64_t sp;
     uint64_t ss;
-
-} __attribute__((packed));
+}
+__attribute__((packed));
 
 extern "C" void            exception_handler(void);
 

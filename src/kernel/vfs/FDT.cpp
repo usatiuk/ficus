@@ -42,7 +42,7 @@ File *FDT::get(FDT::FD fd) const {
 }
 
 FDT *FDT::current() {
-    return cur_task()->addressSpace->getFdt();
+    return Scheduler::cur_task()->_addressSpace->getFdt();
 }
 FDHandle::FDHandle(FDT::FD fd) : _fd(fd) {
 }

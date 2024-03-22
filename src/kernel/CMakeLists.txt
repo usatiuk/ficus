@@ -12,6 +12,7 @@ target_sources(kernel.elf PRIVATE
         Tty.cpp
         cv.cpp
         BytesFormatter.cpp
+        string.c
 )
 
 add_subdirectory(templates)
