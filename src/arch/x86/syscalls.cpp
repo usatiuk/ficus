@@ -12,6 +12,9 @@
 #include "gdt.hpp"
 #include "misc.hpp"
 
+#include "FDT.hpp"
+#include "File.hpp"
+
 // Don't forget the correct order
 // Shockingly, it doesn't immediately break and even something simple as putchar works
 // even with completely broken 16-bit segments somehow
@@ -60,6 +63,34 @@ uint64_t syscall_readchar() {
     return tty->readchar();
 }
 
+uint64_t syscall_open(const char *pathname, int flags) {
+    FDT::FD res = FDT::current()->open(StrToPath(pathname), static_cast<FileOpts>(flags));
+    return res;
+}
+
+uint64_t syscall_close(uint64_t FD) {
+    FDT::current()->close(FD);
+    return 1;
+}
+
+uint64_t syscall_read(uint64_t fd, char *buf, uint64_t len) {
+    auto f = FDT::current()->get(fd);
+    if (!f) return -1;
+    return f->read(buf, len);
+}
+
+uint64_t syscall_write(uint64_t fd, const char *buf, uint64_t len) {
+    auto f = FDT::current()->get(fd);
+    if (!f) return -1;
+    return f->write(buf, len);
+}
+
+uint64_t syscall_lseek(uint64_t fd, uint64_t off, uint64_t whence) {
+    auto f = FDT::current()->get(fd);
+    if (!f) return -1;
+    return f->seek(off);
+}
+
 extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     assert2(are_interrupts_enabled(), "why wouldn't they be?");
     switch (id_rdi) {
@@ -70,6 +101,22 @@ extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_r
         case SYSCALL_READCHAR_ID:
             assert(a1_rsi == NULL);
             return syscall_readchar();
+        case SYSCALL_OPEN_ID:
+            return syscall_open(reinterpret_cast<const char *>(a1_rsi), a2_rdx);
+        case SYSCALL_CLOSE_ID:
+            return syscall_close(a1_rsi);
+        case SYSCALL_READ_ID:
+            return syscall_read(a1_rsi, reinterpret_cast<char *>(a2_rdx), a3_rcx);
+        case SYSCALL_WRITE_ID:
+            return syscall_write(a1_rsi, reinterpret_cast<const char *>(a2_rdx), a3_rcx);
+        case SYSCALL_LSEEK_ID:
+            return syscall_lseek(a1_rsi, a2_rdx, a3_rcx);
+
+        case SYSCALL_OPENDIR_ID:
+        case SYSCALL_READDIR_ID:
+        case SYSCALL_CLOSEDIR_ID:
+        case SYSCALL_MKDIR_ID:
+        case SYSCALL_UNLINK_ID:
         default:
             return -1;
     }

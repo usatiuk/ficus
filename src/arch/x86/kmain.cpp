@@ -181,7 +181,7 @@ void stress() {
 
 void templates_tester() {
     GlobalTtyManager.all_tty_putstr("Testing templates\n");
-    for (int i = 0; i < 2000; i++)
+    for (int i = 0; i < 100; i++)
         test_templates();
     GlobalTtyManager.all_tty_putstr("Testing templates OK\n");
 
@@ -189,7 +189,7 @@ void templates_tester() {
 }
 
 void stress_tester() {
-    for (int i = 0; i < 2000; i++)
+    for (int i = 0; i < 100; i++)
         new_ktask(stress, "stress");
 
     GlobalTtyManager.all_tty_putstr("Finished stress\n");

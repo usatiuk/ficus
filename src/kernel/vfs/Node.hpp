@@ -39,6 +39,8 @@ protected:
     // This is uuugly
     Mutex _lock;
     uint64_t _r_lock_count = 0;
+    uint64_t _rw_lock_count = 0;
+    List<Task *> r_lockers;
     Mutex _rw_lock;
 
     String _name;

@@ -9,7 +9,8 @@ _syscall_entrypoint:
     mov [0x10016], rsp    ; TASK_POINTER->ret_sp_val
     mov [0x10024], r11    ; TASK_POINTER->ret_flags
     mov rsp, [0x10008]    ; TASK_POINTER->entry_ksp_val
-    mov r15, rcx ; This seems like a hack
+    mov r15, rcx ; We need to save rcx
+    mov rcx, rax
 
     sti
     ; Do very complicated stuff here

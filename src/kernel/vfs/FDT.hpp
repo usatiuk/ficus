@@ -15,7 +15,7 @@
 class FDT {
 public:
     using FD = int64_t;
-    FD open(const Path &p, File::OptsT opts);
+    FD open(const Path &p, FileOpts opts);
     void close(FD fd);
     File *get(FD fd);
 

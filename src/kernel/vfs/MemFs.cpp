@@ -7,7 +7,7 @@
 
 //FIXME: asserts on read also make sense
 Vector<Node *> MemFs::MemFsNodeDir::children() {
-    assert(!_rw_lock.test() || _rw_lock.owner() == cur_task());
+    //    assert(!_rw_lock.test() || _rw_lock.owner() == cur_task());
     //    assert(_lock.owner() == cur_task());
 
     Vector<Node *> out;

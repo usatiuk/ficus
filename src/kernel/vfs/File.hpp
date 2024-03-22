@@ -5,6 +5,7 @@
 #ifndef OS2_FILE_HPP
 #define OS2_FILE_HPP
 
+#include "FileOpts.h"
 #include <cstdint>
 
 class Node;
@@ -13,14 +14,7 @@ class NodeFile;
 
 class File {
 public:
-    using OptsT = uint8_t;
-
-    enum Opts : uint8_t {
-        R = 1 << 1,// Read
-        W = 1 << 2,// Write
-    };
-
-    File(Node *n, OptsT opts);
+    File(Node *n, FileOpts opts);
     ~File();
     File(const File &f) = delete;
     File &operator=(const File &o) = delete;
@@ -37,7 +31,7 @@ public:
 private:
     Node *_n;
     uint64_t _pos = 0;
-    OptsT _opts;
+    FileOpts _opts;
 };
 
 #endif//OS2_FILE_HPP

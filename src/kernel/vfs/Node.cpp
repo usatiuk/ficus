@@ -9,11 +9,14 @@
 
 Node::~Node() = default;
 Node *Node::traverse(const Path &path) {
-    lock_r();
+    while (!lock_r()) { yield_self(); }
 
     NodeDir &nodeDir = static_cast<NodeDir &>(*this);
     if (nodeDir._mount) return nodeDir._mount->root()->traverse(path);
-    if (path.empty()) return this;
+    if (path.empty()) {
+        unlock_r();
+        return this;
+    }
 
     if (_type == DIR) {
         // Horribly inefficient
@@ -30,6 +33,7 @@ Node *Node::traverse(const Path &path) {
     unlock_r();
     return nullptr;
 }
+
 void NodeDir::set_mounted(Filesystem *mount) {
     assert(_type == DIR);
     assert(_mount == nullptr);
@@ -38,14 +42,26 @@ void NodeDir::set_mounted(Filesystem *mount) {
 
 bool Node::lock_r() {
     LockGuard l(_lock);
+
     if (_rw_lock.test() && _rw_lock.owner() != cur_task()) return false;
     _r_lock_count++;
+
     return true;
 }
 bool Node::lock_rw() {
     LockGuard l(_lock);
+
     if (_rw_lock.test() && _rw_lock.owner() != cur_task()) return false;
-    _rw_lock.lock();
+
+    if (_r_lock_count != 0 && !(_rw_lock.test() && _rw_lock.owner() == cur_task())) return false;
+
+    if (_rw_lock_count == 0) {
+        assert(!_rw_lock.test());
+        _rw_lock.lock();
+    }
+
+    _rw_lock_count++;
+
     return true;
 }
 void Node::unlock_r() {
@@ -57,5 +73,8 @@ void Node::unlock_r() {
 void Node::unlock_rw() {
     LockGuard l(_lock);
     assert(_rw_lock.test() && _rw_lock.owner() == cur_task());
-    _rw_lock.unlock();
+    assert(_rw_lock_count > 0);
+    _rw_lock_count--;
+    if (_rw_lock_count == 0)
+        _rw_lock.unlock();
 }

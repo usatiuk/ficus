@@ -9,7 +9,7 @@
 
 bool VFSApi::mkdir(const Path &path) {
     auto root = path.subvector(0, path.size() - 1);
-    FDHandle root_fd = FDHandle(FDT::current()->open(root, File::Opts::W | File::Opts::R));
+    FDHandle root_fd = FDHandle(FDT::current()->open(root, O_RDWR));
     if (root_fd.get() == -1) return false;
     File *root_f = FDT::current()->get(root_fd.get());
     if (!root_f->dir()) return false;
@@ -18,7 +18,7 @@ bool VFSApi::mkdir(const Path &path) {
 }
 bool VFSApi::touch(const Path &path) {
     auto root = path.subvector(0, path.size() - 1);
-    FDHandle root_fd = FDHandle(FDT::current()->open(root, File::Opts::W | File::Opts::R));
+    FDHandle root_fd = FDHandle(FDT::current()->open(root, O_RDWR));
     if (root_fd.get() == -1) return false;
     File *root_f = FDT::current()->get(root_fd.get());
     if (!root_f->dir()) return false;
@@ -27,7 +27,7 @@ bool VFSApi::touch(const Path &path) {
 }
 
 FDT::FD VFSApi::open(const Path &path) {
-    return FDT::current()->open(path, File::Opts::W | File::Opts::R);
+    return FDT::current()->open(path, O_RDWR);
 }
 void VFSApi::close(FDT::FD fd) {
     return FDT::current()->close(fd);
