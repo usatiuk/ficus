@@ -96,10 +96,13 @@ Task::Task(Task::TaskMode mode, void (*entrypoint)(), const char *name) {
 
     for (int i = 0; i < 512; i++) _fxsave->_fxsave[i] = 0;
 
-    _frame.flags  = flags();
-    _frame.guard  = IDT_GUARD;
-    _addressSpace = mode == TaskMode::TASKMODE_KERN ? KERN_AddressSpace : new AddressSpace();
-    _vma          = new VMA(_addressSpace);
+    _frame.flags = flags();
+    _frame.guard = IDT_GUARD;
+    if (mode == TaskMode::TASKMODE_USER) {
+        _ownAddressSpace = UniquePtr(new AddressSpace());
+        _vma             = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
+    }
+    _addressSpace = mode == TaskMode::TASKMODE_KERN ? KERN_AddressSpace : _ownAddressSpace.get();
     _state        = TaskState::TS_BLOCKED;
     _mode         = mode;
     _pid          = max_pid.fetch_add(1);

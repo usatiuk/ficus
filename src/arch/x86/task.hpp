@@ -57,18 +57,20 @@ public:
         uint64_t _fxsave[512] __attribute__((aligned(16)));
     } __attribute__((aligned(16)));
 
-    uint64_t              _entry_ksp_val;
-    TaskFrame             _frame;
-    TaskPID               _pid;
-    std::atomic<uint64_t> _used_time;
-    AddressSpace         *_addressSpace;
-    VMA                  *_vma;
-    UniquePtr<KernStack>  _kstack{new KernStack()};
-    UniquePtr<FxSave>     _fxsave{new FxSave()};
-    String                _name;
-    TaskMode              _mode;
-    uint64_t              _sleep_until;
-    TaskState             _state;
+    uint64_t                _entry_ksp_val;
+    TaskFrame               _frame;
+    TaskPID                 _pid;
+    std::atomic<uint64_t>   _used_time;
+    AddressSpace           *_addressSpace;
+    UniquePtr<VMA>          _vma;
+    UniquePtr<KernStack>    _kstack{new KernStack()};
+    UniquePtr<FxSave>       _fxsave{new FxSave()};
+    String                  _name;
+    TaskMode                _mode;
+    uint64_t                _sleep_until;
+    TaskState               _state;
+
+    UniquePtr<AddressSpace> _ownAddressSpace;
 };
 
 
