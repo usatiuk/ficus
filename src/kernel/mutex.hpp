@@ -21,8 +21,10 @@ public:
 
     void lock();
     //    void spin_lock();
-    bool  try_lock();
-    void  unlock();
+    bool try_lock();
+    void unlock();
+    // Same as unlock, but assumes scheduler lock is taken
+    void  unlock_nolock();
     bool  test();
     Task *owner() { return _owner; }
 

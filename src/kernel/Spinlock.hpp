@@ -24,7 +24,7 @@ public:
 
     void spinlock() {
         assert2(!are_interrupts_enabled(), "Assuming all spinlocks are without interrupts");
-        while (!try_lock()) { Scheduler::yield_self(); } // FIXME: Should be pause!
+        while (!try_lock()) __builtin_ia32_pause();
     }
 
     void unlock() {

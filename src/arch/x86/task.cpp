@@ -208,22 +208,11 @@ void Scheduler::sleep_self(uint64_t diff) {
     uint64_t wake_time = micros + diff;
     while (micros <= wake_time) {
         {
-            LockGuard lm(WaitingTasks_mlock);
-
-            // TODO this is all ugly
-            // TODO: also maybe it breaks if it wakes before self_block?
-            uint64_t len1 = 0;
-            for (auto cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) len1++;
-
-            assert(RunningTask != nullptr);
-            assert(WaitingTasks.add(wake_time, RunningTask) != nullptr);
-
-            uint64_t len2 = 0;
-            for (auto cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) len2++;
-
-            assert(len2 - len1 == 1);
+            WaitingTasks_mlock.lock();
+            assert(cur_task() != nullptr);
+            assert(WaitingTasks.add(wake_time, extract_running_task_node()) != nullptr);
+            Scheduler::self_block(WaitingTasks_mlock);
         }
-        Scheduler::self_block();
     }
 }
 
@@ -354,11 +343,18 @@ void Scheduler::self_block() {
 }
 
 void Scheduler::self_block(Spinlock &to_unlock) {
-    assert2(!are_interrupts_enabled(), "Self blocking with enabled interrupts!");
-
     {
         SpinlockLockNoInt l(NextTasks_lock);
         to_unlock.unlock();
+        RunningTask->val->_state = Task::TaskState::TS_BLOCKED;
+    }
+    Scheduler::yield_self();
+}
+
+void Scheduler::self_block(Mutex &to_unlock) {
+    {
+        SpinlockLockNoInt l(NextTasks_lock);
+        to_unlock.unlock_nolock();
         RunningTask->val->_state = Task::TaskState::TS_BLOCKED;
     }
     Scheduler::yield_self();
@@ -372,6 +368,7 @@ void Scheduler::unblock(Task *what) {
     auto new_node = NextTasks.create_node(what);
     {
         SpinlockLockNoInt l(NextTasks_lock);
+        assert(what->_state != Task::TaskState::TS_RUNNING);
         what->_state = Task::TaskState::TS_RUNNING;
         NextTasks.emplace_front(new_node);
     }
@@ -383,6 +380,18 @@ void Scheduler::unblock(List<Task *>::Node *what) {
     sanity_check_frame(&what->val->_frame);
     {
         SpinlockLockNoInt l(NextTasks_lock);
+        assert(what->val->_state != Task::TaskState::TS_RUNNING);
+        what->val->_state = Task::TaskState::TS_RUNNING;
+        NextTasks.emplace_front(what);
+    }
+};
+void Scheduler::unblock_nolock(List<Task *>::Node *what) {
+    assert(what != nullptr);
+    assert(what->val->_state != Task::TaskState::TS_RUNNING);
+    sanity_check_frame(&what->val->_frame);
+    {
+        assert(NextTasks_lock.test() && NextTasks_lock.get_owner() == cur_task());
+        assert(what->val->_state != Task::TaskState::TS_RUNNING);
         what->val->_state = Task::TaskState::TS_RUNNING;
         NextTasks.emplace_front(what);
     }

@@ -80,6 +80,22 @@ void Mutex::unlock() {
     }
     if (t) Scheduler::unblock(t);
 }
+void Mutex::unlock_nolock() {
+    bool expected = true;
+    _owner        = nullptr;
+
+    if (!locked.compare_exchange_strong(expected, false))
+        assert2(false, "Unlocking an unlocked mutex!\n");
+
+    List<Task *>::Node *t = nullptr;
+    {
+        SpinlockLockNoInt l(waiters_lock);
+        if (!waiters.empty()) {
+            t = waiters.extract_back();
+        }
+    }
+    if (t) Scheduler::unblock_nolock(t);
+}
 
 bool Mutex::test() {
     return atomic_load(&locked);

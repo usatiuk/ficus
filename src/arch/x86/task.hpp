@@ -90,10 +90,12 @@ namespace Scheduler {
     void                sleep_self(uint64_t diff);
 
     void                self_block();
-
     void                self_block(Spinlock &to_unlock);
+    void                self_block(Mutex &to_unlock);
+
     void                unblock(Task *what);
     void                unblock(List<Task *>::Node *what);
+    void                unblock_nolock(List<Task *>::Node *what);
 
     extern "C" void     switch_task(TaskFrame *cur_frame);
 

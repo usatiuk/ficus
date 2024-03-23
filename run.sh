@@ -34,6 +34,16 @@ while [[ $# -gt 0 ]]; do
       QEMU_OPTS="$QEMU_OPTS -serial stdio"
       shift
       ;;
+    -mon)
+      if [ $TERM_USED ]; then
+        echo "Conflicting options!"; # (todo: there must be a way to use both...)
+        exit 1
+      fi
+      TERM_USED=true
+      # serial
+      QEMU_OPTS="$QEMU_OPTS -monitor stdio"
+      shift
+      ;;
     -int)
       if [ $TERM_USED ]; then
         echo "Conflicting options!"; # (todo: there must be a way to use both...)
