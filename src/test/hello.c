@@ -23,8 +23,12 @@ void _start() {
     while (1) {
         //        putchar('h');
         //        putchar('i');
-        //        putchar('\n');
-        putchar(readchar());
+        putchar('\n');
+        char read = readchar();
+        if (read == 'm') print_mem();
+        if (read == 't') print_tasks();
+        putchar('\n');
+        putchar(read);
         //        sleep(100000);
     }
 }

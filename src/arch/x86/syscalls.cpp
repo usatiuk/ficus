@@ -12,8 +12,11 @@
 #include "gdt.hpp"
 #include "misc.hpp"
 
+#include "BytesFormatter.hpp"
 #include "FDT.hpp"
 #include "File.hpp"
+#include "memman.hpp"
+#include "timer.hpp"
 
 // Don't forget the correct order
 // Shockingly, it doesn't immediately break and even something simple as putchar works
@@ -91,6 +94,68 @@ uint64_t syscall_lseek(uint64_t fd, uint64_t off, uint64_t whence) {
     return f->seek(off);
 }
 
+uint64_t syscall_print_tasks() {
+    static SkipList<uint64_t, std::pair<String, uint64_t>> last_times      = Scheduler::getTaskTimePerPid();
+    static std::atomic<uint64_t>                           last_print_time = micros;
+
+    uint64_t                                               prev_print_time = last_print_time;
+    last_print_time                                                        = micros;
+    SkipList<uint64_t, std::pair<String, uint64_t>> prev_times             = std::move(last_times);
+    last_times                                                             = Scheduler::getTaskTimePerPid();
+
+    uint64_t slice                                                         = last_print_time - prev_print_time;
+    if (slice == 0) return 0;
+
+    for (const auto &t: prev_times) {
+        auto f = last_times.find(t.key);
+        if (!f->end && f->key == t.key) {
+            assert(f->data.second >= t.data.second);
+            String buf;
+            buf += "PID: ";
+            buf += t.key;
+            buf += " ";
+            buf += t.data.first;
+            buf += " usage: ";
+            buf += (((f->data.second - t.data.second) * 100ULL) / slice);
+            buf += "%\n";
+            GlobalTtyManager.all_tty_putstr(buf.c_str());
+        } else {
+            String buf;
+            buf += "PID: ";
+            buf += t.key;
+            buf += " ";
+            buf += t.data.first;
+            buf += " dead \n";
+            GlobalTtyManager.all_tty_putstr(buf.c_str());
+        }
+    }
+
+    return 0;
+}
+uint64_t syscall_print_mem() {
+    String buf;
+    buf += "=====\n";
+    buf += "Free mem: ";
+    buf += BytesFormatter::formatStr(get_free() * 1024);
+    buf += "\n";
+    GlobalTtyManager.all_tty_putstr(buf.c_str());
+    buf = "";
+
+    buf += "Heap allocated: ";
+    buf += BytesFormatter::formatStr(get_heap_allocated());
+    buf += "\n";
+    GlobalTtyManager.all_tty_putstr(buf.c_str());
+    buf = "";
+
+    buf += "Heap used: ";
+    buf += BytesFormatter::formatStr(get_heap_used());
+    buf += "\n";
+    buf += "=====\n";
+    GlobalTtyManager.all_tty_putstr(buf.c_str());
+
+    return 0;
+}
+
 extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     assert2(are_interrupts_enabled(), "why wouldn't they be?");
     switch (id_rdi) {
@@ -117,6 +182,10 @@ extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_r
         case SYSCALL_CLOSEDIR_ID:
         case SYSCALL_MKDIR_ID:
         case SYSCALL_UNLINK_ID:
+        case SYSCALL_PRINT_TASKS:
+            return syscall_print_tasks();
+        case SYSCALL_PRINT_MEM:
+            return syscall_print_mem();
         default:
             return -1;
     }

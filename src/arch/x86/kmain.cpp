@@ -66,70 +66,6 @@ void ktask() {
     (new Task(Task::TaskMode::TASKMODE_KERN, ktask2, "two"))->start();
 }
 
-void freeprinter() {
-    while (1) {
-        String buf;
-        buf += "=====\n";
-        buf += "Free mem: ";
-        buf += BytesFormatter::formatStr(get_free() * 1024);
-        buf += "\n";
-        GlobalTtyManager.all_tty_putstr(buf.c_str());
-        buf = "";
-
-        buf += "Heap allocated: ";
-        buf += BytesFormatter::formatStr(get_heap_allocated());
-        buf += "\n";
-        GlobalTtyManager.all_tty_putstr(buf.c_str());
-        buf = "";
-
-        buf += "Heap used: ";
-        buf += BytesFormatter::formatStr(get_heap_used());
-        buf += "\n";
-        buf += "=====\n";
-        GlobalTtyManager.all_tty_putstr(buf.c_str());
-        Scheduler::sleep_self(1000000);
-    }
-}
-
-void statprinter() {
-    SkipList<uint64_t, std::pair<String, uint64_t>> last_times      = Scheduler::getTaskTimePerPid();
-    std::atomic<uint64_t>                           last_print_time = micros;
-    while (1) {
-        Scheduler::sleep_self(1000000);
-        uint64_t prev_print_time                                   = last_print_time;
-        last_print_time                                            = micros;
-        SkipList<uint64_t, std::pair<String, uint64_t>> prev_times = std::move(last_times);
-        last_times                                                 = Scheduler::getTaskTimePerPid();
-
-        uint64_t slice                                             = last_print_time - prev_print_time;
-        if (slice == 0) continue;
-
-        for (const auto &t: prev_times) {
-            auto f = last_times.find(t.key);
-            if (!f->end && f->key == t.key) {
-                assert(f->data.second >= t.data.second);
-                String buf;
-                buf += "PID: ";
-                buf += t.key;
-                buf += " ";
-                buf += t.data.first;
-                buf += " usage: ";
-                buf += (((f->data.second - t.data.second) * 100ULL) / slice);
-                buf += "%\n";
-                GlobalTtyManager.all_tty_putstr(buf.c_str());
-            } else {
-                String buf;
-                buf += "PID: ";
-                buf += t.key;
-                buf += " ";
-                buf += t.data.first;
-                buf += " dead \n";
-                GlobalTtyManager.all_tty_putstr(buf.c_str());
-            }
-        }
-    }
-}
-
 static Mutex testmutex;
 
 void         mtest1() {
@@ -206,8 +142,6 @@ void ktask_main() {
     GlobalTtyManager.add_tty(new SerialTty());
 
     (new Task(Task::TaskMode::TASKMODE_KERN, ktask, "one"))->start();
-    (new Task(Task::TaskMode::TASKMODE_KERN, freeprinter, "freeprinter"))->start();
-    (new Task(Task::TaskMode::TASKMODE_KERN, statprinter, "statprinter"))->start();
     (new Task(Task::TaskMode::TASKMODE_KERN, mtest1, "mtest1"))->start();
     (new Task(Task::TaskMode::TASKMODE_KERN, mtest2, "mtest2"))->start();
     (new Task(Task::TaskMode::TASKMODE_KERN, mtest3, "mtest3"))->start();

@@ -47,3 +47,10 @@ uint64_t write(uint64_t fd, const char *buf, uint64_t len) {
 uint64_t lseek(uint64_t fd, uint64_t off, uint64_t whence) {
     return do_syscall(SYSCALL_LSEEK_ID, fd, off, whence);
 }
+
+void print_mem() {
+    do_syscall(SYSCALL_PRINT_MEM, 0, 0, 0);
+}
+void print_tasks() {
+    do_syscall(SYSCALL_PRINT_TASKS, 0, 0, 0);
+}
