@@ -33,6 +33,14 @@ void SerialTty::this_pooler() {
             if (!buf.full())
                 buf.push_back((char) r);
             r = read();
+            // Hack to not hang in case the UART buffer gets completely filled in between
+            // failed read and waiting on the cv
+            // In that case, we won't get interrupts and hang forever
+            // TODO: wait_for or something, or better interurpt handing in this case
+            if (r == -1) {
+                Scheduler::sleep_self(100);
+                r = read();
+            }
         }
         if (read_something)
             readercv.notify_all();
