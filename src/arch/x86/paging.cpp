@@ -176,7 +176,7 @@ void limine_kern_save_response() {
     kernel_virt_base = kernel_address_request.response->virtual_base;
 }
 
-#define EARLY_PAGES_SIZE ((HHDM_SIZE + 1) * 1024)
+#define EARLY_PAGES_SIZE ((HHDM_SIZE + 1) * 2)
 static uint64_t early_pages[EARLY_PAGES_SIZE][512] __attribute__((aligned(PAGE_SIZE)));
 static uint64_t early_pages_used = 0;
 
@@ -198,7 +198,7 @@ void map_hddm(uint64_t *pml4) {
     // Assuming here that everything related to paging is identity mapped
     // Which is true if the first bytes of memory, where the kernel is are identity mapped,
     // Which is true if we're using Limine
-    for (uint64_t i = 0; i < HHDM_SIZE * 1024ULL * 1024ULL * 1024ULL; i += 4096) {
+    for (uint64_t i = 0; i < HHDM_SIZE * 1024ULL * 1024ULL * 1024ULL; i += 2048ULL * 1024ULL) {
         void *virt = (void *) (HHDM_BEGIN + i);
         void *real = (void *) (i);
 
@@ -211,14 +211,13 @@ void map_hddm(uint64_t *pml4) {
         uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
         uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
         uint64_t  pdei  = (uint64_t) virt >> 21 & 0x01FF;
-        uint64_t  ptsi  = (uint64_t) virt >> 12 & 0x01FF;
 
         uint64_t *pml4e = pml4 + pml4i;
 
         if (!(*pml4e & PAGE_PRESENT)) {
             uint64_t *newp = get_early_frame();
 
-            *pml4e |= PAGE_PRESENT | PAGE_RW | PAGE_USER;
+            *pml4e         = PAGE_PRESENT | PAGE_RW | PAGE_USER;
             *pml4e |= (uint64_t) KERN_V2P(newp) & (uint64_t) 0x000FFFFFFFFFF000ULL;
         }
 
@@ -228,23 +227,16 @@ void map_hddm(uint64_t *pml4) {
         if (!(*pdpee & PAGE_PRESENT)) {
             uint64_t *newp = get_early_frame();
 
-            *pdpee |= PAGE_PRESENT | PAGE_RW | PAGE_USER;
+            *pdpee         = PAGE_PRESENT | PAGE_RW | PAGE_USER;
             *pdpee |= (uint64_t) KERN_V2P(newp) & (uint64_t) 0x000FFFFFFFFFF000ULL;
         }
 
         uint64_t *pdeb = (uint64_t *) (*pdpee & 0x000FFFFFFFFFF000ULL);
         uint64_t *pdee = &pdeb[pdei];
         assert2(!(*pdee & PAGE_PS), "Encountered an unexpected large mapping!");
-        if (!(*pdee & PAGE_PRESENT)) {
-            uint64_t *newp = get_early_frame();
-
-            *pdee |= PAGE_PRESENT | PAGE_RW | PAGE_USER;
-            *pdee |= (uint64_t) KERN_V2P(newp) & (uint64_t) 0x000FFFFFFFFFF000ULL;
-        }
-
-        uint64_t *ptsb = (uint64_t *) (*pdee & 0x000FFFFFFFFFF000ULL);
-        uint64_t *ptse = &ptsb[ptsi];
-        *ptse          = ((uint64_t) real & 0x000FFFFFFFFFF000ULL) | (PAGE_PRESENT | PAGE_RW | PAGE_USER) | PAGE_PRESENT;
+        assert2(!(*pdee & PAGE_PRESENT), "Unexpected mapping");
+        *pdee = PAGE_PRESENT | PAGE_RW | PAGE_PS;
+        *pdee |= ((uint64_t) real & 0x000FFFFFFFFFF000ULL);
     }
     _tlb_flush();
 }
