@@ -581,6 +581,10 @@
 # define __stl_assert(expr)
 #endif
 
+#define __STL_THREADS
+#define __STL_VOLATILE volatile
+#define __STL_WIN32THREADS
+
 #if defined(__STL_WIN32THREADS) || defined(__STL_SGI_THREADS) \
     || defined(__STL_PTHREADS)  || defined(__STL_UITHREADS)
 #   define __STL_THREADS

@@ -33,7 +33,10 @@
 #include "thread.h"
 #include "synch.h"
 #elif defined(__STL_WIN32THREADS)
-#include "windows.h"
+#include "mutex.hpp"
+#include <optional>
+#include <atomic>
+//#include "windows.h"
 #endif
 
 __STL_BEGIN_NAMESPACE
@@ -50,6 +53,8 @@ __STL_BEGIN_NAMESPACE
 #  define __add_and_fetch(__l,__v) add_then_test((unsigned long*)__l,__v)  
 #  define __test_and_set(__l,__v)  test_and_set(__l,__v)
 #endif /* o32 */
+
+// TODO: This would need some cleanup
 
 struct _Refcount_Base
 {
@@ -81,8 +86,8 @@ struct _Refcount_Base
   void _M_incr() {  __add_and_fetch(&_M_ref_count, 1); }
   _RC_t _M_decr() { return __add_and_fetch(&_M_ref_count, (size_t) -1); }
 # elif defined (__STL_WIN32THREADS)
-   void _M_incr() { InterlockedIncrement((_RC_t*)&_M_ref_count); }
-  _RC_t _M_decr() { return InterlockedDecrement((_RC_t*)&_M_ref_count); }
+   void _M_incr() { __atomic_add_fetch(&_M_ref_count, 1, __ATOMIC_SEQ_CST); }
+  _RC_t _M_decr() { return __atomic_sub_fetch(&_M_ref_count, 1, __ATOMIC_SEQ_CST); }
 # elif defined(__STL_PTHREADS)
   void _M_incr() {
     pthread_mutex_lock(&_M_ref_count_lock);
@@ -127,7 +132,9 @@ struct _Refcount_Base
     }
 # elif defined(__STL_WIN32THREADS)
     inline unsigned long _Atomic_swap(unsigned long * __p, unsigned long __q) {
-        return (unsigned long) InterlockedExchange((LPLONG)__p, (LONG)__q);
+        unsigned long ret;
+        __atomic_exchange(__p, &__q, &ret, __ATOMIC_SEQ_CST);
+        return ret;
     }
 # elif defined(__STL_PTHREADS)
     // We use a template here only to get a unique initialized instance.
@@ -237,7 +244,7 @@ unsigned _STL_mutex_spin<__inst>::__last = 0;
 
 struct _STL_mutex_lock
 {
-#if defined(__STL_SGI_THREADS) || defined(__STL_WIN32THREADS)
+#if defined(__STL_SGI_THREADS)
   // It should be relatively easy to get this to work on any modern Unix.
   volatile unsigned long _M_lock;
   void _M_initialize() { _M_lock = 0; }
@@ -304,7 +311,7 @@ struct _STL_mutex_lock
 #   elif defined(__STL_SGI_THREADS) && __mips >= 3 \
          && (defined (_ABIN32) || defined(_ABI64))
         __lock_release(__lock);
-#   else 
+#   else
         *__lock = 0;
         // This is not sufficient on many multiprocessors, since
         // writes to protected variables and the lock may be reordered.
@@ -326,10 +333,16 @@ struct _STL_mutex_lock
   void _M_acquire_lock() { mutex_lock(&_M_lock); }
   void _M_release_lock() { mutex_unlock(&_M_lock); }
 #else /* No threads */
-  void _M_initialize()   {}
-  void _M_acquire_lock() {}
-  void _M_release_lock() {}
+//  void _M_initialize()   {}
+//  void _M_acquire_lock() {}
+//  void _M_release_lock() {}
 #endif
+
+  // Probably no need to initialize it like this
+  std::optional<Mutex> _M_lock;
+  void _M_initialize()   {_M_lock.emplace();}
+  void _M_acquire_lock() {_M_lock->lock();}
+  void _M_release_lock() {_M_lock->unlock();}
 };
 
 #ifdef __STL_PTHREADS
@@ -341,7 +354,7 @@ struct _STL_mutex_lock
 // the default value of zero.
 #   define __STL_MUTEX_INITIALIZER = { DEFAULTMUTEX }
 #elif defined(__STL_SGI_THREADS) || defined(__STL_WIN32THREADS)
-#   define __STL_MUTEX_INITIALIZER = { 0 }
+#   define __STL_MUTEX_INITIALIZER
 #else
 #   define __STL_MUTEX_INITIALIZER
 #endif
