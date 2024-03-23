@@ -26,12 +26,12 @@
 #ifndef DEFALLOC_H
 #define DEFALLOC_H
 
-#include <new.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <iostream.h>
-#include <algobase.h>
+#include "new"
+#include "stddef.h"
+#include "stdlib.h"
+#include "limits.h"
+//#include "iostream.h"
+#include "algobase.h"
 
 
 template <class T>

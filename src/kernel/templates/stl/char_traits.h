@@ -14,11 +14,11 @@
 #ifndef __SGI_STL_CHAR_TRAITS_H
 #define __SGI_STL_CHAR_TRAITS_H
 
-#include <string.h>
-#include <wchar.h>
+#include "string.h"
+#include "wchar.h"
 
 #if defined(__STL_USE_NEW_IOSTREAMS) && !defined(__SGI_STL_IOSFWD)
-#include <iosfwd>
+#include "iosfwd"
 #endif /* use new iostreams */
 
 __STL_BEGIN_NAMESPACE

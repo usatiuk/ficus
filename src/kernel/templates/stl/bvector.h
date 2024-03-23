@@ -27,15 +27,15 @@
 #ifndef __SGI_STL_BVECTOR_H
 #define __SGI_STL_BVECTOR_H
 
-#include <stl_range_errors.h>
+#include "stl_range_errors.h"
 #ifdef __STL_CLASS_PARTIAL_SPECIALIZATION
-#include <vector.h>
+#include "vector.h"
 #else
-#include <algobase.h>
-#include <alloc.h>
+#include "algobase.h"
+#include "alloc.h"
 #endif 
 
-#include <stl_bvector.h>
+#include "stl_bvector.h"
 
 #ifdef __STL_USE_NAMESPACES
 

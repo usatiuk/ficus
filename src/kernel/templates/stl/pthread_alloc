@@ -27,9 +27,9 @@
 // cache lines among processors, with potentially serious performance
 // consequences.
 
-#include <errno.h>
-#include <stl_config.h>
-#include <stl_alloc.h>
+#include "errno.h"
+#include "stl_config.h"
+#include "stl_alloc.h"
 #ifndef __RESTRICT
 #  define __RESTRICT
 #endif

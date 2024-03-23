@@ -40,19 +40,20 @@
 
 #ifndef __THROW_BAD_ALLOC
 #  if defined(__STL_NO_BAD_ALLOC) || !defined(__STL_USE_EXCEPTIONS)
-#    include <stdio.h>
-#    include <stdlib.h>
-#    define __THROW_BAD_ALLOC fprintf(stderr, "out of memory\n"); exit(1)
+//#    include <stdio.h>
+//#    include <stdlib.h>
+#include "asserts.hpp"
+#    define __THROW_BAD_ALLOC assert2(false,"out of memory");
 #  else /* Standard conforming out-of-memory handling */
 #    include <new>
 #    define __THROW_BAD_ALLOC throw std::bad_alloc()
 #  endif
 #endif
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+#include "stddef.h"
+#include "stdlib.h"
+#include "string.h"
+#include "asserts.hpp"
 #ifndef __RESTRICT
 #  define __RESTRICT
 #endif

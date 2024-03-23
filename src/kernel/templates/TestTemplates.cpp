@@ -15,7 +15,8 @@
 
 #include "TtyManager.hpp"
 
-#include "map"
+#include "stl/pair.h"
+#include "stl/vector.h"
 
 class SharedPtrTester {
 private:
@@ -282,5 +283,10 @@ int test_templates() {
     cowTester.test();
     test_unique_ptr();
     test_list();
+
+    cgistd::vector<int> test;
+    test.push_back(1);
+    test.push_back(2);
+
     return 0;
 }

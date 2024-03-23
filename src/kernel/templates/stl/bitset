@@ -30,16 +30,16 @@
 // returns a reference to a bit, again without doing any range checking.
 
 
-#include <stddef.h>     // for size_t
-#include <string.h>     // for memset
-#include <string>
-#include <stdexcept>    // for invalid_argument, out_of_range, overflow_error
+#include "stddef.h"     // for size_t
+#include "string.h"     // for memset
+#include "string"
+#include "stdexcept"    // for invalid_argument, out_of_range, overflow_error
 
-#ifdef __STL_USE_NEW_IOSTREAMS 
-#include <iostream>
-#else
-#include <iostream.h>   // for istream, ostream
-#endif
+//#ifdef __STL_USE_NEW_IOSTREAMS
+//#include "iostream"
+//#else
+//#include "iostream.h"   // for istream, ostream
+//#endif
 
 #define __BITS_PER_WORD (CHAR_BIT*sizeof(unsigned long))
 #define __BITSET_WORDS(__n) \
@@ -841,104 +841,104 @@ inline bitset<_Nb> operator^(const bitset<_Nb>& __x, const bitset<_Nb>& __y) {
   return __result;
 }
 
-#ifdef __STL_USE_NEW_IOSTREAMS
-
-template <class _CharT, class _Traits, size_t _Nb>
-basic_istream<_CharT, _Traits>&
-operator>>(basic_istream<_CharT, _Traits>& __is, bitset<_Nb>& __x)
-{
-  basic_string<_CharT, _Traits> __tmp;
-  __tmp.reserve(_Nb);
-
-  // Skip whitespace
-  typename basic_istream<_CharT, _Traits>::sentry __sentry(__is);
-  if (__sentry) {
-    basic_streambuf<_CharT, _Traits>* __buf = __is.rdbuf();
-    for (size_t __i = 0; __i < _Nb; ++__i) {
-      static _Traits::int_type __eof = _Traits::eof();
-
-      typename _Traits::int_type __c1 = __buf->sbumpc();
-      if (_Traits::eq_int_type(__c1, __eof)) {
-        __is.setstate(ios_base::eofbit);
-        break;
-      }
-      else {
-        char __c2 = _Traits::to_char_type(__c1);
-        char __c  = __is.narrow(__c2, '*');
-
-        if (__c == '0' || __c == '1')
-          __tmp.push_back(__c);
-        else if (_Traits::eq_int_type(__buf->sputbackc(__c2), __eof)) {
-          __is.setstate(ios_base::failbit);
-          break;
-        }
-      }
-    }
-
-    if (__tmp.empty())
-      __is.setstate(ios_base::failbit);
-    else
-      __x._M_copy_from_string(__tmp, static_cast<size_t>(0), _Nb);
-  }
-
-  return __is;
-}
-
-template <class _CharT, class _Traits, size_t _Nb>
-basic_ostream<_CharT, _Traits>&
-operator<<(basic_ostream<_CharT, _Traits>& __os, const bitset<_Nb>& __x)
-{
-  basic_string<_CharT, _Traits> __tmp;
-  __x._M_copy_to_string(__tmp);
-  return __os << __tmp;
-}
-
-#else /* __STL_USE_NEW_IOSTREAMS */
-
-template <size_t _Nb>
-istream& operator>>(istream& __is, bitset<_Nb>& __x) {
-  string __tmp;
-  __tmp.reserve(_Nb);
-
-  if (__is.flags() & ios::skipws) {
-    char __c;
-    do 
-      __is.get(__c);
-    while (__is && isspace(__c));
-    if (__is)
-      __is.putback(__c);
-  }
-
-  for (size_t __i = 0; __i < _Nb; ++__i) {
-    char __c;
-    __is.get(__c);
-
-    if (!__is)
-      break;
-    else if (__c != '0' && __c != '1') {
-      __is.putback(__c);
-      break;
-    }
-    else
-      __tmp.push_back(__c);
-  }
-
-  if (__tmp.empty()) 
-    __is.clear(__is.rdstate() | ios::failbit);
-  else
-    __x._M_copy_from_string(__tmp, static_cast<size_t>(0), _Nb);
-
-  return __is;
-}
-
-template <size_t _Nb>
-ostream& operator<<(ostream& __os, const bitset<_Nb>& __x) {
-  string __tmp;
-  __x._M_copy_to_string(__tmp);
-  return __os << __tmp;
-}
-
-#endif /* __STL_USE_NEW_IOSTREAMS */
+//#ifdef __STL_USE_NEW_IOSTREAMS
+//
+//template <class _CharT, class _Traits, size_t _Nb>
+//basic_istream<_CharT, _Traits>&
+//operator>>(basic_istream<_CharT, _Traits>& __is, bitset<_Nb>& __x)
+//{
+//  basic_string<_CharT, _Traits> __tmp;
+//  __tmp.reserve(_Nb);
+//
+//  // Skip whitespace
+//  typename basic_istream<_CharT, _Traits>::sentry __sentry(__is);
+//  if (__sentry) {
+//    basic_streambuf<_CharT, _Traits>* __buf = __is.rdbuf();
+//    for (size_t __i = 0; __i < _Nb; ++__i) {
+//      static _Traits::int_type __eof = _Traits::eof();
+//
+//      typename _Traits::int_type __c1 = __buf->sbumpc();
+//      if (_Traits::eq_int_type(__c1, __eof)) {
+//        __is.setstate(ios_base::eofbit);
+//        break;
+//      }
+//      else {
+//        char __c2 = _Traits::to_char_type(__c1);
+//        char __c  = __is.narrow(__c2, '*');
+//
+//        if (__c == '0' || __c == '1')
+//          __tmp.push_back(__c);
+//        else if (_Traits::eq_int_type(__buf->sputbackc(__c2), __eof)) {
+//          __is.setstate(ios_base::failbit);
+//          break;
+//        }
+//      }
+//    }
+//
+//    if (__tmp.empty())
+//      __is.setstate(ios_base::failbit);
+//    else
+//      __x._M_copy_from_string(__tmp, static_cast<size_t>(0), _Nb);
+//  }
+//
+//  return __is;
+//}
+//
+//template <class _CharT, class _Traits, size_t _Nb>
+//basic_ostream<_CharT, _Traits>&
+//operator<<(basic_ostream<_CharT, _Traits>& __os, const bitset<_Nb>& __x)
+//{
+//  basic_string<_CharT, _Traits> __tmp;
+//  __x._M_copy_to_string(__tmp);
+//  return __os << __tmp;
+//}
+//
+//#else /* __STL_USE_NEW_IOSTREAMS */
+//
+//template <size_t _Nb>
+//istream& operator>>(istream& __is, bitset<_Nb>& __x) {
+//  string __tmp;
+//  __tmp.reserve(_Nb);
+//
+//  if (__is.flags() & ios::skipws) {
+//    char __c;
+//    do
+//      __is.get(__c);
+//    while (__is && isspace(__c));
+//    if (__is)
+//      __is.putback(__c);
+//  }
+//
+//  for (size_t __i = 0; __i < _Nb; ++__i) {
+//    char __c;
+//    __is.get(__c);
+//
+//    if (!__is)
+//      break;
+//    else if (__c != '0' && __c != '1') {
+//      __is.putback(__c);
+//      break;
+//    }
+//    else
+//      __tmp.push_back(__c);
+//  }
+//
+//  if (__tmp.empty())
+//    __is.clear(__is.rdstate() | ios::failbit);
+//  else
+//    __x._M_copy_from_string(__tmp, static_cast<size_t>(0), _Nb);
+//
+//  return __is;
+//}
+//
+//template <size_t _Nb>
+//ostream& operator<<(ostream& __os, const bitset<_Nb>& __x) {
+//  string __tmp;
+//  __x._M_copy_to_string(__tmp);
+//  return __os << __tmp;
+//}
+//
+//#endif /* __STL_USE_NEW_IOSTREAMS */
 
 // ------------------------------------------------------------
 // Lookup tables for find and count operations.

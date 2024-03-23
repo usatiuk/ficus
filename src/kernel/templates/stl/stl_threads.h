@@ -25,15 +25,15 @@
 // Schlick, 1999.
 
 #if defined(__STL_SGI_THREADS)
-#include <mutex.h>
-#include <time.h>
+#include "mutex.h"
+#include "time.h"
 #elif defined(__STL_PTHREADS)
-#include <pthread.h>
+#include "pthread.h"
 #elif defined(__STL_UITHREADS)
-#include <thread.h>
-#include <synch.h>
+#include "thread.h"
+#include "synch.h"
 #elif defined(__STL_WIN32THREADS)
-#include <windows.h>
+#include "windows.h"
 #endif
 
 __STL_BEGIN_NAMESPACE

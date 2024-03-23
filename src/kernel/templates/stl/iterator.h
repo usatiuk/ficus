@@ -28,30 +28,30 @@
 #define __SGI_STL_ITERATOR_H
 
 #ifndef __SGI_STL_FUNCTION_H
-#include <function.h>
+#include "function.h"
 #endif
-#include <stddef.h>
+#include "stddef.h"
 
-#ifdef __STL_USE_NEW_IOSTREAMS 
-#include <iosfwd>
-#else /* __STL_USE_NEW_IOSTREAMS */
-#include <iostream.h>
-#endif /* __STL_USE_NEW_IOSTREAMS */
+//#ifdef __STL_USE_NEW_IOSTREAMS
+//#include "iosfwd"
+//#else /* __STL_USE_NEW_IOSTREAMS */
+//#include "iostream.h"
+//#endif /* __STL_USE_NEW_IOSTREAMS */
 
 #ifndef __SGI_STL_INTERNAL_ITERATOR_BASE_H
-#include <stl_iterator_base.h>
+#include "stl_iterator_base.h"
 #endif
 #ifndef __SGI_STL_INTERNAL_ITERATOR_H
-#include <stl_iterator.h>
+#include "stl_iterator.h"
 #endif
 #ifndef __TYPE_TRAITS_H
-#include <type_traits.h>
+#include "type_traits.h"
 #endif
 #ifndef __SGI_STL_INTERNAL_CONSTRUCT_H
-#include <stl_construct.h>
+#include "stl_construct.h"
 #endif
 #ifndef __SGI_STL_INTERNAL_RAW_STORAGE_ITERATOR_H
-#include <stl_raw_storage_iter.h>
+#include "stl_raw_storage_iter.h"
 #endif
 
 #ifdef __STL_USE_NAMESPACES
@@ -94,8 +94,8 @@ using __STD::back_inserter;
 using __STD::reverse_iterator;
 using __STD::reverse_bidirectional_iterator;
 
-using __STD::istream_iterator;
-using __STD::ostream_iterator;
+//using __STD::istream_iterator;
+//using __STD::ostream_iterator;
 
 // Names from stl_construct.h
 using __STD::construct;

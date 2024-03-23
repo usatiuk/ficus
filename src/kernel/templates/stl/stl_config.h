@@ -141,84 +141,84 @@
 // * __stl_assert, either as a test or as a null macro, depending on
 //   whether or not __STL_ASSERTIONS is defined.
 
-# if defined(_PTHREADS) && !defined(_NOTHREADS)
-#     define __STL_PTHREADS
-# endif
-
-# if defined(_UITHREADS) && !defined(_PTHREADS) && !defined(_NOTHREADS)
-#     define __STL_UITHREADS
-# endif
-
-# if defined(__sgi) && !defined(__GNUC__)
-#   include <standards.h>
-#   if !defined(_BOOL)
-#     define __STL_NO_BOOL
-#   endif
-#   if defined(_MIPS_SIM) && _MIPS_SIM == _ABIO32
-#     define __STL_STATIC_CONST_INIT_BUG
-#   endif
-#   if defined(_WCHAR_T_IS_KEYWORD)
-#     define __STL_HAS_WCHAR_T 
-#   endif
-#   if !defined(_TYPENAME_IS_KEYWORD)
-#     define __STL_NEED_TYPENAME
-#   endif
-#   ifdef _PARTIAL_SPECIALIZATION_OF_CLASS_TEMPLATES
-#     define __STL_CLASS_PARTIAL_SPECIALIZATION
-#   endif
-#   if (_COMPILER_VERSION >= 730) && defined(_MIPS_SIM) && _MIPS_SIM != _ABIO32
-#     define __STL_FUNCTION_TMPL_PARTIAL_ORDER
-#   endif
-#   ifdef _MEMBER_TEMPLATES
-#     define __STL_MEMBER_TEMPLATES
-#     define __STL_TEMPLATE_FRIENDS
-#     define __STL_MEMBER_TEMPLATE_CLASSES
-#   endif
-#   if defined(_MEMBER_TEMPLATE_KEYWORD)
-#     define __STL_MEMBER_TEMPLATE_KEYWORD
-#   endif
-#   if defined(_STANDARD_C_PLUS_PLUS)
-#     define __STL_EXPLICIT_FUNCTION_TMPL_ARGS
-#   endif
-#   if (_COMPILER_VERSION >= 730) && defined(_MIPS_SIM) && _MIPS_SIM != _ABIO32
-#     define __STL_MEMBER_TEMPLATE_KEYWORD
-#   endif
-#   if COMPILER_VERSION < 720 || (defined(_MIPS_SIM) && _MIPS_SIM == _ABIO32)
-#     define __STL_DEFAULT_CONSTRUCTOR_BUG
-#   endif
-#   if !defined(_EXPLICIT_IS_KEYWORD)
-#     define __STL_NEED_EXPLICIT
-#   endif
-#   ifdef __EXCEPTIONS
-#     define __STL_USE_EXCEPTIONS
-#   endif
-#   if (_COMPILER_VERSION >= 721) && defined(_NAMESPACES)
-#     define __STL_HAS_NAMESPACES
-#   endif 
-#   if (_COMPILER_VERSION < 721) || \
-    !defined(__STL_HAS_NAMESPACES) || defined(__STL_NO_NAMESPACES)
-#     define __STL_NO_EXCEPTION_HEADER
-#   endif
-#   if _COMPILER_VERSION < 730 || !defined(_STANDARD_C_PLUS_PLUS) || \
-      !defined(_NAMESPACES)
-#     define __STL_NO_BAD_ALLOC
-#   endif
-#   if !defined(_NOTHREADS) && !defined(__STL_PTHREADS)
-#     define __STL_SGI_THREADS
-#   endif
-#   if defined(_LONGLONG) && defined(_SGIAPI) && _SGIAPI
-#     define __STL_LONG_LONG
-#   endif
-#   if _COMPILER_VERSION >= 730 && defined(_STANDARD_C_PLUS_PLUS)
-#     define __STL_USE_NEW_IOSTREAMS
-#   endif
-#   if _COMPILER_VERSION >= 730 && defined(_STANDARD_C_PLUS_PLUS)
-#     define __STL_CAN_THROW_RANGE_ERRORS
-#   endif
-#   if _COMPILER_VERSION >= 730 && defined(_STANDARD_C_PLUS_PLUS)
-#     define __SGI_STL_USE_AUTO_PTR_CONVERSIONS
-#   endif
-# endif
+//# if defined(_PTHREADS) && !defined(_NOTHREADS)
+//#     define __STL_PTHREADS
+//# endif
+//
+//# if defined(_UITHREADS) && !defined(_PTHREADS) && !defined(_NOTHREADS)
+//#     define __STL_UITHREADS
+//# endif
+//
+//# if defined(__sgi) && !defined(__GNUC__)
+//#   include <standards.h>
+//#   if !defined(_BOOL)
+//#     define __STL_NO_BOOL
+//#   endif
+//#   if defined(_MIPS_SIM) && _MIPS_SIM == _ABIO32
+//#     define __STL_STATIC_CONST_INIT_BUG
+//#   endif
+//#   if defined(_WCHAR_T_IS_KEYWORD)
+//#     define __STL_HAS_WCHAR_T
+//#   endif
+//#   if !defined(_TYPENAME_IS_KEYWORD)
+//#     define __STL_NEED_TYPENAME
+//#   endif
+//#   ifdef _PARTIAL_SPECIALIZATION_OF_CLASS_TEMPLATES
+//#     define __STL_CLASS_PARTIAL_SPECIALIZATION
+//#   endif
+//#   if (_COMPILER_VERSION >= 730) && defined(_MIPS_SIM) && _MIPS_SIM != _ABIO32
+//#     define __STL_FUNCTION_TMPL_PARTIAL_ORDER
+//#   endif
+//#   ifdef _MEMBER_TEMPLATES
+//#     define __STL_MEMBER_TEMPLATES
+//#     define __STL_TEMPLATE_FRIENDS
+//#     define __STL_MEMBER_TEMPLATE_CLASSES
+//#   endif
+//#   if defined(_MEMBER_TEMPLATE_KEYWORD)
+//#     define __STL_MEMBER_TEMPLATE_KEYWORD
+//#   endif
+//#   if defined(_STANDARD_C_PLUS_PLUS)
+//#     define __STL_EXPLICIT_FUNCTION_TMPL_ARGS
+//#   endif
+//#   if (_COMPILER_VERSION >= 730) && defined(_MIPS_SIM) && _MIPS_SIM != _ABIO32
+//#     define __STL_MEMBER_TEMPLATE_KEYWORD
+//#   endif
+//#   if COMPILER_VERSION < 720 || (defined(_MIPS_SIM) && _MIPS_SIM == _ABIO32)
+//#     define __STL_DEFAULT_CONSTRUCTOR_BUG
+//#   endif
+//#   if !defined(_EXPLICIT_IS_KEYWORD)
+//#     define __STL_NEED_EXPLICIT
+//#   endif
+//#   ifdef __EXCEPTIONS
+//#     define __STL_USE_EXCEPTIONS
+//#   endif
+//#   if (_COMPILER_VERSION >= 721) && defined(_NAMESPACES)
+//#     define __STL_HAS_NAMESPACES
+//#   endif
+//#   if (_COMPILER_VERSION < 721) || \
+//    !defined(__STL_HAS_NAMESPACES) || defined(__STL_NO_NAMESPACES)
+//#     define __STL_NO_EXCEPTION_HEADER
+//#   endif
+//#   if _COMPILER_VERSION < 730 || !defined(_STANDARD_C_PLUS_PLUS) || \
+//      !defined(_NAMESPACES)
+//#     define __STL_NO_BAD_ALLOC
+//#   endif
+//#   if !defined(_NOTHREADS) && !defined(__STL_PTHREADS)
+//#     define __STL_SGI_THREADS
+//#   endif
+//#   if defined(_LONGLONG) && defined(_SGIAPI) && _SGIAPI
+//#     define __STL_LONG_LONG
+//#   endif
+//#   if _COMPILER_VERSION >= 730 && defined(_STANDARD_C_PLUS_PLUS)
+//#     define __STL_USE_NEW_IOSTREAMS
+//#   endif
+//#   if _COMPILER_VERSION >= 730 && defined(_STANDARD_C_PLUS_PLUS)
+//#     define __STL_CAN_THROW_RANGE_ERRORS
+//#   endif
+//#   if _COMPILER_VERSION >= 730 && defined(_STANDARD_C_PLUS_PLUS)
+//#     define __SGI_STL_USE_AUTO_PTR_CONVERSIONS
+//#   endif
+//# endif
 
 
 /*
@@ -230,42 +230,70 @@
  *                         macro __USLC__ being defined
  */
 // SCO UDK 7 compiler (UnixWare 7x, OSR 5, UnixWare 2x)
-# if defined(__USLC__)
-#     define __STL_HAS_WCHAR_T 
-#     define __STL_CLASS_PARTIAL_SPECIALIZATION
-#     define __STL_PARTIAL_SPECIALIZATION_SYNTAX
-#     define __STL_FUNCTION_TMPL_PARTIAL_ORDER
-#     define __STL_MEMBER_TEMPLATES
-#     define __STL_MEMBER_TEMPLATE_CLASSES
-#     define __STL_USE_EXCEPTIONS
-#     define __STL_HAS_NAMESPACES
-#     define __STL_USE_NAMESPACES
-#     define __STL_LONG_LONG
-#     if defined(_REENTRANT)
-#           define _UITHREADS     /* if      UnixWare < 7.0.1 */
-#           define __STL_UITHREADS
-//   use the following defines instead of the UI threads defines when
-//   you want to use POSIX threads
-//#         define _PTHREADS      /* only if UnixWare >=7.0.1 */
-//#         define __STL_PTHREADS
-#     endif
-# endif
+//# if defined(__USLC__)
+//#     define __STL_HAS_WCHAR_T
+//#     define __STL_CLASS_PARTIAL_SPECIALIZATION
+//#     define __STL_PARTIAL_SPECIALIZATION_SYNTAX
+//#     define __STL_FUNCTION_TMPL_PARTIAL_ORDER
+//#     define __STL_MEMBER_TEMPLATES
+//#     define __STL_MEMBER_TEMPLATE_CLASSES
+//#     define __STL_USE_EXCEPTIONS
+//#     define __STL_HAS_NAMESPACES
+//#     define __STL_USE_NAMESPACES
+//#     define __STL_LONG_LONG
+//#     if defined(_REENTRANT)
+//#           define _UITHREADS     /* if      UnixWare < 7.0.1 */
+//#           define __STL_UITHREADS
+////   use the following defines instead of the UI threads defines when
+////   you want to use POSIX threads
+////#         define _PTHREADS      /* only if UnixWare >=7.0.1 */
+////#         define __STL_PTHREADS
+//#     endif
+//# endif
 
 
+
+//# ifdef __GNUC__
+//#   if __GNUC__ == 2 && __GNUC_MINOR__ <= 7
+//#     define __STL_STATIC_TEMPLATE_MEMBER_BUG
+//#   endif
+//#   if __GNUC__ < 2
+//#     define __STL_NEED_TYPENAME
+//#     define __STL_NEED_EXPLICIT
+//#   endif
+//#   if __GNUC__ == 2 && __GNUC_MINOR__ <= 8
+//#     define __STL_NO_EXCEPTION_HEADER
+//#     define __STL_NO_BAD_ALLOC
+//#   endif
+//#   if __GNUC__ == 2 && __GNUC_MINOR__ >= 8
+//#     define __STL_CLASS_PARTIAL_SPECIALIZATION
+//#     define __STL_FUNCTION_TMPL_PARTIAL_ORDER
+//#     define __STL_EXPLICIT_FUNCTION_TMPL_ARGS
+//#     define __STL_MEMBER_TEMPLATES
+//#     define __STL_CAN_THROW_RANGE_ERRORS
+//      //    g++ 2.8.1 supports member template functions, but not member
+//      //    template nested classes.
+//#     if __GNUC_MINOR__ >= 9
+//#       define __STL_MEMBER_TEMPLATE_CLASSES
+//#       define __STL_TEMPLATE_FRIENDS
+//#       define __SGI_STL_USE_AUTO_PTR_CONVERSIONS
+//#       define __STL_HAS_NAMESPACES
+////#       define __STL_USE_NEW_IOSTREAMS
+//#     endif
+//#   endif
+//#   define __STL_DEFAULT_CONSTRUCTOR_BUG
+//#   ifdef __EXCEPTIONS
+//#     define __STL_USE_EXCEPTIONS
+//#   endif
+//#   ifdef _REENTRANT
+//#     define __STL_PTHREADS
+//#   endif
+//#   if (__GNUC__ < 2) || (__GNUC__ == 2 && __GNUC_MINOR__ < 95)
+//#     define __STL_NO_FUNCTION_PTR_IN_CLASS_TEMPLATE
+//#   endif
+//# endif
 
 # ifdef __GNUC__
-#   if __GNUC__ == 2 && __GNUC_MINOR__ <= 7
-#     define __STL_STATIC_TEMPLATE_MEMBER_BUG
-#   endif
-#   if __GNUC__ < 2 
-#     define __STL_NEED_TYPENAME
-#     define __STL_NEED_EXPLICIT
-#   endif
-#   if __GNUC__ == 2 && __GNUC_MINOR__ <= 8
-#     define __STL_NO_EXCEPTION_HEADER
-#     define __STL_NO_BAD_ALLOC
-#   endif
-#   if __GNUC__ == 2 && __GNUC_MINOR__ >= 8
 #     define __STL_CLASS_PARTIAL_SPECIALIZATION
 #     define __STL_FUNCTION_TMPL_PARTIAL_ORDER
 #     define __STL_EXPLICIT_FUNCTION_TMPL_ARGS
@@ -273,155 +301,147 @@
 #     define __STL_CAN_THROW_RANGE_ERRORS
       //    g++ 2.8.1 supports member template functions, but not member
       //    template nested classes.
-#     if __GNUC_MINOR__ >= 9
 #       define __STL_MEMBER_TEMPLATE_CLASSES
 #       define __STL_TEMPLATE_FRIENDS
 #       define __SGI_STL_USE_AUTO_PTR_CONVERSIONS
 #       define __STL_HAS_NAMESPACES
-//#       define __STL_USE_NEW_IOSTREAMS
-#     endif
-#   endif
 #   define __STL_DEFAULT_CONSTRUCTOR_BUG
-#   ifdef __EXCEPTIONS
-#     define __STL_USE_EXCEPTIONS
-#   endif
-#   ifdef _REENTRANT
-#     define __STL_PTHREADS
-#   endif
-#   if (__GNUC__ < 2) || (__GNUC__ == 2 && __GNUC_MINOR__ < 95)
-#     define __STL_NO_FUNCTION_PTR_IN_CLASS_TEMPLATE
-#   endif
+//#   ifdef _REENTRANT
+//#     define __STL_PTHREADS
+//#   endif
 # endif
 
-# if defined(__SUNPRO_CC) 
-#   define __STL_NO_BOOL
-#   define __STL_NEED_TYPENAME
-#   define __STL_NEED_EXPLICIT
-#   define __STL_USE_EXCEPTIONS
-#   ifdef _REENTRANT
-#     define __STL_PTHREADS
-#   endif
-#   define __SGI_STL_NO_ARROW_OPERATOR
-#   define __STL_PARTIAL_SPECIALIZATION_SYNTAX
-#   define __STL_NO_EXCEPTION_HEADER
-#   define __STL_NO_BAD_ALLOC
-# endif
 
-# if defined(__COMO__)
-#   define __STL_MEMBER_TEMPLATES
-#   define __STL_MEMBER_TEMPLATE_CLASSES
-#   define __STL_TEMPLATE_FRIENDS
-#   define __STL_CLASS_PARTIAL_SPECIALIZATION
-#   define __STL_USE_EXCEPTIONS
-#   define __STL_HAS_NAMESPACES
-# endif
+
+//# if defined(__SUNPRO_CC)
+//#   define __STL_NO_BOOL
+//#   define __STL_NEED_TYPENAME
+//#   define __STL_NEED_EXPLICIT
+//#   define __STL_USE_EXCEPTIONS
+//#   ifdef _REENTRANT
+//#     define __STL_PTHREADS
+//#   endif
+//#   define __SGI_STL_NO_ARROW_OPERATOR
+//#   define __STL_PARTIAL_SPECIALIZATION_SYNTAX
+//#   define __STL_NO_EXCEPTION_HEADER
+//#   define __STL_NO_BAD_ALLOC
+//# endif
+
+//# if defined(__COMO__)
+//#   define __STL_MEMBER_TEMPLATES
+//#   define __STL_MEMBER_TEMPLATE_CLASSES
+//#   define __STL_TEMPLATE_FRIENDS
+//#   define __STL_CLASS_PARTIAL_SPECIALIZATION
+//#   define __STL_USE_EXCEPTIONS
+//#   define __STL_HAS_NAMESPACES
+//# endif
 
 // Intel compiler, which uses the EDG front end.
-# if defined(__ICL)
-#   define __STL_LONG_LONG 
-#   define __STL_MEMBER_TEMPLATES
-#   define __STL_MEMBER_TEMPLATE_CLASSES
-#   define __STL_TEMPLATE_FRIENDS
-#   define __STL_FUNCTION_TMPL_PARTIAL_ORDER
-#   define __STL_CLASS_PARTIAL_SPECIALIZATION
-#   define __STL_NO_DRAND48
-#   define __STL_HAS_NAMESPACES
-#   define __STL_USE_EXCEPTIONS
-#   define __STL_MEMBER_TEMPLATE_KEYWORD
-#   ifdef _CPPUNWIND
-#     define __STL_USE_EXCEPTIONS
-#   endif
-#   ifdef _MT
-#     define __STL_WIN32THREADS
-#   endif
-# endif
+//# if defined(__ICL)
+//#   define __STL_LONG_LONG
+//#   define __STL_MEMBER_TEMPLATES
+//#   define __STL_MEMBER_TEMPLATE_CLASSES
+//#   define __STL_TEMPLATE_FRIENDS
+//#   define __STL_FUNCTION_TMPL_PARTIAL_ORDER
+//#   define __STL_CLASS_PARTIAL_SPECIALIZATION
+//#   define __STL_NO_DRAND48
+//#   define __STL_HAS_NAMESPACES
+//#   define __STL_USE_EXCEPTIONS
+//#   define __STL_MEMBER_TEMPLATE_KEYWORD
+//#   ifdef _CPPUNWIND
+//#     define __STL_USE_EXCEPTIONS
+//#   endif
+//#   ifdef _MT
+//#     define __STL_WIN32THREADS
+//#   endif
+//# endif
 
 // Mingw32, egcs compiler using the Microsoft C runtime
-# if defined(__MINGW32__)
-#   define __STL_NO_DRAND48
-#   ifdef _MT
-#     define __STL_WIN32THREADS
-#   endif
-# endif
+//# if defined(__MINGW32__)
+//#   define __STL_NO_DRAND48
+//#   ifdef _MT
+//#     define __STL_WIN32THREADS
+//#   endif
+//# endif
 
 // Cygwin32, egcs compiler on MS Windows
-# if defined(__CYGWIN__)
-#   define __STL_NO_DRAND48
-# endif
+//# if defined(__CYGWIN__)
+//#   define __STL_NO_DRAND48
+//# endif
 
 
 
 // Microsoft compiler.
-# if defined(_MSC_VER) && !defined(__ICL) && !defined(__MWERKS__)
-#   define __STL_NO_DRAND48
-#   define __STL_STATIC_CONST_INIT_BUG
-#   define __STL_NEED_TYPENAME
-#   define __STL_NO_USING_CLAUSE_IN_CLASS
-#   define __STL_NO_FRIEND_TEMPLATE_CLASS
-#   if _MSC_VER < 1100  /* 1000 is version 4.0, 1100 is 5.0, 1200 is 6.0. */
-#     define __STL_NEED_EXPLICIT
-#     define __STL_NO_BOOL
-#     define __STL_NO_BAD_ALLOC
-#   endif
-#   if _MSC_VER > 1000
-#     include <yvals.h>
-#     define __STL_DONT_USE_BOOL_TYPEDEF
-#   endif
-#   define __STL_NON_TYPE_TMPL_PARAM_BUG
-#   define __SGI_STL_NO_ARROW_OPERATOR
-#   define __STL_DEFAULT_CONSTRUCTOR_BUG
-#   ifdef _CPPUNWIND
-#     define __STL_USE_EXCEPTIONS
-#   endif
-#   ifdef _MT
-#     define __STL_WIN32THREADS
-#   endif
-#   if _MSC_VER >= 1200
-#     define __STL_PARTIAL_SPECIALIZATION_SYNTAX
-#     define __STL_HAS_NAMESPACES
-#     define __STL_CAN_THROW_RANGE_ERRORS
-#     define NOMINMAX
-#     undef min
-#     undef max
-// disable warning 'initializers put in unrecognized initialization area'
-#     pragma warning ( disable : 4075 )
-// disable warning 'empty controlled statement found'
-#     pragma warning ( disable : 4390 )
-// disable warning 'debug symbol greater than 255 chars'
-#     pragma warning ( disable : 4786 )
-#   endif
-#   if _MSC_VER < 1100
-#     define __STL_NO_EXCEPTION_HEADER
-#     define __STL_NO_BAD_ALLOC
-#   endif
-    // Because of a Microsoft front end bug, we must not provide a
-    // namespace qualifier when declaring a friend function.
-#   define __STD_QUALIFIER
-# endif
+//# if defined(_MSC_VER) && !defined(__ICL) && !defined(__MWERKS__)
+//#   define __STL_NO_DRAND48
+//#   define __STL_STATIC_CONST_INIT_BUG
+//#   define __STL_NEED_TYPENAME
+//#   define __STL_NO_USING_CLAUSE_IN_CLASS
+//#   define __STL_NO_FRIEND_TEMPLATE_CLASS
+//#   if _MSC_VER < 1100  /* 1000 is version 4.0, 1100 is 5.0, 1200 is 6.0. */
+//#     define __STL_NEED_EXPLICIT
+//#     define __STL_NO_BOOL
+//#     define __STL_NO_BAD_ALLOC
+//#   endif
+//#   if _MSC_VER > 1000
+//#     include <yvals.h>
+//#     define __STL_DONT_USE_BOOL_TYPEDEF
+//#   endif
+//#   define __STL_NON_TYPE_TMPL_PARAM_BUG
+//#   define __SGI_STL_NO_ARROW_OPERATOR
+//#   define __STL_DEFAULT_CONSTRUCTOR_BUG
+//#   ifdef _CPPUNWIND
+//#     define __STL_USE_EXCEPTIONS
+//#   endif
+//#   ifdef _MT
+//#     define __STL_WIN32THREADS
+//#   endif
+//#   if _MSC_VER >= 1200
+//#     define __STL_PARTIAL_SPECIALIZATION_SYNTAX
+//#     define __STL_HAS_NAMESPACES
+//#     define __STL_CAN_THROW_RANGE_ERRORS
+//#     define NOMINMAX
+//#     undef min
+//#     undef max
+//// disable warning 'initializers put in unrecognized initialization area'
+//#     pragma warning ( disable : 4075 )
+//// disable warning 'empty controlled statement found'
+//#     pragma warning ( disable : 4390 )
+//// disable warning 'debug symbol greater than 255 chars'
+//#     pragma warning ( disable : 4786 )
+//#   endif
+//#   if _MSC_VER < 1100
+//#     define __STL_NO_EXCEPTION_HEADER
+//#     define __STL_NO_BAD_ALLOC
+//#   endif
+//    // Because of a Microsoft front end bug, we must not provide a
+//    // namespace qualifier when declaring a friend function.
+//#   define __STD_QUALIFIER
+//# endif
 
-# if defined(__BORLANDC__)
-#     define __STL_NO_BAD_ALLOC
-#     define __STL_NO_DRAND48
-#     define __STL_DEFAULT_CONSTRUCTOR_BUG
-#   if __BORLANDC__ >= 0x540 /* C++ Builder 4.0 */
-#     define __STL_CLASS_PARTIAL_SPECIALIZATION
-#     define __STL_FUNCTION_TMPL_PARTIAL_ORDER
-#     define __STL_EXPLICIT_FUNCTION_TMPL_ARGS
-#     define __STL_MEMBER_TEMPLATES
-#     define __STL_TEMPLATE_FRIENDS
-#   else
-#     define __STL_NEED_TYPENAME
-#     define __STL_LIMITED_DEFAULT_TEMPLATES
-#     define __SGI_STL_NO_ARROW_OPERATOR
-#     define __STL_NON_TYPE_TMPL_PARAM_BUG
-#   endif
-#   ifdef _CPPUNWIND
-#     define __STL_USE_EXCEPTIONS
-#   endif
-#   ifdef __MT__
-#     define __STL_WIN32THREADS
-#   endif
-# endif
+//# if defined(__BORLANDC__)
+//#     define __STL_NO_BAD_ALLOC
+//#     define __STL_NO_DRAND48
+//#     define __STL_DEFAULT_CONSTRUCTOR_BUG
+//#   if __BORLANDC__ >= 0x540 /* C++ Builder 4.0 */
+//#     define __STL_CLASS_PARTIAL_SPECIALIZATION
+//#     define __STL_FUNCTION_TMPL_PARTIAL_ORDER
+//#     define __STL_EXPLICIT_FUNCTION_TMPL_ARGS
+//#     define __STL_MEMBER_TEMPLATES
+//#     define __STL_TEMPLATE_FRIENDS
+//#   else
+//#     define __STL_NEED_TYPENAME
+//#     define __STL_LIMITED_DEFAULT_TEMPLATES
+//#     define __SGI_STL_NO_ARROW_OPERATOR
+//#     define __STL_NON_TYPE_TMPL_PARAM_BUG
+//#   endif
+//#   ifdef _CPPUNWIND
+//#     define __STL_USE_EXCEPTIONS
+//#   endif
+//#   ifdef __MT__
+//#     define __STL_WIN32THREADS
+//#   endif
+//# endif
 
 # if defined(__STL_NO_BOOL) && !defined(__STL_DONT_USE_BOOL_TYPEDEF)
     typedef int bool;
@@ -462,6 +482,9 @@
 #   define __STL_TEMPLATE_NULL
 # endif
 
+
+#define __STL_USE_SGI_ALLOCATORS
+
 // Use standard-conforming allocators if we have the necessary language
 // features.  __STL_USE_SGI_ALLOCATORS is a hook so that users can 
 // disable new-style allocators, and continue to use the same kind of
@@ -491,20 +514,20 @@
 // edit library headers.
 # if defined(__STL_HAS_NAMESPACES) && !defined(__STL_NO_NAMESPACES)
 #   define __STL_USE_NAMESPACES
-#   define __STD std
-#   define __STL_BEGIN_NAMESPACE namespace std {
+#   define __STD cgistd
+#   define __STL_BEGIN_NAMESPACE namespace cgistd {
 #   define __STL_END_NAMESPACE }
 #   if defined(__STL_FUNCTION_TMPL_PARTIAL_ORDER) && \
        !defined(__STL_NO_RELOPS_NAMESPACE)
 #     define __STL_USE_NAMESPACE_FOR_RELOPS
-#     define __STL_BEGIN_RELOPS_NAMESPACE namespace std { namespace rel_ops {
+#     define __STL_BEGIN_RELOPS_NAMESPACE namespace cgistd { namespace rel_ops {
 #     define __STL_END_RELOPS_NAMESPACE } }
-#     define __STD_RELOPS std::rel_ops
+#     define __STD_RELOPS cgistd::rel_ops
 #   else /* Use std::rel_ops namespace */
 #     define __STL_USE_NAMESPACE_FOR_RELOPS
-#     define __STL_BEGIN_RELOPS_NAMESPACE namespace std {
+#     define __STL_BEGIN_RELOPS_NAMESPACE namespace cgistd {
 #     define __STL_END_RELOPS_NAMESPACE }
-#     define __STD_RELOPS std
+#     define __STD_RELOPS cgistd
 #   endif /* Use std::rel_ops namespace */
 # else
 #   define __STD 
@@ -524,7 +547,7 @@
 // MR version is not expected to have it.
 
 # if defined(__STL_USE_NAMESPACES) && !defined(__STD_QUALIFIER)
-#   define __STD_QUALIFIER std::
+#   define __STD_QUALIFIER cgistd::
 # else
 #   define __STD_QUALIFIER
 # endif
