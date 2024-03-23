@@ -570,11 +570,13 @@
 #   define __STL_UNWIND(action) 
 # endif
 
+#define __STL_ASSERTIONS
+
 #ifdef __STL_ASSERTIONS
-# include <stdio.h>
-# define __stl_assert(expr) \
-    if (!(expr)) { fprintf(stderr, "%s:%d STL assertion failure: %s\n", \
-			  __FILE__, __LINE__, # expr); abort(); }
+# include <asserts.hpp>
+# define __stl_assert(expr) assert2(expr, "STL Assert fail") ;
+//    if (!(expr)) { fprintf(stderr, "%s:%d STL assertion failure: %s\n", \
+//			  __FILE__, __LINE__, # expr); abort(); }
 #else
 # define __stl_assert(expr)
 #endif
