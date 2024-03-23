@@ -965,6 +965,9 @@ _OutputIter rotate_copy(_ForwardIter __first, _ForwardIter __middle,
 // whether we're using rand (part of the standard C library) or lrand48
 // (not standard, but a much better choice whenever it's available).
 
+// FIXME:
+#define __STL_NO_DRAND48
+
 template <class _Distance>
 inline _Distance __random_number(_Distance __n) {
 #ifdef __STL_NO_DRAND48

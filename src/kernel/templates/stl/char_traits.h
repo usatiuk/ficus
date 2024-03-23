@@ -15,7 +15,7 @@
 #define __SGI_STL_CHAR_TRAITS_H
 
 #include "string.h"
-#include "wchar.h"
+//#include "wchar.h"
 
 #if defined(__STL_USE_NEW_IOSTREAMS) && !defined(__SGI_STL_IOSFWD)
 #include "iosfwd"
@@ -137,9 +137,9 @@ public:
 
 // Specialization for wchar_t.
 
-__STL_TEMPLATE_NULL class char_traits<wchar_t>
-  : public __char_traits_base<wchar_t, wint_t>
-{};
+//__STL_TEMPLATE_NULL class char_traits<wchar_t>
+//  : public __char_traits_base<wchar_t, wint_t>
+//{};
 
 
 __STL_END_NAMESPACE

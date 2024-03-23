@@ -15,7 +15,9 @@
 
 #include "TtyManager.hpp"
 
+#include "stl/map"
 #include "stl/pair.h"
+#include "stl/string"
 #include "stl/vector.h"
 
 class SharedPtrTester {
@@ -287,6 +289,13 @@ int test_templates() {
     cgistd::vector<int> test;
     test.push_back(1);
     test.push_back(2);
+
+    cgistd::map<uint64_t, cgistd::vector<int>> map;
+    map[2] = cgistd::vector<int>();
+    map[2].push_back(2);
+
+    cgistd::string s = "hello world \n";
+    writestr_no_yield(s.c_str());
 
     return 0;
 }

@@ -27,7 +27,7 @@ template <class _CharT,
 class basic_string;
 
 typedef basic_string<char>    string;
-typedef basic_string<wchar_t> wstring;
+//typedef basic_string<wchar_t> wstring;
 
 static const char* __get_c_string(const string&);
 

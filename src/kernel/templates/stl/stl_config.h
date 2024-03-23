@@ -552,6 +552,8 @@
 #   define __STD_QUALIFIER
 # endif
 
+#define __STL_NO_EXCEPTION_HEADER
+
 # ifdef __STL_USE_EXCEPTIONS
 #   define __STL_TRY try
 #   define __STL_CATCH_ALL catch(...)

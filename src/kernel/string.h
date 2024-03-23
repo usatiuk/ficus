@@ -102,6 +102,16 @@ inline void strcpy(const char *src, char *dst) {
     dst[i] = '\0';
 }
 
+inline void strncpy(char *dst, const char *src, size_t bufsize) {
+    int i = 0;
+    while (src[i] != '\0' && (i < (bufsize - 1))) {
+        dst[i] = src[i];
+        i++;
+    }
+    dst[i] = '\0';
+}
+
+
 #ifdef __cplusplus
 }
 #endif

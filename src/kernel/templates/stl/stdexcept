@@ -23,6 +23,8 @@
 
 __STL_BEGIN_NAMESPACE
 
+#include "string.h"
+
 class __Named_exception : public __STL_EXCEPTION_BASE {
 public:
   __Named_exception(const string& __str) {
