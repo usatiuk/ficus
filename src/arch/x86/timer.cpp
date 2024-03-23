@@ -41,6 +41,8 @@ void set_pit_count(unsigned count) {
 #define FREQ            (1193182 / (RELOAD_VAL))
 #define MICROS_PER_TICK (1000000 / (FREQ))
 
+static_assert(MICROS_PER_TICK >= 1);
+
 void init_timer() {
     outb(0x43, 0b00110100);
     set_pit_count(RELOAD_VAL);
