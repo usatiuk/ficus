@@ -47,7 +47,7 @@ extern "C" void _start(void) {
     limine_kern_save_response();
     limine_modules_save();
     barrier();
-    map_hddm(get_cr3());
+    map_hhdm(get_cr3());
     barrier();
     new (BOOT_AddressSpace_storage) AddressSpace((uint64_t *) HHDM_P2V(get_cr3()));
     BOOT_AddressSpace = reinterpret_cast<AddressSpace *>(BOOT_AddressSpace_storage);
@@ -60,7 +60,7 @@ extern "C" void _start(void) {
     uint64_t *KERN_AddressSpace_PML4 = static_cast<uint64_t *>(get4k());
     for (int i = 0; i < 512; i++)
         KERN_AddressSpace_PML4[i] = 0x02;
-    map_hddm((uint64_t *) HHDM_V2P(KERN_AddressSpace_PML4));
+    map_hhdm((uint64_t *) HHDM_V2P(KERN_AddressSpace_PML4));
 
     new (KERN_AddressSpace_storage) AddressSpace(KERN_AddressSpace_PML4);
     KERN_AddressSpace = reinterpret_cast<AddressSpace *>(KERN_AddressSpace_storage);

@@ -43,7 +43,7 @@ public:
     FDT *getFdt();
 
 private:
-    // Pointer to PML4 in HDDM
+    // Pointer to PML4 in HHDM
     uint64_t *PML4;
 
     FDT      *_fdt = nullptr;
@@ -60,7 +60,7 @@ void                 limine_kern_save_response();
 #define PAGE_USER    (1 << 2)
 #define PAGE_PRESENT (0x01ULL)
 
-void            map_hddm(uint64_t *pml4);
+void            map_hhdm(uint64_t *pml4);
 
 extern "C" void _tlb_flush();
 

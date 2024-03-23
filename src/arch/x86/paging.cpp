@@ -44,8 +44,8 @@ void *AddressSpace::virt2real(void *virt) {
     assert2(((uint64_t) virt & 0xFFF) == 0, "Trying to unmap non-aligned memory!");
 
     // Assuming everything related to paging is HHDM
-    assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
-    assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
+    assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HHDM!");
+    assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HHDM!");
 
     uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
     uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
@@ -79,8 +79,8 @@ int AddressSpace::map(void *virt, void *real, uint32_t flags) {
     assert2(((uint64_t) real & 0xFFF) == 0, "Trying to map to non-aligned memory!");
 
     // Assuming everything related to paging is HHDM
-    assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
-    assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
+    assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HHDM!");
+    assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HHDM!");
 
     uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
     uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
@@ -133,8 +133,8 @@ int AddressSpace::unmap(void *virt) {
     assert2(((uint64_t) virt & 0xFFF) == 0, "Trying to map non-aligned memory!");
 
     // Assuming everything related to paging is HHDM
-    assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HDDM!");
-    assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HDDM!");
+    assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HHDM!");
+    assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HHDM!");
 
     uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
     uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
@@ -191,7 +191,7 @@ uint64_t       *get_early_frame() {
     return newp;
 }
 
-void map_hddm(uint64_t *pml4) {
+void map_hhdm(uint64_t *pml4) {
     assert2(kernel_virt_base != 0, "Kernel virt address not loaded!");
     assert2(kernel_phys_base != 0, "Kernel phys address not loaded!");
 
