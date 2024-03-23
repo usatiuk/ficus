@@ -1,6 +1,10 @@
 #ifndef OS1_KMEM_H
 #define OS1_KMEM_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -27,5 +31,9 @@ void                    *krealloc(void *addr, size_t newsize);
 
 uint64_t                 get_heap_allocated();
 uint64_t                 get_heap_used();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
