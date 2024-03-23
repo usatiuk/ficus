@@ -15,6 +15,8 @@
 
 #include "TtyManager.hpp"
 
+#include "map"
+
 class SharedPtrTester {
 private:
     auto getThingy() {
