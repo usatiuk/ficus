@@ -20,7 +20,7 @@ void _start() {
     }
     putchar('\n');
 
-    while (true) {
+    while (1) {
         //        putchar('h');
         //        putchar('i');
         //        putchar('\n');

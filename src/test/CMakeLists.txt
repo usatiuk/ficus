@@ -1,4 +1,4 @@
-add_executable(hello hello.cpp)
+add_executable(hello hello.c)
 
 target_link_libraries(hello syscalls_interface)
 
