@@ -17,6 +17,7 @@
 
 #include "stl/map"
 #include "stl/pair.h"
+#include "stl/rope"
 #include "stl/string"
 #include "stl/vector.h"
 
@@ -296,6 +297,14 @@ int test_templates() {
 
     cgistd::string s = "hello world \n";
     writestr_no_yield(s.c_str());
+
+    cgistd::rope r = "e";
+    r.push_back('e');
+    r.append("asd");
+    for (char c: r) {
+        write_serial_no_yield(c);
+    }
+    write_serial('\n');
 
     return 0;
 }
