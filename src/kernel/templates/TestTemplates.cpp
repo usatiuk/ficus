@@ -296,15 +296,15 @@ int test_templates() {
     map[2].push_back(2);
 
     cgistd::string s = "hello world \n";
-    writestr_no_yield(s.c_str());
+    //    writestr_no_yield(s.c_str());
 
     cgistd::rope r = "e";
     r.push_back('e');
     r.append("asd");
     for (char c: r) {
-        write_serial_no_yield(c);
+        //        write_serial_no_yield(c);
     }
-    write_serial('\n');
+    //    write_serial('\n');
 
     return 0;
 }
