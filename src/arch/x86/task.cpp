@@ -67,7 +67,7 @@ cgistd::priority_queue<List<Task *>::Node *, cgistd::vector<List<Task *>::Node *
 static std::atomic<bool> initialized = false;
 
 //
-static void remove_self() {
+void Scheduler::remove_self() {
     assert(RunningTask != nullptr);
     {
         LockGuard l(TasksToFree_lock);
@@ -86,7 +86,7 @@ static void remove_self() {
 
 static void trampoline(void *rdi, void (*rsi_entrypoint)()) {
     rsi_entrypoint();
-    remove_self();
+    Scheduler::remove_self();
 }
 
 Task::Task(Task::TaskMode mode, void (*entrypoint)(), const char *name) {

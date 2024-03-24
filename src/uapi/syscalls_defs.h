@@ -14,6 +14,8 @@ extern "C" {
 
 #include "FileOpts.h"
 
+#define SYSCALL_EXIT_ID     0
+
 #define SYSCALL_PUTCHAR_ID  1
 #define SYSCALL_SLEEP_ID    2
 #define SYSCALL_READCHAR_ID 3

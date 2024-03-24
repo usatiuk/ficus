@@ -5,11 +5,13 @@ add_custom_target(iso
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/limine.cfg ${CMAKE_CURRENT_BINARY_DIR}/isodir/
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:kernel.elf> ${CMAKE_CURRENT_BINARY_DIR}/isodir/os2.elf
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:hello> ${CMAKE_CURRENT_BINARY_DIR}/isodir/hello
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:hello2> ${CMAKE_CURRENT_BINARY_DIR}/isodir/hello2
         COMMAND xorriso -as mkisofs -b limine-bios-cd.bin -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label ${CMAKE_CURRENT_BINARY_DIR}/isodir -o ${CMAKE_CURRENT_BINARY_DIR}/os2.iso
         COMMAND ${tools}/limine/prefix/bin/limine bios-install ${CMAKE_CURRENT_BINARY_DIR}/os2.iso
         VERBATIM
         DEPENDS kernel.elf
         DEPENDS hello
+        DEPENDS hello2
         DEPENDS iso_limine
 )
 

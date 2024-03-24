@@ -1,7 +1,7 @@
 #include "syscalls_interface.h"
 
 
-void _start() {
+__attribute__((unused)) void _start() {
     //    putchar('h');
     //    putchar('i');
     //    putchar('\n');

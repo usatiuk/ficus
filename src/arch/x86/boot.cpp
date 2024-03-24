@@ -35,7 +35,7 @@ real_start() {
 
 // Set up the address space for the kernel and prepare other structures to work without the bootloader,
 // then call real_start with this address space and the new stack.
-extern "C" void _start(void) {
+extern "C" __attribute__((unused)) void _start(void) {
     _sse_setup();
     barrier();
     Arch::GDT::gdt_setup();

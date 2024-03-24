@@ -16,6 +16,7 @@
 #include "FDT.hpp"
 #include "File.hpp"
 #include "memman.hpp"
+#include "task.hpp"
 #include "timer.hpp"
 
 // Don't forget the correct order
@@ -49,6 +50,10 @@ void setup_syscalls() {
     wrmsr(0xc0000084, (1 << 9)); // IA32_FMASK, mask interrupts
 
     wrmsr(0xC0000080, rdmsr(0xC0000080) | 0b1);
+}
+
+void syscall_exit() {
+    Scheduler::remove_self();
 }
 
 uint64_t syscall_putchar(char c) {
@@ -132,6 +137,7 @@ uint64_t syscall_print_tasks() {
 
     return 0;
 }
+
 uint64_t syscall_print_mem() {
     String buf;
     buf += "=====\n";
@@ -159,6 +165,9 @@ uint64_t syscall_print_mem() {
 extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     assert2(are_interrupts_enabled(), "why wouldn't they be?");
     switch (id_rdi) {
+        case SYSCALL_EXIT_ID:
+            syscall_exit();
+            return 0;
         case SYSCALL_PUTCHAR_ID:
             return syscall_putchar(a1_rsi);
         case SYSCALL_SLEEP_ID:

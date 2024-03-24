@@ -16,6 +16,8 @@ extern "C" {
 
 #include "FileOpts.h"
 
+void     exit();
+
 uint64_t putchar(char c);
 uint64_t readchar();
 uint64_t sleep(uint64_t micros);

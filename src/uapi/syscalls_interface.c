@@ -16,6 +16,10 @@ uint64_t do_syscall(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t 
     return res;
 }
 
+void exit() {
+    do_syscall(SYSCALL_EXIT_ID, 0, 0, 0);
+}
+
 uint64_t readchar() {
     return do_syscall(SYSCALL_READCHAR_ID, 0, 0, 0);
 }
