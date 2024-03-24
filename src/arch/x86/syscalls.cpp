@@ -3,6 +3,8 @@
 //
 
 #include "syscalls.hpp"
+#include "VFSApi.hpp"
+#include "VMA.hpp"
 #include "syscalls_defs.h"
 
 #include <cstdint>
@@ -16,6 +18,7 @@
 #include "FDT.hpp"
 #include "File.hpp"
 #include "memman.hpp"
+#include "paging.hpp"
 #include "task.hpp"
 #include "timer.hpp"
 
@@ -162,6 +165,29 @@ uint64_t syscall_print_mem() {
     return 0;
 }
 
+uint64_t syscall_execve(const char *pathname, char *const argv[], char *const envp[]) {
+    // Just copy for now;
+    FDT::FD fd = VFSApi::open(StrToPath(pathname));
+    if (fd == -1) return -1;
+    File *f      = VFSApi::get(fd);
+
+    Task *utask  = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) 0x00020000, pathname);
+    char *mapped = static_cast<char *>(utask->_vma->mmap_mem((void *) 0x00020000, f->size(), 0, PAGE_USER | PAGE_RW));
+    assert(mapped == (void *) 0x00020000);
+    char *target = mapped + f->size();
+
+    for (; mapped < target; mapped += PAGE_SIZE) {
+        char     buf[PAGE_SIZE];
+        uint64_t read = f->read(buf, PAGE_SIZE);
+        memcpy((char *) HHDM_P2V(utask->_addressSpace->virt2real(mapped)), buf, read);
+    }
+
+    VFSApi::close(fd);
+
+    utask->start();
+    return 0;
+}
+
 extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     assert2(are_interrupts_enabled(), "why wouldn't they be?");
     switch (id_rdi) {
@@ -185,7 +211,8 @@ extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_r
             return syscall_write(a1_rsi, reinterpret_cast<const char *>(a2_rdx), a3_rcx);
         case SYSCALL_LSEEK_ID:
             return syscall_lseek(a1_rsi, a2_rdx, a3_rcx);
-
+        case SYSCALL_EXECVE_ID:
+            return syscall_execve(reinterpret_cast<const char *>(a1_rsi), reinterpret_cast<char *const *>(a2_rdx), reinterpret_cast<char *const *>(a3_rcx));
         case SYSCALL_OPENDIR_ID:
         case SYSCALL_READDIR_ID:
         case SYSCALL_CLOSEDIR_ID:

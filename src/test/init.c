@@ -20,6 +20,10 @@ __attribute__((unused)) void _start() {
     }
     putchar('\n');
 
+    sleep(100);
+
+    execve("/hello2", 0, 0);
+
     while (1) {
         //        putchar('h');
         //        putchar('i');
@@ -27,6 +31,7 @@ __attribute__((unused)) void _start() {
         char read = readchar();
         if (read == 'm') print_mem();
         if (read == 't') print_tasks();
+        if (read == 'h') execve("/hello2", 0, 0);
         putchar('\n');
         putchar(read);
         //        sleep(100000);

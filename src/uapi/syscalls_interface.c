@@ -52,6 +52,10 @@ uint64_t lseek(uint64_t fd, uint64_t off, uint64_t whence) {
     return do_syscall(SYSCALL_LSEEK_ID, fd, off, whence);
 }
 
+uint64_t execve(const char *pathname, char *const argv[], char *const envp[]) {
+    return do_syscall(SYSCALL_EXECVE_ID, (uint64_t) pathname, (uint64_t) argv, (uint64_t) envp);
+}
+
 void print_mem() {
     do_syscall(SYSCALL_PRINT_MEM, 0, 0, 0);
 }

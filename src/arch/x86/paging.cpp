@@ -58,13 +58,11 @@ void *AddressSpace::virt2real(void *virt) {
     uint64_t *pdpeb = (uint64_t *) HHDM_P2V((*pml4e & 0x000FFFFFFFFFF000ULL));
     uint64_t *pdpee = pdpeb + pdpei;
     if (!((*pdpee) & PAGE_PRESENT)) return 0;
-    // Calculations here might be incorrect
     if (*pdpee & PAGE_PS) return (void *) ((*pdpee & 0x000FFFFFFFFFF000ULL) | ((uint64_t) virt & 0x00000003FFFF000ULL));
 
     uint64_t *pdeb = (uint64_t *) HHDM_P2V((*pdpee & 0x000FFFFFFFFFF000ULL));
     uint64_t *pdee = pdeb + pdei;
     if (!((*pdee) & PAGE_PRESENT)) return 0;
-    // Calculations here might be incorrect
     if (*pdee & PAGE_PS) return (void *) ((*pdee & 0x000FFFFFFFFFF000ULL) | ((uint64_t) virt & 0x0000000001FF000ULL));
 
     uint64_t *ptsb = (uint64_t *) HHDM_P2V((*pdee & 0x000FFFFFFFFFF000ULL));

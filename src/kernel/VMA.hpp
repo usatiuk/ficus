@@ -16,8 +16,13 @@ class AddressSpace;
 class VMA {
 public:
     VMA(AddressSpace *space);
+    ~VMA();
 
-    void mark_taken(void *addr, size_t length);
+    VMA(const VMA &)            = delete;
+    VMA(VMA &&)                 = delete;
+    VMA &operator=(const VMA &) = delete;
+    VMA &operator=(VMA &&)      = delete;
+
 
     /// Map all higher-half pages into the address space
     /// By linking them to same entries as kernel
@@ -30,12 +35,21 @@ private:
     AddressSpace *space = nullptr;
     Mutex         space_lock;
 
+    enum class EntryType {
+        FREE,
+        PHYS,
+        ANON
+    };
+
     struct ListEntry {
         uintptr_t begin;
         uint64_t  length;
-        bool      available;
+        EntryType type = EntryType::FREE;
     };
 
+    ListEntry *get_entry(uintptr_t v_addr, size_t length);
+
+    //
     SkipList<uintptr_t, ListEntry> regions;
     Mutex                          regions_lock;
 };

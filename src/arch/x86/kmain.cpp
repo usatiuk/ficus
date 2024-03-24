@@ -12,6 +12,7 @@
 #include "String.hpp"
 #include "TestTemplates.hpp"
 #include "TtyManager.hpp"
+#include "VFSApi.hpp"
 #include "VFSGlobals.hpp"
 #include "VFSTester.hpp"
 #include "VMA.hpp"
@@ -152,15 +153,24 @@ void ktask_main() {
     (new Task(Task::TaskMode::TASKMODE_KERN, vfs_tester, "vfs_tester"))->start();
 
     for (int i = 0; i < saved_modules_size; i++) {
-        GlobalTtyManager.all_tty_putstr("Starting ");
-        GlobalTtyManager.all_tty_putstr(saved_modules_names[i]);
-        GlobalTtyManager.all_tty_putchar('\n');
+        VFSApi::touch(StrToPath(saved_modules_names[i]));
+        FDT::FD fd = VFSApi::open(StrToPath(saved_modules_names[i]));
+        File   *f  = VFSApi::get(fd);
+        f->write(saved_modules_data[i], saved_modules_data_size[i]);
 
-        Task *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) 0x00020000, saved_modules_names[i]);
-        assert(saved_modules_size > 0);
-        utask->_vma->mmap_phys((void *) 0x00020000, (void *) KERN_V2P(saved_modules_data[i]),
-                               max_saved_module_file_size, PAGE_USER | PAGE_RW);
-        utask->start();
+        if (strcmp(saved_modules_names[i], "/init") == 0) {
+            GlobalTtyManager.all_tty_putstr("Starting ");
+            GlobalTtyManager.all_tty_putstr(saved_modules_names[i]);
+            GlobalTtyManager.all_tty_putchar('\n');
+
+            Task *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) 0x00020000, saved_modules_names[i]);
+            assert(saved_modules_size > 0);
+            utask->_vma->mmap_phys((void *) 0x00020000, (void *) KERN_V2P(saved_modules_data[i]),
+                                   max_saved_module_file_size, PAGE_USER | PAGE_RW);
+            utask->start();
+        }
+
+        VFSApi::close(fd);
     }
 }
 

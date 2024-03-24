@@ -29,6 +29,8 @@ uint64_t read(uint64_t fd, char *buf, uint64_t len);
 uint64_t write(uint64_t fd, const char *buf, uint64_t len);
 uint64_t lseek(uint64_t fd, uint64_t off, uint64_t whence);
 
+uint64_t execve(const char *pathname, char *const argv[], char *const envp[]);
+
 void     print_mem();
 void     print_tasks();
 
