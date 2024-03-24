@@ -1,11 +1,11 @@
-add_executable(hello hello.c)
+add_executable(init init.c)
 
-target_link_libraries(hello syscalls_interface)
+target_link_libraries(init syscalls_interface)
 
-target_include_directories(hello PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(init PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_options(hello PRIVATE "SHELL:-T${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
-set_target_properties(hello PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
+target_link_options(init PRIVATE "SHELL:-T${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
+set_target_properties(init PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
 
 add_executable(hello2 hello2.c)
 
