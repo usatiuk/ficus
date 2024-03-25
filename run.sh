@@ -77,7 +77,7 @@ if [ $CLEAN ]; then
   cmake --build cmake-build-$MODE --target clean
 fi
 
-cmake --build cmake-build-$MODE --target iso
+cmake --build cmake-build-$MODE --target iso --parallel $(nproc)
 
 qemu-system-x86_64 -s $QEMU_OPTS -cdrom cmake-build-$MODE/src/iso/os2.iso
 
