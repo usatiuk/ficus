@@ -15,10 +15,12 @@
 #include "misc.hpp"
 
 #include "BytesFormatter.hpp"
+#include "ElfParser.hpp"
 #include "FDT.hpp"
 #include "File.hpp"
 #include "memman.hpp"
 #include "paging.hpp"
+#include "stl/vector"
 #include "task.hpp"
 #include "timer.hpp"
 
@@ -169,22 +171,20 @@ uint64_t syscall_execve(const char *pathname, char *const argv[], char *const en
     // Just copy for now;
     FDT::FD fd = VFSApi::open(StrToPath(pathname));
     if (fd == -1) return -1;
-    File *f      = VFSApi::get(fd);
+    File                *f = VFSApi::get(fd);
 
-    Task *utask  = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) 0x00020000, pathname);
-    char *mapped = static_cast<char *>(utask->_vma->mmap_mem((void *) 0x00020000, f->size(), 0, PAGE_USER | PAGE_RW));
-    assert(mapped == (void *) 0x00020000);
-    char *target = mapped + f->size();
-
-    for (; mapped < target; mapped += PAGE_SIZE) {
-        char     buf[PAGE_SIZE];
-        uint64_t read = f->read(buf, PAGE_SIZE);
-        memcpy((char *) HHDM_P2V(utask->_addressSpace->virt2real(mapped)), buf, read);
-    }
-
+    cgistd::vector<char> read_data(f->size());
+    f->read(read_data.begin(), f->size());
     VFSApi::close(fd);
 
-    utask->start();
+    ElfParser elfParser(read_data);
+
+    Task     *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), pathname);
+    if (elfParser.copy_to(utask))
+        utask->start();
+    else
+        return -1;
+
     return 0;
 }
 

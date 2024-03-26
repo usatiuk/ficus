@@ -4,6 +4,7 @@
 #include <cstddef>
 
 #include "BytesFormatter.hpp"
+#include "ElfParser.hpp"
 #include "LockGuard.hpp"
 #include "MemFs.hpp"
 #include "MountTable.hpp"
@@ -163,11 +164,15 @@ void ktask_main() {
             GlobalTtyManager.all_tty_putstr(saved_modules_names[i]);
             GlobalTtyManager.all_tty_putchar('\n');
 
-            Task *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) 0x00020000, saved_modules_names[i]);
-            assert(saved_modules_size > 0);
-            utask->_vma->mmap_phys((void *) 0x00020000, (void *) KERN_V2P(saved_modules_data[i]),
-                                   max_saved_module_file_size, PAGE_USER | PAGE_RW);
-            utask->start();
+            cgistd::vector<char> read_data(max_saved_module_file_size);
+            memcpy(read_data.begin(), saved_modules_data[i], max_saved_module_file_size);
+            ElfParser elfParser(read_data);
+
+            Task     *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), saved_modules_names[i]);
+            if (elfParser.copy_to(utask))
+                utask->start();
+            else
+                assert2(false, "Init couldn't be loaded!");
         }
 
         VFSApi::close(fd);

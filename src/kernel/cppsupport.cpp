@@ -162,4 +162,8 @@ struct type_mismatch_info {
     writestr_no_yield("Warning: division overflow\n");
     if (SAN_STOP) _hcf();
 }
+[[maybe_unused]] void __ubsan_handle_nonnull_arg() {
+    writestr_no_yield("Warning: null argument\n");
+    if (SAN_STOP) _hcf();
+}
 };

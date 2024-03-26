@@ -17,3 +17,4 @@ target_sources(kernel.elf PRIVATE
 
 add_subdirectory(templates)
 add_subdirectory(vfs)
+add_subdirectory(elf)

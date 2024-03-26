@@ -58,6 +58,9 @@ inline void _Destroy(_Tp* __pointer) {
   __pointer->~_Tp();
 }
 
+template <class _Tp>
+inline void destroy(_Tp* __pointer);
+
 template <class _ForwardIterator>
 void
 __destroy_aux(_ForwardIterator __first, _ForwardIterator __last, __false_type)
