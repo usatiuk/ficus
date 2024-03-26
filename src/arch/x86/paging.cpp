@@ -3,6 +3,7 @@
 //
 
 #include "paging.hpp"
+#include "LockGuard.hpp"
 #include "asserts.hpp"
 #include "limine.h"
 #include "memman.hpp"
@@ -47,6 +48,7 @@ AddressSpace::~AddressSpace() {
 }
 
 void *AddressSpace::virt2real(void *virt) {
+    LockGuard l(_lock);
     assert2(((uint64_t) virt & 0xFFF) == 0, "Trying to unmap non-aligned memory!");
 
     // Assuming everything related to paging is HHDM
@@ -79,6 +81,7 @@ void *AddressSpace::virt2real(void *virt) {
 }
 
 int AddressSpace::map(void *virt, void *real, uint32_t flags) {
+    LockGuard l(_lock);
     assert2(((uint64_t) virt & 0xFFF) == 0, "Trying to map non-aligned memory!");
     assert2(((uint64_t) real & 0xFFF) == 0, "Trying to map to non-aligned memory!");
 
@@ -134,6 +137,7 @@ int AddressSpace::map(void *virt, void *real, uint32_t flags) {
     return 1;
 }
 int AddressSpace::unmap(void *virt) {
+    LockGuard l(_lock);
     assert2(((uint64_t) virt & 0xFFF) == 0, "Trying to map non-aligned memory!");
 
     // Assuming everything related to paging is HHDM
@@ -168,7 +172,7 @@ int AddressSpace::unmap(void *virt) {
 }
 FDT *AddressSpace::getFdt() {
     if (_fdt.get() == nullptr) {
-        LockGuard l(_fdtLock);
+        LockGuard l(_lock);
         if (_fdt.get() == nullptr) {
             _fdt = UniquePtr(new FDT());
         }

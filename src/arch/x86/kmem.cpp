@@ -42,6 +42,7 @@ void         init_kern_heap() {
 }
 
 static void extend_heap(size_t n_pages) {
+    assert(kmem_lock.test() && kmem_lock.owner() == Scheduler::cur_task());
     for (size_t i = 0; i < n_pages; i++) {
         void *p = get4k();
         assert2(p != NULL, "Kernel out of memory!");
@@ -53,6 +54,7 @@ static void extend_heap(size_t n_pages) {
 
 // n is required length!
 struct HeapEntry *split_entry(struct HeapEntry *what, size_t n) {
+    assert(kmem_lock.test() && kmem_lock.owner() == Scheduler::cur_task());
     assert2(what->len > (n + sizeof(struct HeapEntry)), "Trying to split a heap entry that's too small!");
     assert(n <= allocated);
 
@@ -200,6 +202,7 @@ void *kmalloc(size_t n) {
 }
 
 static void try_merge_fwd(struct HeapEntry *entry) {
+    assert(kmem_lock.test() && kmem_lock.owner() == Scheduler::cur_task());
     assert2(entry->magic == KERN_HeapMagicFree, "Bad merge!");
     assert(entry->prev == NULL);
 
@@ -230,6 +233,7 @@ static void try_merge_fwd(struct HeapEntry *entry) {
 }
 
 static struct HeapEntry *try_shrink_heap(struct HeapEntry *entry) {
+    assert(kmem_lock.test() && kmem_lock.owner() == Scheduler::cur_task());
     assert(entry->prev == NULL);
     if ((uint64_t) entry + sizeof(struct HeapEntry) + entry->len == KERN_HeapEnd) {
         // Shrink it if it's at least three pages

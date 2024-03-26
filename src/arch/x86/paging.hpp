@@ -52,9 +52,10 @@ private:
     uint64_t                             *PML4;
 
     UniquePtr<FDT>                        _fdt;
-    Mutex                                 _fdtLock;
 
     UniquePtr<cgistd::vector<uint64_t *>> _taken_pages;
+
+    Mutex                                 _lock;
 };
 
 extern AddressSpace *KERN_AddressSpace;

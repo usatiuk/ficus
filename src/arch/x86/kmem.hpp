@@ -9,13 +9,13 @@ extern "C" {
 #include <stdint.h>
 
 #define KERN_HeapVirtBegin  (0xffffc00000000000ULL)
-#define KERN_HeapMagicFree  0xDEDE
-#define KERN_HeapMagicTaken 0xADAD
+#define KERN_HeapMagicFree  0xDEDEDEDEDEDEDEDE
+#define KERN_HeapMagicTaken 0xADADADADADADADAD
 
 void init_kern_heap();
 
 struct HeapEntry {
-    uint_fast16_t     magic;
+    uint64_t          magic;
     struct HeapEntry *next;
     struct HeapEntry *prev;
     uint64_t          len;
