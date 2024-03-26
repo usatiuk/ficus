@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "PointersCollection.hpp"
+#include "mutex.hpp"
 
 #define PAGE_SIZE   4096
 
@@ -44,9 +45,10 @@ public:
 
 private:
     // Pointer to PML4 in HHDM
-    uint64_t *PML4;
+    uint64_t      *PML4;
 
-    FDT      *_fdt = nullptr;
+    UniquePtr<FDT> _fdt;
+    Mutex          _fdtLock;
 };
 
 extern AddressSpace *KERN_AddressSpace;

@@ -161,8 +161,13 @@ int AddressSpace::unmap(void *virt) {
     return 1;
 }
 FDT *AddressSpace::getFdt() {
-    if (!_fdt) _fdt = new FDT();
-    return _fdt;
+    if (_fdt.get() == nullptr) {
+        LockGuard l(_fdtLock);
+        if (_fdt.get() == nullptr) {
+            _fdt = UniquePtr(new FDT());
+        }
+    }
+    return _fdt.get();
 }
 
 static volatile struct limine_kernel_address_request kernel_address_request = {
