@@ -57,10 +57,15 @@ public:
         uint64_t _fxsave[512] __attribute__((aligned(16)));
     } __attribute__((aligned(16)));
 
-    uint64_t                _entry_ksp_val;
-    TaskFrame               _frame;
-    TaskPID                 _pid;
-    std::atomic<uint64_t>   _used_time;
+    uint64_t              _entry_ksp_val;
+    TaskFrame             _frame;
+    TaskPID               _pid;
+    std::atomic<uint64_t> _used_time;
+
+    // Note that address space must be destroyed after VMA!
+    // as VMA frees what it had allocated there too
+    UniquePtr<AddressSpace> _ownAddressSpace;
+
     AddressSpace           *_addressSpace;
     UniquePtr<VMA>          _vma;
     UniquePtr<KernStack>    _kstack{new KernStack()};
@@ -69,8 +74,6 @@ public:
     TaskMode                _mode;
     uint64_t                _sleep_until;
     TaskState               _state;
-
-    UniquePtr<AddressSpace> _ownAddressSpace;
 };
 
 
