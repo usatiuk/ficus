@@ -27,6 +27,7 @@
 #define SYSCALL_UNLINK_ID   13
 
 #define SYSCALL_EXECVE_ID   50
+#define SYSCALL_SBRK_ID     100
 
 
 #define SYSCALL_PRINT_MEM   1000
@@ -53,9 +54,13 @@ int    execve(char *name, char **argv, char **env) {
     return _do_syscall(SYSCALL_EXECVE_ID, (uint64_t) name, (uint64_t) argv, (uint64_t) env);
 }
 int fork() {}
-int fstat(int file, struct stat *st) {}
+
 int getpid() {}
-int isatty(int file) {}
+int isatty(int file) { return file == 0 || file == 1 || file == 2; }
+
+int fstat(int file, struct stat *st) {
+    if (isatty(file)) st->st_mode = S_IFCHR;
+}
 int kill(int pid, int sig) {}
 int link(char *old, char *new) {}
 int lseek(int file, int ptr, int dir) {
@@ -67,7 +72,9 @@ int open(const char *name, int flags, ...) {
 int read(int file, char *ptr, int len) {
     return _do_syscall(SYSCALL_READ_ID, file, (uint64_t) ptr, len);
 }
-caddr_t sbrk(int incr) {}
+caddr_t sbrk(int incr) {
+    return (caddr_t) _do_syscall(SYSCALL_SBRK_ID, (int64_t) incr, 0, 0);
+}
 int     stat(const char *file, struct stat *st) {}
 clock_t times(struct tms *buf) {}
 int     unlink(char *name) {}

@@ -86,13 +86,34 @@ uint64_t syscall_close(uint64_t FD) {
     return 1;
 }
 
+//FIXME:
 uint64_t syscall_read(uint64_t fd, char *buf, uint64_t len) {
+    if (fd == 0) {
+        auto c = buf;
+        while ((c - buf) < len) {
+            *c = GlobalTtyManager.get_tty(0)->readchar();
+            if (*c == '\r') {
+                *(c) = '\n';
+                *(++c) = '0';
+                break;
+            }
+            c++;
+        }
+        return (c-buf);
+    }
     auto f = FDT::current()->get(fd);
     if (!f) return -1;
     return f->read(buf, len);
 }
 
 uint64_t syscall_write(uint64_t fd, const char *buf, uint64_t len) {
+    if (fd == 1) {
+        auto c = buf;
+        while (*c != '\0' && (c - buf) < len) {
+            GlobalTtyManager.all_tty_putchar(*c);
+            c++;
+        }
+    }
     auto f = FDT::current()->get(fd);
     if (!f) return -1;
     return f->write(buf, len);
@@ -188,6 +209,26 @@ uint64_t syscall_execve(const char *pathname, char *const argv[], char *const en
     return 0;
 }
 
+char *syscall_sbrk(int brk) {
+    auto  vma = Scheduler::cur_task()->_vma.get();
+
+    char *ret = reinterpret_cast<char *>(-1);
+
+    if (!vma) return reinterpret_cast<char *>(-1);
+
+    if (!vma->brk_start) {
+        vma->brk_start = (char *) vma->mmap_mem(nullptr, 16ULL * 1024ULL * 1024ULL /* 16MB */, 0, PAGE_RW | PAGE_USER);
+        if (!vma->brk_start) return reinterpret_cast<char *>(-1); // FIXME:
+        vma->brk_end_real = *vma->brk_start + 16ULL * 1024ULL * 1024ULL;
+        vma->brk_end_fake = vma->brk_start;
+    }
+
+    ret               = *vma->brk_end_fake;
+    vma->brk_end_fake = *vma->brk_end_fake + brk;
+
+    return ret;
+}
+
 extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     assert2(are_interrupts_enabled(), "why wouldn't they be?");
     switch (id_rdi) {
@@ -213,6 +254,8 @@ extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_r
             return syscall_lseek(a1_rsi, a2_rdx, a3_rcx);
         case SYSCALL_EXECVE_ID:
             return syscall_execve(reinterpret_cast<const char *>(a1_rsi), reinterpret_cast<char *const *>(a2_rdx), reinterpret_cast<char *const *>(a3_rcx));
+        case SYSCALL_SBRK_ID:
+            return reinterpret_cast<uint64_t>(syscall_sbrk(static_cast<int64_t>(a1_rsi)));
         case SYSCALL_OPENDIR_ID:
         case SYSCALL_READDIR_ID:
         case SYSCALL_CLOSEDIR_ID:

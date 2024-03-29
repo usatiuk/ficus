@@ -1,11 +1,24 @@
 #include "syscalls_interface.h"
 
 #include "stdio.h"
+#include "stdlib.h"
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <sys/unistd.h>
 
+
 int main() {
+    malloc(100);
+    malloc(100);
+    malloc(100);
+    malloc(100);
+    printf("Who are you?\n");
+    char  *line = NULL;
+    size_t len  = 0;
+    //    __getline(&line, &len, stdin);
+
+
+    printf("hi %s\n", line);
     //    sputchar('h');
     //    sputchar('i');
     //    sputchar('\n');
@@ -18,26 +31,19 @@ int main() {
     char buf[123];
     read(test123, buf, 9);
 
-    sputchar('\n');
-    for (int i = 0; i < 8; i++) {
-        sputchar(buf[i]);
-    }
-    sputchar('\n');
+    printf("\n %s \n", buf);
 
     usleep(100);
 
     execve("/hello2", 0, 0);
 
     while (1) {
-        //        sputchar('h');
-        //        sputchar('i');
-        sputchar('\n');
-        char read = sreadchar();
-        if (read == 'm') print_mem();
-        if (read == 't') print_tasks();
-        if (read == 'h') execve("/hello2", 0, 0);
-        sputchar('\n');
-        sputchar(read);
-        //        sleep(100000);
+        printf("\n");
+        char c;
+        scanf(" %c", &c);
+        if (c == 'm') print_mem();
+        if (c == 't') print_tasks();
+        if (c == 'h') execve("/hello2", 0, 0);
+        printf("%c", c);
     }
 }

@@ -10,6 +10,7 @@
 #include "mutex.hpp"
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 
 class AddressSpace;
 
@@ -30,6 +31,10 @@ public:
     void *mmap_phys(void *v_addr, void *real_addr, size_t length, int flags);
     void *mmap_mem(void *v_addr, size_t length, int prot, int flags);
     int   munmap(void *addr, size_t length);
+
+    std::optional<char*> brk_start;
+    std::optional<char*> brk_end_fake;
+    std::optional<char*> brk_end_real;
 
 private:
     AddressSpace *space = nullptr;

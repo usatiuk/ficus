@@ -34,7 +34,7 @@ extern "C" {
 #define SYSCALL_UNLINK_ID   13
 
 #define SYSCALL_EXECVE_ID   50
-
+#define SYSCALL_SBRK_ID     100
 
 #define SYSCALL_PRINT_MEM   1000
 #define SYSCALL_PRINT_TASKS 1001

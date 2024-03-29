@@ -1,17 +1,7 @@
 #include "syscalls_interface.h"
 
-volatile char        asdfasdf[323];
-volatile int         x     = 3;
-volatile int         w     = 0;
+#include "stdio.h"
 
-volatile const char *hello = "hello xd";
-
-//
 int main() {
-    if (x == 3) sputchar('x');
-    if (w == 2) sputchar('w');
-    if (asdfasdf[0] == '\0') sputchar('a');
-    sputchar('h');
-    sputchar('i');
-    sputchar('\n');
+    printf("Hi!\n");
 }
