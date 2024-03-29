@@ -24,7 +24,9 @@ target_sources(kernel.elf PRIVATE
         misc.cpp
         syscalls.cpp
         syscalls.asm
-        limine_modules.cpp)
+        limine_modules.cpp
+        handle_exception.cpp
+)
 
 target_include_directories(kernel.elf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
