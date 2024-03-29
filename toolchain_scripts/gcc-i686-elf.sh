@@ -19,6 +19,14 @@ if [ ! -d gcc-13.2.0 ]; then
     rm gcc-13.2.0.tar.xz
 fi
 
+cd gcc-13.2.0
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+patch -p1 -u -i "$SCRIPT_DIR/p1.patch"
+patch -p1 -u -i "$SCRIPT_DIR/p2.patch"
+
+cd ..
+
 mkdir -p build
 pushd build
 
