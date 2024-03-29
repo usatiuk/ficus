@@ -428,6 +428,8 @@ fi
 case "${host}" in
   *-*-os3*)
     sys_dir=os3
+	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
+	newlib_cflags="${newlib_cflags} -DREENTRANT_SYSCALLS_PROVIDED"
     ;;
   *-*-cygwin*)
 	posix_dir=posix
