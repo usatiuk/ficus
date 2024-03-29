@@ -16,44 +16,12 @@ uint64_t do_syscall(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t 
     return res;
 }
 
-void exit() {
-    do_syscall(SYSCALL_EXIT_ID, 0, 0, 0);
-}
-
-uint64_t readchar() {
+uint64_t sreadchar() {
     return do_syscall(SYSCALL_READCHAR_ID, 0, 0, 0);
 }
 
-uint64_t putchar(char c) {
+uint64_t sputchar(char c) {
     return do_syscall(SYSCALL_PUTCHAR_ID, c, 0, 0);
-}
-
-uint64_t sleep(uint64_t micros) {
-    return do_syscall(SYSCALL_SLEEP_ID, micros, 0, 0);
-}
-
-uint64_t open(const char *pathname, int flags) {
-    return do_syscall(SYSCALL_OPEN_ID, (uint64_t) pathname, flags, 0);
-}
-
-uint64_t close(uint64_t FD) {
-    return do_syscall(SYSCALL_CLOSE_ID, FD, 0, 0);
-}
-
-uint64_t read(uint64_t fd, char *buf, uint64_t len) {
-    return do_syscall(SYSCALL_READ_ID, fd, (uint64_t) buf, len);
-}
-
-uint64_t write(uint64_t fd, const char *buf, uint64_t len) {
-    return do_syscall(SYSCALL_WRITE_ID, fd, (uint64_t) buf, len);
-}
-
-uint64_t lseek(uint64_t fd, uint64_t off, uint64_t whence) {
-    return do_syscall(SYSCALL_LSEEK_ID, fd, off, whence);
-}
-
-uint64_t execve(const char *pathname, char *const argv[], char *const envp[]) {
-    return do_syscall(SYSCALL_EXECVE_ID, (uint64_t) pathname, (uint64_t) argv, (uint64_t) envp);
 }
 
 void print_mem() {

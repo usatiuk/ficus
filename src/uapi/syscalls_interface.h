@@ -16,20 +16,8 @@ extern "C" {
 
 #include "FileOpts.h"
 
-void     exit();
-
-uint64_t putchar(char c);
-uint64_t readchar();
-uint64_t sleep(uint64_t micros);
-
-uint64_t open(const char *pathname, int flags);
-uint64_t close(uint64_t FD);
-
-uint64_t read(uint64_t fd, char *buf, uint64_t len);
-uint64_t write(uint64_t fd, const char *buf, uint64_t len);
-uint64_t lseek(uint64_t fd, uint64_t off, uint64_t whence);
-
-uint64_t execve(const char *pathname, char *const argv[], char *const envp[]);
+uint64_t sputchar(char c);
+uint64_t sreadchar();
 
 void     print_mem();
 void     print_tasks();

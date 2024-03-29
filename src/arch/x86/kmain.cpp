@@ -126,15 +126,6 @@ void stress_tester() {
 }
 
 
-void user_task() {
-    while (true) {
-        putchar('h');
-        putchar('i');
-        putchar('\n');
-        sleep(100000);
-    }
-}
-
 void vfs_tester() {
     VFSTester vfsTester;
     vfsTester.test();

@@ -3,6 +3,9 @@
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
     <excludeRoots>
+      <file path="$PROJECT_DIR$/os3-toolchain/binutils-x86_64-os3/build" />
+      <file path="$PROJECT_DIR$/os3-toolchain/gcc-x86_64-os3/build" />
+      <file path="$PROJECT_DIR$/os3-toolchain/newlib/build" />
       <file path="$PROJECT_DIR$/toolchain" />
     </excludeRoots>
   </component>

@@ -1,10 +1,14 @@
 #include "syscalls_interface.h"
 
+#include "stdio.h"
+#include <sys/fcntl.h>
+#include <sys/stat.h>
+#include <sys/unistd.h>
 
 int main() {
-    //    putchar('h');
-    //    putchar('i');
-    //    putchar('\n');
+    //    sputchar('h');
+    //    sputchar('i');
+    //    sputchar('\n');
     uint64_t    test123 = open("/test123", O_CREAT | O_RDWR);
     const char *teststr = "test str";
     write(test123, teststr, 9);
@@ -14,26 +18,26 @@ int main() {
     char buf[123];
     read(test123, buf, 9);
 
-    putchar('\n');
+    sputchar('\n');
     for (int i = 0; i < 8; i++) {
-        putchar(buf[i]);
+        sputchar(buf[i]);
     }
-    putchar('\n');
+    sputchar('\n');
 
-    sleep(100);
+    usleep(100);
 
     execve("/hello2", 0, 0);
 
     while (1) {
-        //        putchar('h');
-        //        putchar('i');
-        putchar('\n');
-        char read = readchar();
+        //        sputchar('h');
+        //        sputchar('i');
+        sputchar('\n');
+        char read = sreadchar();
         if (read == 'm') print_mem();
         if (read == 't') print_tasks();
         if (read == 'h') execve("/hello2", 0, 0);
-        putchar('\n');
-        putchar(read);
+        sputchar('\n');
+        sputchar(read);
         //        sleep(100000);
     }
 }
