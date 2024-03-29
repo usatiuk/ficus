@@ -33,16 +33,7 @@ make -j$(nproc) all-target-libgcc
 make install-gcc
 make install-target-libgcc
 
-cd ../../
-cd newlib
-rm -rf build
-mkdir build
-cd build
-../newlib-4.4.0.20231231/configure --enable-newlib-supplied-syscalls --prefix=/usr --target=$TARGET
-make -j$(nproc) all
-make DESTDIR="$OS2_ROOT/sysroot" install
-cp -r "$OS2_ROOT/sysroot/usr"/x86_64-os3/* "$OS2_ROOT/sysroot/usr"
-cd ../../
+"$SCRIPT_DIR"/build-newlib.sh
 
 cd gcc-x86_64-os3
 rm -rf build
