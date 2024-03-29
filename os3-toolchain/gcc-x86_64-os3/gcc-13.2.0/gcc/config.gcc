@@ -1133,6 +1133,7 @@ esac
 
 case ${target} in
 x86_64-*-os3*)
+    tmake_file="${tmake_file} i386/t-x86_64-os3"
     tm_file="${tm_file} i386/unix.h i386/att.h elfos.h glibc-stdint.h i386/i386elf.h i386/x86-64.h os3.h"
     ;;
 aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems*)

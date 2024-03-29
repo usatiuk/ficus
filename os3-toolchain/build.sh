@@ -48,8 +48,12 @@ cd gcc-x86_64-os3
 rm -rf build
 mkdir -p build
 cd build
-../gcc-13.2.0/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot="$OS2_ROOT/sysroot" --disable-nls --enable-languages=c,c++ --with-newlib --enable-version-specific-runtime-libs --with-gmp=/opt/homebrew --with-mpc=/opt/homebrew --with-mpfr=/opt/homebrew
+../gcc-13.2.0/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot="$OS2_ROOT/sysroot" --disable-nls \
+    --enable-languages=c,c++ --with-newlib --disable-libstdcxx-threads \
+    --enable-version-specific-runtime-libs --with-gmp=/opt/homebrew --with-mpc=/opt/homebrew --with-mpfr=/opt/homebrew
 make -j$(nproc) all-gcc
 make -j$(nproc) all-target-libgcc
+make -j$(nproc) all-target-libstdc++-v3
 make install-gcc
 make install-target-libgcc
+make install-target-libstdc++-v3
