@@ -25,7 +25,6 @@ m4_foreach_w([SYS_DIR], [
   w65
   xtensa
   z8ksim
-  os3
 ], [AM_CONDITIONAL([HAVE_LIBC_SYS_]m4_toupper(SYS_DIR)[_DIR], test "${sys_dir}" = SYS_DIR)])
 
 AC_TYPE_LONG_DOUBLE

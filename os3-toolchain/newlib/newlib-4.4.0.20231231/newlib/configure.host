@@ -426,9 +426,6 @@ fi
 # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
 
 case "${host}" in
-  *-*-os3*)
-    sys_dir=os3
-    ;;
   *-*-cygwin*)
 	posix_dir=posix
 	xdr_dir=xdr
