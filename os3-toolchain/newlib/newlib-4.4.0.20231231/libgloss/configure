@@ -2972,6 +2972,9 @@ case "${target}" in
 	config_testsuite=false
 	config_libnosys=false
 	;;
+  *-*-os3*)
+	config_libnosys=false
+	;;
   tic6x-*-*)
 	ac_config_files="$ac_config_files tic6x/Makefile"
 

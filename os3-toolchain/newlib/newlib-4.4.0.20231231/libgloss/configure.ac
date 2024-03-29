@@ -225,6 +225,9 @@ case "${target}" in
 	config_testsuite=false
 	config_libnosys=false
 	;;
+  *-*-os3*)
+	config_libnosys=false
+	;;
   tic6x-*-*)
 	AC_CONFIG_FILES([tic6x/Makefile])
 	subdirs="$subdirs tic6x"
