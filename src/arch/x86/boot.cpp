@@ -45,7 +45,6 @@ extern "C" __attribute__((unused)) void _start(void) {
     init_serial();
     barrier();
     limine_kern_save_response();
-    limine_modules_save();
     barrier();
     map_hhdm(get_cr3());
     barrier();
@@ -68,6 +67,7 @@ extern "C" __attribute__((unused)) void _start(void) {
         // FIXME:
         KERN_AddressSpace->map((void *) (kernel_virt_base + i * PAGE_SIZE), (void *) (kernel_phys_base + i * PAGE_SIZE), PAGE_RW);
     }
+    limine_modules_remap();
 
     uint64_t  real_new_cr3  = (uint64_t) HHDM_V2P(KERN_AddressSpace_PML4);
     uint64_t *new_stack_top = &KERN_stack[KERN_STACK_SIZE - 1];                                     // Don't forget in which direction the stack grows...

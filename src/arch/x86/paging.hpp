@@ -13,15 +13,18 @@
 
 #include <stl/vector>
 
-#define PAGE_SIZE   4096
+#define PAGE_SIZE          4096
 
-#define KERN_V2P(a) ((((uintptr_t) (a) - (uintptr_t) kernel_virt_base) + (uintptr_t) kernel_phys_base))
-#define KERN_P2V(a) ((((uintptr_t) (a) -kernel_phys_base) | kernel_virt_base))
+#define PAGE_ROUND_DOWN(x) (((uintptr_t) (x)) & (~(PAGE_SIZE - 1)))
+#define PAGE_ROUND_UP(x)   ((((uintptr_t) (x)) + PAGE_SIZE - 1) & (~(PAGE_SIZE - 1)))
 
-#define HHDM_BEGIN  0xfffff80000000000ULL
-#define HHDM_SIZE   32ULL // In GB
-#define HHDM_V2P(a) ((((uintptr_t) (a)) & ~HHDM_BEGIN))
-#define HHDM_P2V(a) ((((uintptr_t) (a)) | HHDM_BEGIN))
+#define KERN_V2P(a)        ((((uintptr_t) (a) - (uintptr_t) kernel_virt_base) + (uintptr_t) kernel_phys_base))
+#define KERN_P2V(a)        ((((uintptr_t) (a) -kernel_phys_base) | kernel_virt_base))
+
+#define HHDM_BEGIN         0xfffff80000000000ULL
+#define HHDM_SIZE          32ULL // In GB
+#define HHDM_V2P(a)        ((((uintptr_t) (a)) & ~HHDM_BEGIN))
+#define HHDM_P2V(a)        ((((uintptr_t) (a)) | HHDM_BEGIN))
 
 class FDT;
 
@@ -62,6 +65,7 @@ extern AddressSpace *KERN_AddressSpace;
 
 extern uintptr_t     kernel_phys_base;
 extern uintptr_t     kernel_virt_base;
+extern size_t        kernel_file_size;
 void                 limine_kern_save_response();
 
 #define PAGE_PS      (1 << 7)

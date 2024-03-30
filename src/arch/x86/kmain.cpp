@@ -145,18 +145,20 @@ void ktask_main() {
     (new Task(Task::TaskMode::TASKMODE_KERN, vfs_tester, "vfs_tester"))->start();
 
     for (int i = 0; i < saved_modules_size; i++) {
+        auto &mod = saved_modules[i];
+
         VFSApi::touch(StrToPath(saved_modules_names[i]));
         FDT::FD fd = VFSApi::open(StrToPath(saved_modules_names[i]));
         File   *f  = VFSApi::get(fd);
-        f->write(saved_modules_data[i], saved_modules_data_size[i]);
+        f->write(static_cast<const char *>(mod.address), mod.size);
 
         if (strcmp(saved_modules_names[i], "/init") == 0) {
             GlobalTtyManager.all_tty_putstr("Starting ");
             GlobalTtyManager.all_tty_putstr(saved_modules_names[i]);
             GlobalTtyManager.all_tty_putchar('\n');
 
-            cgistd::vector<char> read_data(max_saved_module_file_size);
-            memcpy(read_data.begin(), saved_modules_data[i], max_saved_module_file_size);
+            cgistd::vector<char> read_data(mod.size);
+            memcpy(read_data.begin(), mod.address, mod.size);
             ElfParser elfParser(read_data);
 
             Task     *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), saved_modules_names[i]);
