@@ -90,11 +90,14 @@ static void trampoline(void *rdi, void (*rsi_entrypoint)()) {
 }
 
 Task::Task(Task::TaskMode mode, void (*entrypoint)(), const char *name) {
-    _name      = name;
+    _name = name;
 
-    _frame.ip  = reinterpret_cast<uint64_t>(&trampoline);
-    _frame.rsi = (uint64_t) entrypoint;
-
+    if (mode == TaskMode::TASKMODE_KERN) {
+        _frame.ip  = reinterpret_cast<uint64_t>(&trampoline);
+        _frame.rsi = (uint64_t) entrypoint;
+    } else {
+        _frame.ip = reinterpret_cast<uint64_t>(entrypoint);
+    }
     if (mode == TaskMode::TASKMODE_KERN) {
         _frame.cs = Arch::GDT::gdt_code.selector();
         _frame.ss = Arch::GDT::gdt_data.selector();

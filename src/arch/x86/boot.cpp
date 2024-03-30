@@ -27,9 +27,9 @@ extern void kmain();
 extern "C" __attribute__((noreturn))
 __attribute__((used)) void
 real_start() {
+    init_kern_heap();
     parse_limine_memmap(limine_mm_entries, limine_mm_count, LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE);
     limine_fb_remap(KERN_AddressSpace);
-    init_kern_heap();
     kmain();
 }
 
@@ -49,8 +49,7 @@ extern "C" __attribute__((unused)) void _start(void) {
     barrier();
     map_hhdm(get_cr3());
     barrier();
-    new (BOOT_AddressSpace_storage) AddressSpace((uint64_t *) HHDM_P2V(get_cr3()));
-    BOOT_AddressSpace = reinterpret_cast<AddressSpace *>(BOOT_AddressSpace_storage);
+    BOOT_AddressSpace = new (BOOT_AddressSpace_storage) AddressSpace((uint64_t *) HHDM_P2V(get_cr3()));
 
     limine_fb_save_response(BOOT_AddressSpace);
     limine_mm_save_response();
@@ -62,13 +61,12 @@ extern "C" __attribute__((unused)) void _start(void) {
         KERN_AddressSpace_PML4[i] = 0x02;
     map_hhdm((uint64_t *) HHDM_V2P(KERN_AddressSpace_PML4));
 
-    new (KERN_AddressSpace_storage) AddressSpace(KERN_AddressSpace_PML4);
-    KERN_AddressSpace = reinterpret_cast<AddressSpace *>(KERN_AddressSpace_storage);
+    KERN_AddressSpace = new (KERN_AddressSpace_storage) AddressSpace(KERN_AddressSpace_PML4);
 
     // TODO: Accurate kernel length
     for (int i = 0; i < 100000; i++) {
         // FIXME:
-        KERN_AddressSpace->map((void *) (kernel_virt_base + i * PAGE_SIZE), (void *) (kernel_phys_base + i * PAGE_SIZE), PAGE_RW | PAGE_USER);
+        KERN_AddressSpace->map((void *) (kernel_virt_base + i * PAGE_SIZE), (void *) (kernel_phys_base + i * PAGE_SIZE), PAGE_RW);
     }
 
     uint64_t  real_new_cr3  = (uint64_t) HHDM_V2P(KERN_AddressSpace_PML4);
