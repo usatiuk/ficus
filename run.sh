@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 POSITIONAL_ARGS=()
 
 QEMU_OPTS=" -no-reboot "
@@ -77,7 +76,7 @@ if [ $CLEAN ]; then
   cmake --build cmake-build-$MODE --target clean
 fi
 
-cmake --build cmake-build-$MODE --target iso --parallel $(nproc)
+cmake --build cmake-build-$MODE --target iso --parallel $(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
 
 qemu-system-x86_64 -s $QEMU_OPTS -cdrom cmake-build-$MODE/src/iso/os2.iso
 
