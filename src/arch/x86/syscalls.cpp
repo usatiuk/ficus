@@ -93,13 +93,12 @@ uint64_t syscall_read(uint64_t fd, char *buf, uint64_t len) {
         while ((c - buf) < len) {
             *c = GlobalTtyManager.get_tty(0)->readchar();
             if (*c == '\r') {
-                *(c) = '\n';
-                *(++c) = '0';
+                *(c++) = '\n';
                 break;
             }
             c++;
         }
-        return (c-buf);
+        return (c - buf);
     }
     auto f = FDT::current()->get(fd);
     if (!f) return -1;
@@ -113,6 +112,7 @@ uint64_t syscall_write(uint64_t fd, const char *buf, uint64_t len) {
             GlobalTtyManager.all_tty_putchar(*c);
             c++;
         }
+        return len;
     }
     auto f = FDT::current()->get(fd);
     if (!f) return -1;

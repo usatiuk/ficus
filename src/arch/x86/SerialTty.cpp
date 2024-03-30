@@ -73,10 +73,9 @@ void SerialTty::this_isr() {
 
 char SerialTty::readchar() {
     mutex.lock();
-    if (buf.empty()) {
+    while (buf.empty()) {
         readercv.wait(mutex);
     }
-    assert(!buf.empty());
     char ret = buf.pop_back();
     mutex.unlock();
     return ret;

@@ -5,5 +5,5 @@ target_link_libraries(init syscalls_interface)
 
 target_include_directories(init PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(hello2 hello2.c)
+add_executable(hello2 hello2.cpp)
 
