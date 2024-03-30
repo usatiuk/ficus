@@ -20,7 +20,9 @@ void SerialTty::putstr(const char *str) {
 }
 static int read() {
     if (!(inb(PORT + 5) & 1)) return -1;
-    return inb(PORT);
+    char r = inb(PORT);
+    write_serial(r);
+    return r;
 }
 
 void SerialTty::this_pooler() {
