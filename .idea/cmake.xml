@@ -2,9 +2,9 @@
 <project version="4">
   <component name="CMakeSharedSettings">
     <configurations>
-      <configuration PROFILE_NAME="RelWithDebInfo" ENABLED="true" CONFIG_NAME="RelWithDebInfo" GENERATION_OPTIONS="-DOS2_ROOT=$CMakeProjectDir$ -DCMAKE_TOOLCHAIN_FILE=CMake-x86_64-os3-toolchain.cmake" />
+      <configuration PROFILE_NAME="RelWithDebInfo" ENABLED="true" CONFIG_NAME="RelWithDebInfo" GENERATION_OPTIONS="-DFICUS_ROOT=$CMakeProjectDir$ -DCMAKE_TOOLCHAIN_FILE=CMake-x86_64-ficus-toolchain.cmake" />
       <configuration PROFILE_NAME="Test" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-DTEST_MODE=NATIVE" />
-      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-DOS2_ROOT=$CMakeProjectDir$ -DCMAKE_TOOLCHAIN_FILE=CMake-x86_64-os3-toolchain.cmake" />
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-DFICUS_ROOT=$CMakeProjectDir$ -DCMAKE_TOOLCHAIN_FILE=CMake-x86_64-ficus-toolchain.cmake" />
     </configurations>
   </component>
 </project>

@@ -2,9 +2,9 @@
 // Created by Stepan Usatiuk on 21.10.2023.
 //
 
-#ifndef OS2_TESTTEMPLATES_HPP
-#define OS2_TESTTEMPLATES_HPP
+#ifndef FICUS_TESTTEMPLATES_HPP
+#define FICUS_TESTTEMPLATES_HPP
 
 int test_templates();
 
-#endif //OS2_TESTTEMPLATES_HPP
+#endif //FICUS_TESTTEMPLATES_HPP

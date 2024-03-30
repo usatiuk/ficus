@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 25.03.2024.
 //
 
-#ifndef OS2_ELFPARSER_HPP
-#define OS2_ELFPARSER_HPP
+#ifndef FICUS_ELFPARSER_HPP
+#define FICUS_ELFPARSER_HPP
 
 #include "stl/vector"
 
@@ -61,4 +61,4 @@ private:
 };
 
 
-#endif //OS2_ELFPARSER_HPP
+#endif //FICUS_ELFPARSER_HPP

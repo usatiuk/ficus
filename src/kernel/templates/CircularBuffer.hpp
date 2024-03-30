@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 26.11.2023.
 //
 
-#ifndef OS2_CIRCULARBUFFER_HPP
-#define OS2_CIRCULARBUFFER_HPP
+#ifndef FICUS_CIRCULARBUFFER_HPP
+#define FICUS_CIRCULARBUFFER_HPP
 
 #include "asserts.hpp"
 
@@ -62,4 +62,4 @@ public:
     }
 };
 
-#endif //OS2_CIRCULARBUFFER_HPP
+#endif //FICUS_CIRCULARBUFFER_HPP

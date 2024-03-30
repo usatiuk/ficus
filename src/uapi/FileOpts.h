@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 22.03.2024.
 //
 
-#ifndef OS2_FILEOPTS_HPP
-#define OS2_FILEOPTS_HPP
+#ifndef FICUS_FILEOPTS_HPP
+#define FICUS_FILEOPTS_HPP
 
 #ifdef __cplusplus
 #include <cstdint>
@@ -24,4 +24,4 @@ enum FileOpts : uint8_t {
 #endif
 
 
-#endif //OS2_FILEOPTS_HPP
+#endif //FICUS_FILEOPTS_HPP

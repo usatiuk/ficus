@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 23.02.2024.
 //
 
-#ifndef OS2_MEMFS_HPP
-#define OS2_MEMFS_HPP
+#ifndef FICUS_MEMFS_HPP
+#define FICUS_MEMFS_HPP
 
 #include "Filesystem.hpp"
 #include "Node.hpp"
@@ -44,4 +44,4 @@ private:
 };
 
 
-#endif //OS2_MEMFS_HPP
+#endif //FICUS_MEMFS_HPP

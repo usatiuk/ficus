@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 22.03.2024.
 //
 
-#ifndef OS2_DIRENT_H
-#define OS2_DIRENT_H
+#ifndef FICUS_DIRENT_H
+#define FICUS_DIRENT_H
 
 
 #ifdef __cplusplus
@@ -23,4 +23,4 @@ struct dirent {
 #endif
 
 
-#endif //OS2_DIRENT_H
+#endif //FICUS_DIRENT_H

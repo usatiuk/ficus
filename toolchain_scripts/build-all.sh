@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euxo pipefail
 
-if [ -z "$OS2_ROOT" ]; then
-    echo "$OS2_ROOT" is blank
+if [ -z "$FICUS_ROOT" ]; then
+    echo "$FICUS_ROOT" is blank
 fi
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)

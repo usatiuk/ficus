@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 26.11.2023.
 //
 
-#ifndef OS2_TTY_HPP
-#define OS2_TTY_HPP
+#ifndef FICUS_TTY_HPP
+#define FICUS_TTY_HPP
 
 
 #include "mutex.hpp"
@@ -15,4 +15,4 @@ public:
 };
 
 
-#endif //OS2_TTY_HPP
+#endif //FICUS_TTY_HPP

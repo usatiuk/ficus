@@ -1,13 +1,13 @@
 #!/bin/bash
 set -euxo pipefail
 
-if [ -z "$OS2_ROOT" ]; then
-    echo "$OS2_ROOT" is blank
+if [ -z "$FICUS_ROOT" ]; then
+    echo "$FICUS_ROOT" is blank
 fi
 
-mkdir -p $OS2_ROOT/toolchain || exit 1
+mkdir -p $FICUS_ROOT/toolchain || exit 1
 
-pushd $OS2_ROOT/toolchain
+pushd $FICUS_ROOT/toolchain
 
 mkdir -p binutils-x86_64-elf
 
@@ -23,7 +23,7 @@ mkdir -p build
 
 pushd build
 
-export PREFIX="$OS2_ROOT/toolchain/gcc-x86_64-elf-prefix/"
+export PREFIX="$FICUS_ROOT/toolchain/gcc-x86_64-elf-prefix/"
 export TARGET=x86_64-elf
 export PATH="$PREFIX/bin:$PATH"
 

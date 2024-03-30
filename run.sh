@@ -78,5 +78,5 @@ fi
 
 cmake --build cmake-build-$MODE --target iso --parallel $(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
 
-qemu-system-x86_64 -s $QEMU_OPTS -cdrom cmake-build-$MODE/src/iso/os2.iso
+qemu-system-x86_64 -s $QEMU_OPTS -cdrom cmake-build-$MODE/src/iso/ficus.iso
 

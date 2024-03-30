@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 23.02.2024.
 //
 
-#ifndef OS2_VFSAPI_HPP
-#define OS2_VFSAPI_HPP
+#ifndef FICUS_VFSAPI_HPP
+#define FICUS_VFSAPI_HPP
 
 
 #include "FDT.hpp"
@@ -20,4 +20,4 @@ namespace VFSApi {
 };     // namespace VFSApi
 
 
-#endif //OS2_VFSAPI_HPP
+#endif //FICUS_VFSAPI_HPP

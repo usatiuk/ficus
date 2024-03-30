@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 23.02.2024.
 //
 
-#ifndef OS2_NODE_HPP
-#define OS2_NODE_HPP
+#ifndef FICUS_NODE_HPP
+#define FICUS_NODE_HPP
 
 #include "List.hpp"
 #include "LockGuard.hpp"
@@ -66,4 +66,4 @@ protected:
 };
 
 
-#endif //OS2_NODE_HPP
+#endif //FICUS_NODE_HPP

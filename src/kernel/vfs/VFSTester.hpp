@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 23.02.2024.
 //
 
-#ifndef OS2_VFSTESTER_HPP
-#define OS2_VFSTESTER_HPP
+#ifndef FICUS_VFSTESTER_HPP
+#define FICUS_VFSTESTER_HPP
 
 
 class VFSTester {
@@ -12,4 +12,4 @@ public:
 };
 
 
-#endif //OS2_VFSTESTER_HPP
+#endif //FICUS_VFSTESTER_HPP

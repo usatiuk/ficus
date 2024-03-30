@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 21.10.2023.
 //
 
-#ifndef OS2_LOCKGUARD_H
-#define OS2_LOCKGUARD_H
+#ifndef FICUS_LOCKGUARD_H
+#define FICUS_LOCKGUARD_H
 
 #include "asserts.hpp"
 
@@ -49,4 +49,4 @@ private:
 };
 
 
-#endif //OS2_LOCKGUARD_H
+#endif //FICUS_LOCKGUARD_H

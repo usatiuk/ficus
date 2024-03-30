@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 23.03.2024.
 //
 
-#ifndef OS2_STDLIB_H
-#define OS2_STDLIB_H
+#ifndef FICUS_STDLIB_H
+#define FICUS_STDLIB_H
 
 #include "kmem.hpp"
 
@@ -24,4 +24,4 @@ static inline void *realloc(void *ptr, size_t size) { return krealloc(ptr, size)
 }
 #endif
 
-#endif //OS2_STDLIB_H
+#endif //FICUS_STDLIB_H

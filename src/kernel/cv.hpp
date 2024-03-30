@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 26.11.2023.
 //
 
-#ifndef OS2_CV_HPP
-#define OS2_CV_HPP
+#ifndef FICUS_CV_HPP
+#define FICUS_CV_HPP
 
 #include <atomic>
 #include <cstddef>
@@ -55,4 +55,4 @@ public:
 };
 
 
-#endif //OS2_CV_HPP
+#endif //FICUS_CV_HPP

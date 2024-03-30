@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 26.11.2023.
 //
 
-#ifndef OS2_LIMINE_MODULES_HPP
-#define OS2_LIMINE_MODULES_HPP
+#ifndef FICUS_LIMINE_MODULES_HPP
+#define FICUS_LIMINE_MODULES_HPP
 
 #include "limine.hpp"
 
@@ -18,4 +18,4 @@ extern unsigned           saved_modules_size;
 extern limine_file        saved_modules[max_saved_modules];
 extern char               saved_modules_names[max_saved_modules][max_saved_module_name] __attribute__((aligned(4096)));
 
-#endif //OS2_LIMINE_MODULES_HPP
+#endif //FICUS_LIMINE_MODULES_HPP

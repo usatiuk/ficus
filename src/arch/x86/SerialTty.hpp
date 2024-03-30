@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 26.11.2023.
 //
 
-#ifndef OS2_SERIALTTY_HPP
-#define OS2_SERIALTTY_HPP
+#ifndef FICUS_SERIALTTY_HPP
+#define FICUS_SERIALTTY_HPP
 
 #include "CircularBuffer.hpp"
 #include "Tty.hpp"
@@ -28,4 +28,4 @@ public:
 };
 
 
-#endif //OS2_SERIALTTY_HPP
+#endif //FICUS_SERIALTTY_HPP

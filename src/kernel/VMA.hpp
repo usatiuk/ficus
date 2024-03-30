@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 26.10.2023.
 //
 
-#ifndef OS2_VMA_HPP
-#define OS2_VMA_HPP
+#ifndef FICUS_VMA_HPP
+#define FICUS_VMA_HPP
 
 #include "SkipList.hpp"
 #include "Spinlock.hpp"
@@ -60,4 +60,4 @@ private:
 };
 
 
-#endif //OS2_VMA_HPP
+#endif //FICUS_VMA_HPP

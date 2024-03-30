@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 21.10.2023.
 //
 
-#ifndef OS2_STRING_H
-#define OS2_STRING_H
+#ifndef FICUS_STRING_H
+#define FICUS_STRING_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -116,4 +116,4 @@ inline void strncpy(char *dst, const char *src, size_t bufsize) {
 }
 #endif
 
-#endif //OS2_STRING_H
+#endif //FICUS_STRING_H

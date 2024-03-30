@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 22.03.2024.
 //
 
-#ifndef OS2_BYTESFORMATTER_HPP
-#define OS2_BYTESFORMATTER_HPP
+#ifndef FICUS_BYTESFORMATTER_HPP
+#define FICUS_BYTESFORMATTER_HPP
 
 #include "String.hpp"
 
@@ -28,4 +28,4 @@ public:
 };
 
 
-#endif //OS2_BYTESFORMATTER_HPP
+#endif //FICUS_BYTESFORMATTER_HPP

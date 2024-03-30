@@ -1,13 +1,13 @@
 #!/bin/bash
 set -euxo pipefail
 
-if [ -z "$OS2_ROOT" ]; then
-  echo "$OS2_ROOT" is blank
+if [ -z "$FICUS_ROOT" ]; then
+  echo "$FICUS_ROOT" is blank
 fi
 
-mkdir -p $OS2_ROOT/toolchain || exit 1
+mkdir -p $FICUS_ROOT/toolchain || exit 1
 
-cd $OS2_ROOT/toolchain
+cd $FICUS_ROOT/toolchain
 
 cd gcc-x86_64-elf || exit 1
 
@@ -16,12 +16,12 @@ if [ ! -d gcc-13.2.0 ]; then
   exit 1
 fi
 
-if [ ! -f "$OS2_ROOT/toolchain/gcc-x86_64-elf-prefix/bin/x86_64-elf-as" ]; then
+if [ ! -f "$FICUS_ROOT/toolchain/gcc-x86_64-elf-prefix/bin/x86_64-elf-as" ]; then
   echo "binutils not found"
   exit 1
 fi
 
-if [ ! -f "$OS2_ROOT/toolchain/gcc-x86_64-elf-prefix/bin/x86_64-elf-gcc" ]; then
+if [ ! -f "$FICUS_ROOT/toolchain/gcc-x86_64-elf-prefix/bin/x86_64-elf-gcc" ]; then
   echo "gcc not found"
   exit 1
 fi
@@ -30,7 +30,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 patch -p0 -u -i "$SCRIPT_DIR/gcc-libstdcpp.patch"
 
-export PREFIX="$OS2_ROOT/toolchain/gcc-x86_64-elf-prefix/"
+export PREFIX="$FICUS_ROOT/toolchain/gcc-x86_64-elf-prefix/"
 export TARGET=x86_64-elf
 export PATH="$PREFIX/bin:$PATH"
 

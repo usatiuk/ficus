@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 21.10.2023.
 //
 
-#ifndef OS2_SPINLOCK_H
-#define OS2_SPINLOCK_H
+#ifndef FICUS_SPINLOCK_H
+#define FICUS_SPINLOCK_H
 
 #include "asserts.hpp"
 #include "task.hpp"
@@ -84,4 +84,4 @@ private:
     unsigned long f;
 };
 
-#endif //OS2_SPINLOCK_H
+#endif //FICUS_SPINLOCK_H

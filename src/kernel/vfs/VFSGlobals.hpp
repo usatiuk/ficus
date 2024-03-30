@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 24.02.2024.
 //
 
-#ifndef OS2_VFSGLOBALS_HPP
-#define OS2_VFSGLOBALS_HPP
+#ifndef FICUS_VFSGLOBALS_HPP
+#define FICUS_VFSGLOBALS_HPP
 
 #include "MountTable.hpp"
 #include "Node.hpp"
@@ -21,4 +21,4 @@ namespace VFSGlobals {
 };     // namespace VFSGlobals
 
 
-#endif //OS2_VFSGLOBALS_HPP
+#endif //FICUS_VFSGLOBALS_HPP

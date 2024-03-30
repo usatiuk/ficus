@@ -1,13 +1,13 @@
 #!/bin/bash
 set -euxo pipefail
 
-if [ -z "$OS2_ROOT" ]; then
-    echo "$OS2_ROOT" is blank
+if [ -z "$FICUS_ROOT" ]; then
+    echo "$FICUS_ROOT" is blank
 fi
 
-mkdir -p $OS2_ROOT/toolchain || exit 1
+mkdir -p $FICUS_ROOT/toolchain || exit 1
 
-pushd $OS2_ROOT/toolchain
+pushd $FICUS_ROOT/toolchain
 
 mkdir -p gcc-i686-elf
 
@@ -30,11 +30,11 @@ cd ..
 mkdir -p build
 pushd build
 
-export PREFIX="$OS2_ROOT/toolchain/gcc-i686-elf-prefix/"
+export PREFIX="$FICUS_ROOT/toolchain/gcc-i686-elf-prefix/"
 export TARGET=i686-elf
 export PATH="$PREFIX/bin:$PATH"
 
-if [ ! -f "$OS2_ROOT/toolchain/gcc-i686-elf-prefix/bin/i686-elf-as" ]; then
+if [ ! -f "$FICUS_ROOT/toolchain/gcc-i686-elf-prefix/bin/i686-elf-as" ]; then
     echo "binutils not found"
     exit 1
 fi

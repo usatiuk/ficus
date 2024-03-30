@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 21.10.2023.
 //
 
-#ifndef OS2_LIST_HPP
-#define OS2_LIST_HPP
+#ifndef FICUS_LIST_HPP
+#define FICUS_LIST_HPP
 
 #include <atomic>
 #include <cstdint>
@@ -133,4 +133,4 @@ public:
 };
 
 
-#endif //OS2_LIST_HPP
+#endif //FICUS_LIST_HPP

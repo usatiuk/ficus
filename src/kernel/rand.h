@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 21.10.2023.
 //
 
-#ifndef OS2_RAND_H
-#define OS2_RAND_H
+#ifndef FICUS_RAND_H
+#define FICUS_RAND_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,4 +18,4 @@ void srand(unsigned int seed);
 }
 #endif
 
-#endif //OS2_RAND_H
+#endif //FICUS_RAND_H

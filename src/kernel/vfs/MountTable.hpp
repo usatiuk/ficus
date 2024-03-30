@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 23.02.2024.
 //
 
-#ifndef OS2_MOUNTTABLE_HPP
-#define OS2_MOUNTTABLE_HPP
+#ifndef FICUS_MOUNTTABLE_HPP
+#define FICUS_MOUNTTABLE_HPP
 
 #include "String.hpp"
 
@@ -20,4 +20,4 @@ private:
 };
 
 
-#endif //OS2_MOUNTTABLE_HPP
+#endif //FICUS_MOUNTTABLE_HPP

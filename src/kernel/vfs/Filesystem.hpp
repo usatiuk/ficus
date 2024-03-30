@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 23.02.2024.
 //
 
-#ifndef OS2_FILESYSTEM_HPP
-#define OS2_FILESYSTEM_HPP
+#ifndef FICUS_FILESYSTEM_HPP
+#define FICUS_FILESYSTEM_HPP
 
 #include "Node.hpp"
 
@@ -18,4 +18,4 @@ public:
 };
 
 
-#endif //OS2_FILESYSTEM_HPP
+#endif //FICUS_FILESYSTEM_HPP

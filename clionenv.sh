@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # FIXME:
-export PREFIX="/Users/stepus53/projects/os2/toolchain/gcc-x86_64-os3-prefix/"
-export TARGET=x86_64-os3
+export PREFIX="/Users/stepus53/projects/ficus/toolchain/gcc-x86_64-ficus-prefix/"
+export TARGET=x86_64-ficus
 export PATH="$PREFIX/bin:$PATH"
 

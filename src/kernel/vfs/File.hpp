@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 24.02.2024.
 //
 
-#ifndef OS2_FILE_HPP
-#define OS2_FILE_HPP
+#ifndef FICUS_FILE_HPP
+#define FICUS_FILE_HPP
 
 #include "FileOpts.h"
 #include <cstdint>
@@ -34,4 +34,4 @@ private:
     FileOpts    _opts;
 };
 
-#endif //OS2_FILE_HPP
+#endif //FICUS_FILE_HPP

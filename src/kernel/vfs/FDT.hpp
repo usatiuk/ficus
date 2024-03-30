@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 23.02.2024.
 //
 
-#ifndef OS2_FDT_HPP
-#define OS2_FDT_HPP
+#ifndef FICUS_FDT_HPP
+#define FICUS_FDT_HPP
 
 #include "File.hpp"
 #include "Node.hpp"
@@ -41,4 +41,4 @@ private:
 };
 
 
-#endif //OS2_FDT_HPP
+#endif //FICUS_FDT_HPP
