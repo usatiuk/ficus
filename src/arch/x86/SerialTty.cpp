@@ -52,7 +52,7 @@ void SerialTty::this_pooler() {
 }
 
 SerialTty::SerialTty() : Tty() {
-    outb(PORT + 3, 0x00); // Disable DLAB
+    //    outb(PORT + 3, 0x00); // Disable DLAB
     outb(PORT + 1, 0x01); // Enable data available interrupt
 
     Task *task       = new Task(Task::TaskMode::TASKMODE_KERN, (void (*)(void))(&SerialTty::this_pooler), "serialpooler");
