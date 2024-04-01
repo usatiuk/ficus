@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 12.08.2023.
 //
 
-#ifndef OS1_LIMINE_MM_H
-#define OS1_LIMINE_MM_H
+#ifndef FICUS_LIMINE_MM_H
+#define FICUS_LIMINE_MM_H
 
 #include "limine.h"
 
@@ -15,4 +15,4 @@ extern unsigned int               limine_mm_overflow;
 
 void                              limine_mm_save_response();
 
-#endif //OS1_LIMINE_MM_H
+#endif //FICUS_LIMINE_MM_H

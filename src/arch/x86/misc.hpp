@@ -1,5 +1,5 @@
-#ifndef OS1_MISC_H
-#define OS1_MISC_H
+#ifndef FICUS_MISC_H
+#define FICUS_MISC_H
 
 #include <stdint.h>
 

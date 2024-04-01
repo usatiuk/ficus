@@ -1,5 +1,5 @@
-#ifndef OS1_GDT_H
-#define OS1_GDT_H
+#ifndef FICUS_GDT_H
+#define FICUS_GDT_H
 
 #include <cstdint>
 

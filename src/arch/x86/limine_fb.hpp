@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 12.08.2023.
 //
 
-#ifndef OS1_LIMINE_FB_H
-#define OS1_LIMINE_FB_H
+#ifndef FICUS_LIMINE_FB_H
+#define FICUS_LIMINE_FB_H
 
 #include "limine.h"
 
@@ -16,4 +16,4 @@ extern int                       framebuffer_count;
 extern struct limine_framebuffer framebuffers[10];
 
 
-#endif //OS1_LIMINE_FB_H
+#endif //FICUS_LIMINE_FB_H

@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 18.08.2023.
 //
 
-#ifndef OS1_TASK_H
-#define OS1_TASK_H
+#ifndef FICUS_TASK_H
+#define FICUS_TASK_H
 
 #include "List.hpp"
 #include "PointersCollection.hpp"
@@ -114,4 +114,4 @@ namespace Scheduler {
 // Expects the caller to save interrupt state
 extern "C" void _yield_self_kern();
 
-#endif //OS1_TASK_H
+#endif //FICUS_TASK_H

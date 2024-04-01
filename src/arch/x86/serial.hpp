@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 12.08.2023.
 //
 
-#ifndef OS1_SERIAL_H
-#define OS1_SERIAL_H
+#ifndef FICUS_SERIAL_H
+#define FICUS_SERIAL_H
 
 #include "misc.hpp"
 
@@ -18,4 +18,4 @@ void writestr(const char *a);
 void write_serial_no_yield(char a);
 void writestr_no_yield(const char *a);
 
-#endif //OS1_SERIAL_H
+#endif //FICUS_SERIAL_H

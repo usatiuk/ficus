@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 25.08.2023.
 //
 
-#ifndef OS1_TTY_H
-#define OS1_TTY_H
+#ifndef FICUS_TTY_H
+#define FICUS_TTY_H
 
 #include "Spinlock.hpp"
 #include "Tty.hpp"
@@ -25,4 +25,4 @@ public:
 
 extern TtyManager GlobalTtyManager;
 
-#endif //OS1_TTY_H
+#endif //FICUS_TTY_H

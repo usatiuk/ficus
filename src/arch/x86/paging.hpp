@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 09.08.2023.
 //
 
-#ifndef OS1_PAGING_H
-#define OS1_PAGING_H
+#ifndef FICUS_PAGING_H
+#define FICUS_PAGING_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -77,4 +77,4 @@ void            map_hhdm(uint64_t *pml4);
 
 extern "C" void _tlb_flush();
 
-#endif //OS1_PAGING_H
+#endif //FICUS_PAGING_H

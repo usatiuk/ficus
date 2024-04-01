@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 12.08.2023.
 //
 
-#ifndef OS1_IO_H
-#define OS1_IO_H
+#ifndef FICUS_IO_H
+#define FICUS_IO_H
 
 #include <stdint.h>
 
@@ -27,4 +27,4 @@ static inline void io_wait(void) {
     outb(0x80, 0);
 }
 
-#endif //OS1_IO_H
+#endif //FICUS_IO_H

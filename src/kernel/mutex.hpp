@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 20.08.2023.
 //
 
-#ifndef OS1_MUTEX_H
-#define OS1_MUTEX_H
+#ifndef FICUS_MUTEX_H
+#define FICUS_MUTEX_H
 
 #include <atomic>
 #include <cstddef>
@@ -39,4 +39,4 @@ private:
 };
 
 
-#endif //OS1_MUTEX_H
+#endif //FICUS_MUTEX_H

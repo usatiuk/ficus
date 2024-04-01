@@ -1,5 +1,5 @@
-#ifndef OS1_KMEM_H
-#define OS1_KMEM_H
+#ifndef FICUS_KMEM_H
+#define FICUS_KMEM_H
 
 #ifdef __cplusplus
 extern "C" {

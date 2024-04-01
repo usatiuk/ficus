@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 13.08.2023.
 //
 
-#ifndef OS1_GLOBALS_H
-#define OS1_GLOBALS_H
+#ifndef FICUS_GLOBALS_H
+#define FICUS_GLOBALS_H
 
 #include <cstdint>
 
@@ -16,4 +16,4 @@ extern AddressSpace *KERN_AddressSpace;
 
 #define TASK_POINTER 0x10000
 
-#endif //OS1_GLOBALS_H
+#endif //FICUS_GLOBALS_H

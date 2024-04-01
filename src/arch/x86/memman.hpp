@@ -2,8 +2,8 @@
 // Created by Stepan Usatiuk on 12.08.2023.
 //
 
-#ifndef OS1_MEMMAN_H
-#define OS1_MEMMAN_H
+#ifndef FICUS_MEMMAN_H
+#define FICUS_MEMMAN_H
 
 #include "limine.h"
 enum PageStatus {
@@ -27,4 +27,4 @@ void    *get4k();
 void     free4k(void *page);
 uint64_t get_free();
 
-#endif //OS1_MEMMAN_H
+#endif //FICUS_MEMMAN_H
