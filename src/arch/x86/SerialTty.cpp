@@ -60,7 +60,7 @@ SerialTty::SerialTty() : Tty() {
     task->start();
 
     attach_interrupt(4, &SerialTty::isr, this);
-    IRQ_clear_mask(4);
+    Arch::IDT::IRQ_clear_mask(4);
 }
 void SerialTty::isr(void *tty) {
     ((SerialTty *) tty)->this_isr();

@@ -18,7 +18,8 @@ struct FourPages {
     enum PageStatus second : 2;
     enum PageStatus third  : 2;
     enum PageStatus fourth : 2;
-};
+} __attribute__((packed));
+static_assert(sizeof(FourPages) == 1);
 
 void     parse_limine_memmap(struct limine_memmap_entry *entries, unsigned int num, uint64_t what_is_considered_free);
 

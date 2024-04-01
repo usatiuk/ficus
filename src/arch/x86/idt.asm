@@ -2,21 +2,22 @@
 
 %include "task.inc.asm"
 
+extern exception_handler_err
+extern exception_handler_no_err
+
 section .text
 %macro isr_err_stub 1
 isr_stub_%+%1:
-    pop rdi ; Keep the stacktrace
-    call exception_handler
+    call exception_handler_err
     iretq
 %endmacro
 
 %macro isr_no_err_stub 1
 isr_stub_%+%1:
-    call exception_handler
+    call exception_handler_no_err
     iretq
 %endmacro
 
-extern exception_handler
 isr_no_err_stub 0
 isr_no_err_stub 1
 isr_no_err_stub 2

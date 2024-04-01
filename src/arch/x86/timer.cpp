@@ -46,7 +46,7 @@ static_assert(MICROS_PER_TICK >= 1);
 void init_timer() {
     outb(0x43, 0b00110100);
     set_pit_count(RELOAD_VAL);
-    IRQ_clear_mask(0);
+    Arch::IDT::IRQ_clear_mask(0);
 }
 
 void timer_tick() {

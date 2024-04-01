@@ -24,12 +24,12 @@
 
 char temp_fxsave[512] __attribute__((aligned(16)));
 
-void sanity_check_frame(TaskFrame *cur_frame) {
+void sanity_check_frame(Arch::TaskFrame *cur_frame) {
     // TODO: This makes sense to check when entering, but not when switching
     //    assert((((uintptr_t) cur_frame) & 0xFULL) == 0);
     assert2((void *) cur_frame->ip != NULL, "Sanity check");
     assert2((void *) cur_frame->sp != NULL, "Sanity check");
-    assert2(cur_frame->guard == IDT_GUARD, "IDT Guard wrong!");
+    assert2(cur_frame->guard == Arch::kIDT_GUARD, "IDT Guard wrong!");
     assert(cur_frame->ss != 0);
     assert(cur_frame->cs != 0);
     assert(cur_frame->sp != 0);
@@ -111,7 +111,7 @@ Task::Task(Task::TaskMode mode, void (*entrypoint)(), const char *name) {
     for (int i = 0; i < 512; i++) _fxsave->_fxsave[i] = 0;
 
     _frame.flags = flags();
-    _frame.guard = IDT_GUARD;
+    _frame.guard = Arch::kIDT_GUARD;
     if (mode == TaskMode::TASKMODE_USER) {
         _ownAddressSpace = UniquePtr(new AddressSpace());
         _vma             = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
@@ -276,7 +276,7 @@ void Scheduler::init_tasks() {
     atomic_store(&initialized, true);
 }
 
-extern "C" void Scheduler::switch_task(TaskFrame *cur_frame) {
+extern "C" void Scheduler::switch_task(Arch::TaskFrame *cur_frame) {
     assert2(!are_interrupts_enabled(), "Switching tasks with enabled interrupts!");
     if (!atomic_load(&initialized)) return;
     sanity_check_frame(cur_frame);

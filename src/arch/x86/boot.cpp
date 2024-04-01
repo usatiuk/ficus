@@ -40,7 +40,7 @@ extern "C" __attribute__((unused)) void _start(void) {
     barrier();
     Arch::GDT::gdt_setup();
     barrier();
-    idt_init();
+    Arch::IDT::idt_init();
     barrier();
     init_serial();
     barrier();

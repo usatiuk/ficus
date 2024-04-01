@@ -10,6 +10,7 @@
 #include "SkipList.hpp"
 #include "String.hpp"
 #include "idt.hpp"
+#include "task_arch.hpp"
 
 #define TASK_SS 16384
 
@@ -58,7 +59,7 @@ public:
     } __attribute__((aligned(16)));
 
     uint64_t              _entry_ksp_val;
-    TaskFrame             _frame;
+    Arch::TaskFrame             _frame;
     TaskPID               _pid;
     std::atomic<uint64_t> _used_time;
 
@@ -102,7 +103,7 @@ namespace Scheduler {
     void                unblock(List<Task *>::Node *what);
     void                unblock_nolock(List<Task *>::Node *what);
 
-    extern "C" void     switch_task(TaskFrame *cur_frame);
+    extern "C" void     switch_task(Arch::TaskFrame *cur_frame);
 
     // TODO: that's quite inefficient!
     SkipList<uint64_t, std::pair<String, Task::TaskPID>> getTaskTimePerPid();

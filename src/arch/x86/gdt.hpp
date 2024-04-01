@@ -22,7 +22,7 @@ namespace Arch::GDT {
         unsigned int base_high              : 8;
 
         //
-        uint64_t selector() volatile;
+        [[nodiscard]] uint64_t selector() const volatile;
     } __attribute__((packed));
 
     struct gdt_tss_entry_bits {
@@ -81,7 +81,7 @@ namespace Arch::GDT {
     } __attribute__((packed)) gdtr;
     }
 
-    inline uint64_t gdt_entry_bits::selector() volatile {
+    inline uint64_t gdt_entry_bits::selector() const volatile {
         return (((uint64_t) this) - ((uint64_t) &gdt_null));
     }
 
