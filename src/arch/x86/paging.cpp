@@ -133,7 +133,7 @@ int AddressSpace::map(void *virt, void *real, uint32_t flags) {
     uint64_t *ptsb = (uint64_t *) HHDM_P2V((*pdee & 0x000FFFFFFFFFF000ULL));
     uint64_t *ptse = &ptsb[ptsi];
     *ptse          = ((uint64_t) real & 0x000FFFFFFFFFF000ULL) | (flags & 0xFFF) | PAGE_PRESENT;
-    invlpg((void *) ((uint64_t) virt & 0x000FFFFFFFFFF000ULL));
+    invlpg(virt);
     return 1;
 }
 int AddressSpace::unmap(void *virt) {
@@ -167,7 +167,7 @@ int AddressSpace::unmap(void *virt) {
     uint64_t *ptse = &ptsb[ptsi];
     assert(*ptse & PAGE_PRESENT);
     *ptse = (*ptse) & (~PAGE_PRESENT);
-    invlpg((void *) ((uint64_t) virt & 0x000FFFFFFFFFF000ULL));
+    invlpg(virt);
     return 1;
 }
 FDT *AddressSpace::getFdt() {

@@ -47,13 +47,6 @@ static void extend_heap(size_t n_pages) {
         void *p = get4k();
         assert2(p != NULL, "Kernel out of memory!");
         KERN_AddressSpace->map((void *) KERN_HeapEnd, (void *) HHDM_V2P(p), PAGE_RW);
-        volatile char *bugcheck2 = (volatile char *) KERN_HeapEnd;
-        for (size_t i = 0; i < PAGE_SIZE; i++) {
-            bugcheck2[i] = '\xff';
-        }
-        for (size_t i = 0; i < PAGE_SIZE; i++) {
-            assert2(bugcheck2[i] == '\xff', "I am insane");
-        }
         KERN_HeapEnd += PAGE_SIZE;
     }
     allocated.fetch_add(n_pages * PAGE_SIZE);
