@@ -172,7 +172,7 @@ int AddressSpace::unmap(void *virt) {
 }
 FDT *AddressSpace::getFdt() {
     if (_fdt.get() == nullptr) {
-        LockGuard l(_lock);
+        LockGuard l(_fdtLock);
         if (_fdt.get() == nullptr) {
             _fdt = UniquePtr(new FDT());
         }

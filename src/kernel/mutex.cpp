@@ -23,6 +23,8 @@ bool Mutex::try_lock() {
 //}
 
 void Mutex::lock() {
+    assert((owner() != Scheduler::cur_task() || !locked));
+
     bool spinned = false;
 
     if (Mutex::try_lock()) {
