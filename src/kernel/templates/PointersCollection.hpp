@@ -1,6 +1,7 @@
 #ifndef POINTERS_H
 #define POINTERS_H
 
+#include <atomic>
 #include <utility>
 
 #include "kmem.hpp"
@@ -61,12 +62,11 @@ class SharedPtr {
 public:
     SharedPtr() = default;
 
-    explicit SharedPtr(T *data) : ptr(data), uses(new int(1)) {}
+    explicit SharedPtr(T *data) : ptr(data), uses(new std::atomic<int>(1)) {}
 
     ~SharedPtr() {
         if (ptr == nullptr || uses == nullptr) return;
-        --(*uses);
-        if (*uses == 0) {
+        if (uses->fetch_sub(1) == 1) {
             delete ptr;
             delete uses;
         }
@@ -77,6 +77,11 @@ public:
     }
 
     SharedPtr(SharedPtr &&other) {
+        if (ptr != nullptr && uses != nullptr)
+            if (uses->fetch_sub(1) == 1) {
+                delete ptr;
+                delete uses;
+            }
         uses       = other.uses;
         ptr        = other.ptr;
         other.uses = nullptr;
@@ -98,8 +103,8 @@ public:
     [[nodiscard]] int useCount() const { return *uses; }
 
 private:
-    T   *ptr  = nullptr;
-    int *uses = nullptr;
+    T                *ptr  = nullptr;
+    std::atomic<int> *uses = nullptr;
 };
 
 class COWTester;
