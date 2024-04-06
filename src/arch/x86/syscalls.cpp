@@ -217,10 +217,14 @@ char *syscall_sbrk(int brk) {
     if (!vma) return reinterpret_cast<char *>(-1);
 
     if (!vma->brk_start) {
-        vma->brk_start = (char *) vma->mmap_mem(nullptr, 16ULL * 1024ULL * 1024ULL /* 16MB */, 0, PAGE_RW | PAGE_USER);
+        vma->brk_start = (char *) vma->mmap_mem(nullptr, VMA::kBrkSize /* 16MB */, 0, PAGE_RW | PAGE_USER);
         if (!vma->brk_start) return reinterpret_cast<char *>(-1); // FIXME:
-        vma->brk_end_real = *vma->brk_start + 16ULL * 1024ULL * 1024ULL;
+        vma->brk_end_real = *vma->brk_start + VMA::kBrkSize;
         vma->brk_end_fake = vma->brk_start;
+    }
+
+    if (*vma->brk_end_fake + brk >= *vma->brk_start + VMA::kBrkSize) {
+        return ret;
     }
 
     ret               = *vma->brk_end_fake;
