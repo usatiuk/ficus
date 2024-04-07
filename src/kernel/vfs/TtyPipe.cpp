@@ -4,7 +4,7 @@
 
 #include "TtyPipe.hpp"
 #include "TtyManager.hpp"
-bool TtyPipe::read(char *buf, size_t start, size_t num) {
+int64_t TtyPipe::read(char *buf, size_t start, size_t num) {
     auto c = buf;
     while ((c - buf) < num) {
         *c = GlobalTtyManager.get_tty(0)->readchar();
@@ -16,7 +16,7 @@ bool TtyPipe::read(char *buf, size_t start, size_t num) {
     }
     return (c - buf);
 }
-bool TtyPipe::write(const char *buf, size_t start, size_t num) {
+int64_t TtyPipe::write(const char *buf, size_t start, size_t num) {
     auto c = buf;
     while (*c != '\0' && (c - buf) < num) {
         GlobalTtyManager.all_tty_putchar(*c);

@@ -5,6 +5,8 @@
 #include "MemFs.hpp"
 #include "LockGuard.hpp"
 
+#include <algorithm>
+
 Vector<SharedPtr<Node>> MemFs::MemFsNodeDir::children() {
     LockGuard               l(_lock);
 
@@ -27,22 +29,21 @@ SharedPtr<NodeFile> MemFs::MemFsNodeDir::mkfile(const String &name) {
     _children.add(name, static_ptr_cast<Node>(newfile));
     return static_ptr_cast<NodeFile>(newfile);
 }
-bool MemFs::MemFsNodeFile::read(char *buf, size_t start, size_t num) {
+int64_t MemFs::MemFsNodeFile::read(char *buf, size_t start, size_t num) {
     LockGuard l(_lock);
-    if (start >= _bytes.size()) return false;
-    if (start + num > _bytes.size()) return false;
+    num = std::min(num, _bytes.size() - start);
     for (size_t i = 0; i < num; i++) {
         buf[i] = _bytes[start + i];
     }
-    return false;
+    return num;
 }
-bool MemFs::MemFsNodeFile::write(const char *buf, size_t start, size_t num) {
+int64_t MemFs::MemFsNodeFile::write(const char *buf, size_t start, size_t num) {
     LockGuard l(_lock);
     while (_bytes.size() <= start + num) _bytes.emplace_back(0);
     for (size_t i = 0; i < num; i++) {
         _bytes[start + i] = buf[i];
     }
-    return true;
+    return num;
 }
 size_t MemFs::MemFsNodeFile::size() {
     LockGuard l(_lock);

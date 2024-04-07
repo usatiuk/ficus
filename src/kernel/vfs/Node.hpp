@@ -41,7 +41,7 @@ protected:
     mutable Mutex _lock;
 
     String        _name;
-    Filesystem   *_mount = nullptr;
+    Filesystem   *_mount     = nullptr;
     WeakPtr<Node> _self_weak = nullptr;
 };
 
@@ -50,8 +50,8 @@ class NodeFile;
 class NodeDir : public Node {
 public:
     virtual Vector<SharedPtr<Node>> children()                 = 0;
-    virtual SharedPtr<NodeDir>         mkdir(const String &name)  = 0;
-    virtual SharedPtr<NodeFile>         mkfile(const String &name) = 0;
+    virtual SharedPtr<NodeDir>      mkdir(const String &name)  = 0;
+    virtual SharedPtr<NodeFile>     mkfile(const String &name) = 0;
     virtual void                    set_mounted(Filesystem *mount);
 
 protected:
@@ -60,10 +60,10 @@ protected:
 
 class NodeFile : public Node {
 public:
-    virtual bool   read(char *buf, size_t start, size_t num)        = 0;
-    virtual bool   write(const char *buf, size_t start, size_t num) = 0;
-    virtual size_t size()                                           = 0;
-    virtual bool   is_tty()                                         = 0;
+    virtual int64_t read(char *buf, size_t start, size_t num)        = 0;
+    virtual int64_t write(const char *buf, size_t start, size_t num) = 0;
+    virtual size_t  size()                                           = 0;
+    virtual bool    is_tty()                                         = 0;
 
 protected:
     NodeFile() : Node(Type::FILE) {}

@@ -173,7 +173,8 @@ uint64_t syscall_execve(const char *pathname, char *const argv[], char *const en
     // Just copy for now;
     FDT::FD fd = VFSApi::open(StrToPath(pathname));
     if (fd == -1) return -1;
-    File                *f = VFSApi::get(fd);
+    File *f = VFSApi::get(fd);
+    if (f->dir().get() != nullptr) return -1;
 
     cgistd::vector<char> read_data(f->size());
     f->read(read_data.begin(), f->size());

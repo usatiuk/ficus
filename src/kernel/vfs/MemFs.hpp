@@ -31,8 +31,8 @@ class MemFs : public Filesystem {
 
     struct MemFsNodeFile : public NodeFile {
     public:
-        bool                            read(char *buf, size_t start, size_t num) override;
-        bool                            write(const char *buf, size_t start, size_t num) override;
+        int64_t                         read(char *buf, size_t start, size_t num) override;
+        int64_t                         write(const char *buf, size_t start, size_t num) override;
         size_t                          size() override;
         bool                            is_tty() override { return false; }
 

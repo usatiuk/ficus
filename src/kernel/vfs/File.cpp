@@ -31,17 +31,17 @@ uint64_t File::seek(uint64_t pos) {
 }
 uint64_t File::read(char *buf, uint64_t size) {
     if (file().get() != nullptr) {
-        file()->read(buf, _pos, size);
-        _pos += size;
-        return size;
+        int64_t fret = file()->read(buf, _pos, size);
+        _pos += fret;
+        return fret;
     }
 }
 uint64_t File::write(const char *buf, uint64_t size) {
     if (!(_opts & FileOpts::O_WRONLY)) return -1;
     if (file().get() != nullptr) {
-        file()->write(buf, _pos, size);
-        _pos += size;
-        return size;
+        int64_t fret = file()->write(buf, _pos, size);
+        _pos += fret;
+        return fret;
     }
 }
 uint64_t File::size() {
