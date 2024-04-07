@@ -5,6 +5,8 @@
 #ifndef FICUS_NODE_HPP
 #define FICUS_NODE_HPP
 
+#include <utility>
+
 #include "List.hpp"
 #include "LockGuard.hpp"
 #include "String.hpp"
@@ -28,7 +30,7 @@ public:
         LockGuard l(_lock);
         return _name;
     }
-    virtual Node *traverse(const Path &path);
+    virtual SharedPtr<Node> traverse(const Path &path);
 
 protected:
     Node(Type type) : _type(type) {}
@@ -40,16 +42,17 @@ protected:
 
     String        _name;
     Filesystem   *_mount = nullptr;
+    WeakPtr<Node> _self_weak = nullptr;
 };
 
 class NodeFile;
 
 class NodeDir : public Node {
 public:
-    virtual Vector<Node *> children()                 = 0;
-    virtual NodeDir       *mkdir(const String &name)  = 0;
-    virtual NodeFile      *mkfile(const String &name) = 0;
-    virtual void           set_mounted(Filesystem *mount);
+    virtual Vector<SharedPtr<Node>> children()                 = 0;
+    virtual SharedPtr<NodeDir>         mkdir(const String &name)  = 0;
+    virtual SharedPtr<NodeFile>         mkfile(const String &name) = 0;
+    virtual void                    set_mounted(Filesystem *mount);
 
 protected:
     NodeDir() : Node(Type::DIR) {}
@@ -60,6 +63,7 @@ public:
     virtual bool   read(char *buf, size_t start, size_t num)        = 0;
     virtual bool   write(const char *buf, size_t start, size_t num) = 0;
     virtual size_t size()                                           = 0;
+    virtual bool   is_tty()                                         = 0;
 
 protected:
     NodeFile() : Node(Type::FILE) {}

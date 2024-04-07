@@ -11,4 +11,6 @@ target_sources(kernel.elf PRIVATE
         FDT.cpp
         VFSGlobals.cpp
         File.cpp
+        PipeFs.cpp
+        TtyPipe.cpp
 )

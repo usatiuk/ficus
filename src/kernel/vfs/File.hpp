@@ -6,6 +6,8 @@
 #define FICUS_FILE_HPP
 
 #include "FileOpts.h"
+#include "PointersCollection.hpp"
+
 #include <cstdint>
 
 class Node;
@@ -14,24 +16,24 @@ class NodeFile;
 
 class File {
 public:
-    File(Node *n, FileOpts opts);
+    File(SharedPtr<Node> n, FileOpts opts);
     ~File();
-    File(const File &f)                = delete;
-    File     &operator=(const File &o) = delete;
+    File(const File &f)                          = delete;
+    File               &operator=(const File &o) = delete;
 
-    Node     *node();
-    NodeDir  *dir();
-    NodeFile *file() const;
+    SharedPtr<Node>     node() const;
+    SharedPtr<NodeDir>  dir() const;
+    SharedPtr<NodeFile> file() const;
 
-    uint64_t  seek(uint64_t pos);
-    uint64_t  read(char *buf, uint64_t size);
-    uint64_t  write(const char *buf, uint64_t size);
-    uint64_t  size();
+    uint64_t            seek(uint64_t pos);
+    uint64_t            read(char *buf, uint64_t size);
+    uint64_t            write(const char *buf, uint64_t size);
+    uint64_t            size();
 
 private:
-    Node *const _n;
-    uint64_t    _pos = 0;
-    FileOpts    _opts;
+    SharedPtr<Node> _n;
+    uint64_t        _pos = 0;
+    FileOpts        _opts;
 };
 
 #endif //FICUS_FILE_HPP

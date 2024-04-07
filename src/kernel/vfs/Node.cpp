@@ -8,24 +8,25 @@
 #include "Filesystem.hpp"
 
 Node::~Node() = default;
-Node *Node::traverse(const Path &path) {
-    NodeDir    &nodeDir = static_cast<NodeDir &>(*this);
+SharedPtr<Node> Node::traverse(const Path &path) {
 
     Filesystem *mnt;
     {
         LockGuard l(_lock);
-        mnt = nodeDir._mount;
+        mnt = _mount;
     }
     if (mnt) return mnt->root()->traverse(path);
 
     if (path.empty()) {
-        return this;
+        auto ret = _self_weak.lock();
+        assert(ret != std::nullopt);
+        return *ret;
     }
 
 
     if (type() == DIR) {
         // Horribly inefficient
-        auto children = nodeDir.children();
+        auto children = static_cast<NodeDir *>(this)->children();
         for (size_t i = 0; i < children.size(); i++) {
             if (children[i]->name() == path[0]) {
                 return children[i]->traverse(path.subvector(1, path.size()));

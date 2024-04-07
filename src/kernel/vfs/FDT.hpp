@@ -14,6 +14,8 @@
 
 class FDT {
 public:
+    FDT();
+
     using FD = int64_t;
     FD          open(const Path &p, FileOpts opts);
     void        close(FD fd);

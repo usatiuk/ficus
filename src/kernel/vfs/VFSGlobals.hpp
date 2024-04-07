@@ -10,9 +10,9 @@
 
 class RootNode : public NodeDir {
 public:
-    Vector<Node *> children() override;
-    NodeDir       *mkdir(const String &name) override;
-    NodeFile      *mkfile(const String &name) override;
+    Vector<SharedPtr<Node>> children() override;
+    SharedPtr<NodeDir>      mkdir(const String &name) override;
+    SharedPtr<NodeFile>     mkfile(const String &name) override;
 };
 
 namespace VFSGlobals {

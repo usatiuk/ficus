@@ -12,7 +12,7 @@ bool VFSApi::mkdir(const Path &path) {
     FDHandle root_fd = FDHandle(FDT::current()->open(root, O_RDWR));
     if (root_fd.get() == -1) return false;
     File *root_f = FDT::current()->get(root_fd.get());
-    if (!root_f->dir()) return false;
+    if (root_f->dir().get() == nullptr) return false;
     root_f->dir()->mkdir(path.back());
     return true;
 }
@@ -21,7 +21,7 @@ bool VFSApi::touch(const Path &path) {
     FDHandle root_fd = FDHandle(FDT::current()->open(root, O_RDWR));
     if (root_fd.get() == -1) return false;
     File *root_f = FDT::current()->get(root_fd.get());
-    if (!root_f->dir()) return false;
+    if (root_f->dir().get() == nullptr) return false;
     root_f->dir()->mkfile(path.back());
     return true;
 }

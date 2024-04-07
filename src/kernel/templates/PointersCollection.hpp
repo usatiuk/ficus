@@ -2,8 +2,10 @@
 #define POINTERS_H
 
 #include <atomic>
+#include <optional>
 #include <utility>
 
+#include "asserts.hpp"
 #include "kmem.hpp"
 
 class SharedPtrTester;
@@ -55,6 +57,78 @@ private:
     T *ptr = nullptr;
 };
 
+struct SharedPtr_Base {
+    struct UsesBlock {
+        int32_t _uses_ctl;
+        int32_t _uses_obj;
+    } __attribute__((packed));
+
+    std::atomic<UsesBlock> _uses;
+
+    static_assert(decltype(_uses)::is_always_lock_free);
+
+    // Increments control block use counter
+    void weak_lock() {
+        UsesBlock old_uses = _uses.load();
+        UsesBlock new_uses;
+        do {
+            assert(old_uses._uses_ctl >= 1);
+            new_uses = old_uses;
+            new_uses._uses_ctl++;
+        } while (!_uses.compare_exchange_weak(old_uses, new_uses));
+    }
+
+    // Decrements control block use counter
+    // Returns true if it was deleted
+    bool weak_release() {
+        UsesBlock old_uses = _uses.load();
+        UsesBlock new_uses;
+        do {
+            new_uses = old_uses;
+            new_uses._uses_ctl--;
+        } while (!_uses.compare_exchange_weak(old_uses, new_uses));
+
+        if (new_uses._uses_ctl == 0)
+            delete this;
+        return new_uses._uses_ctl == 0;
+    }
+
+    // Increments control and object use counter
+    // Returns false if the object was already deleted
+    bool strong_lock() {
+        UsesBlock old_uses = _uses.load();
+        UsesBlock new_uses;
+        do {
+            if (old_uses._uses_obj <= 0)
+                return false;
+            new_uses = old_uses;
+            new_uses._uses_ctl++;
+            new_uses._uses_obj++;
+        } while (!_uses.compare_exchange_weak(old_uses, new_uses));
+
+        assert(new_uses._uses_obj > 0);
+        assert(new_uses._uses_ctl >= new_uses._uses_obj);
+        return true;
+    }
+
+    // Decrements control and object use counter
+    // Returns true if the object is to be deleted (it was the last reference)
+    bool strong_release() {
+        UsesBlock old_uses = _uses.load();
+        UsesBlock new_uses;
+        do {
+            new_uses = old_uses;
+            new_uses._uses_obj--;
+            new_uses._uses_ctl--;
+        } while (!_uses.compare_exchange_weak(old_uses, new_uses));
+
+        if (new_uses._uses_ctl == 0)
+            delete this;
+
+        return new_uses._uses_obj == 0;
+    }
+};
+
 template<typename T>
 class SharedPtr {
     friend SharedPtrTester;
@@ -62,50 +136,145 @@ class SharedPtr {
 public:
     SharedPtr() = default;
 
-    explicit SharedPtr(T *data) : ptr(data), uses(new std::atomic<int>(1)) {}
+    explicit SharedPtr(T *data) : _ptr(data), _base(new SharedPtr_Base{SharedPtr_Base::UsesBlock{1, 1}}) {}
+    SharedPtr(std::nullptr_t a_nullptr) : _ptr(nullptr), _base(nullptr) {}
 
     ~SharedPtr() {
-        if (ptr == nullptr || uses == nullptr) return;
-        if (uses->fetch_sub(1) == 1) {
-            delete ptr;
-            delete uses;
-        }
+        unref();
     }
 
-    SharedPtr(SharedPtr const &other) : ptr(other.ptr), uses(other.uses) {
-        ++(*uses);
+    SharedPtr(SharedPtr const &other) : _base(other._base), _ptr(other._ptr) {
+        if (!_base) return;
+        _base->strong_lock();
     }
 
     SharedPtr(SharedPtr &&other) {
-        if (ptr != nullptr && uses != nullptr)
-            if (uses->fetch_sub(1) == 1) {
-                delete ptr;
-                delete uses;
-            }
-        uses       = other.uses;
-        ptr        = other.ptr;
-        other.uses = nullptr;
-        other.ptr  = nullptr;
+        unref();
+
+        _base       = other._base;
+        _ptr        = other._ptr;
+        other._base = nullptr;
+        other._ptr  = nullptr;
     }
 
     SharedPtr &operator=(SharedPtr other) {
-        std::swap(ptr, other.ptr);
-        std::swap(uses, other.uses);
+        std::swap(_base, other._base);
+        std::swap(_ptr, other._ptr);
         return *this;
     }
 
-    T                *operator->() const { return ptr; }
+    T *operator->() const {
+        return _ptr;
+    }
 
-    T                &operator*() const { return *ptr; }
+    T &operator*() const {
+        return *_ptr;
+    }
 
-    T                *get() const noexcept { return ptr; }
+    T *get() const noexcept {
+        return _ptr;
+    }
 
-    [[nodiscard]] int useCount() const { return *uses; }
+    [[nodiscard]] int useCount() const {
+        if (!_base) return 0;
+        return _base->_uses.load()._uses_obj;
+    }
+
+    template<typename Tgt, template<class> class Ptr, typename Orig>
+    friend Ptr<Tgt> static_ptr_cast(const Ptr<Orig> &ptr);
 
 private:
-    T                *ptr  = nullptr;
-    std::atomic<int> *uses = nullptr;
+    template<typename U>
+    friend class WeakPtr;
+
+    explicit SharedPtr(T *ptr, SharedPtr_Base *base) : _ptr(ptr), _base(base) {}
+
+    void unref() {
+        if (!_base) return;
+        if (_base->strong_release())
+            delete _ptr;
+        _ptr  = nullptr;
+        _base = nullptr;
+    }
+
+    T              *_ptr  = nullptr;
+    SharedPtr_Base *_base = nullptr;
 };
+
+
+template<typename T>
+class WeakPtr {
+public:
+    WeakPtr() = default;
+
+    WeakPtr(const SharedPtr<T> &shared) : _base(shared._base), _ptr(shared._ptr) { _base->weak_lock(); }
+    WeakPtr(std::nullptr_t a_nullptr) : _ptr(nullptr), _base(nullptr) {}
+
+    ~WeakPtr() {
+        unref();
+    }
+
+    WeakPtr(WeakPtr const &other) : _base(other._base), _ptr(other._ptr) {
+        if (!_base) return;
+        _base->weak_lock();
+    }
+
+    WeakPtr(WeakPtr &&other) {
+        unref();
+
+        _base       = other._base;
+        _ptr        = other._ptr;
+        other._base = nullptr;
+        other._ptr  = nullptr;
+    }
+
+    WeakPtr &operator=(WeakPtr other) {
+        std::swap(_ptr, other._ptr);
+        std::swap(_base, other._base);
+        return *this;
+    }
+
+    std::optional<SharedPtr<T>> lock() {
+        if (!_base) return std::nullopt;
+        if (_base->strong_lock())
+            return SharedPtr(_ptr, _base);
+        else
+            return std::nullopt;
+    }
+
+    [[nodiscard]] int expired() const {
+        if (!_base) return true;
+        return _base->_uses.load()._uses_obj <= 0;
+    }
+
+    template<typename Tgt, template<class> class Ptr, typename Orig>
+    friend Ptr<Tgt> static_ptr_cast(const Ptr<Orig> &ptr);
+
+private:
+    void unref() {
+        if (!_base) return;
+        _base->weak_release();
+        _base = nullptr;
+        _ptr  = nullptr;
+    }
+
+    T              *_ptr  = nullptr;
+    SharedPtr_Base *_base = nullptr;
+};
+
+template<typename Tgt, template<class> class Ptr, typename Orig>
+static Ptr<Tgt> static_ptr_cast(const Ptr<Orig> &ptr) {
+    static_assert(std::is_convertible_v<Orig *, Tgt *> || std::is_base_of_v<Orig, Tgt>);
+    if constexpr (std::is_same_v<Ptr<Tgt>, SharedPtr<Tgt>>) {
+        ptr._base->strong_lock();
+    } else if constexpr (std::is_same_v<Ptr<Tgt>, WeakPtr<Tgt>>) {
+        ptr._base->weak_lock();
+    } else {
+        static_assert(false);
+    }
+    return Ptr<Tgt>(static_cast<Tgt *>(ptr._ptr), ptr._base);
+}
+
 
 class COWTester;
 

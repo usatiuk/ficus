@@ -9,7 +9,7 @@
 
 extern volatile struct limine_module_request module_request;
 
-static constexpr unsigned max_saved_modules          = 2;
+static constexpr unsigned max_saved_modules          = 4;
 static constexpr unsigned max_saved_module_name      = 256;
 
 void limine_modules_remap();

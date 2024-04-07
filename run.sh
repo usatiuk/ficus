@@ -2,7 +2,7 @@
 
 POSITIONAL_ARGS=()
 
-QEMU_OPTS=" -no-reboot "
+QEMU_OPTS=" -no-reboot -m 256M"
 
 while [[ $# -gt 0 ]]; do
   case $1 in

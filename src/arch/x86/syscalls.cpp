@@ -88,32 +88,12 @@ uint64_t syscall_close(uint64_t FD) {
 
 //FIXME:
 uint64_t syscall_read(uint64_t fd, char *buf, uint64_t len) {
-    if (fd == 0) {
-        auto c = buf;
-        while ((c - buf) < len) {
-            *c = GlobalTtyManager.get_tty(0)->readchar();
-            if (*c == '\r') {
-                *(c++) = '\n';
-                break;
-            }
-            c++;
-        }
-        return (c - buf);
-    }
     auto f = FDT::current()->get(fd);
     if (!f) return -1;
     return f->read(buf, len);
 }
 
 uint64_t syscall_write(uint64_t fd, const char *buf, uint64_t len) {
-    if (fd == 1) {
-        auto c = buf;
-        while (*c != '\0' && (c - buf) < len) {
-            GlobalTtyManager.all_tty_putchar(*c);
-            c++;
-        }
-        return len;
-    }
     auto f = FDT::current()->get(fd);
     if (!f) return -1;
     return f->write(buf, len);

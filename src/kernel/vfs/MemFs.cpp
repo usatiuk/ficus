@@ -5,28 +5,27 @@
 #include "MemFs.hpp"
 #include "LockGuard.hpp"
 
-Vector<Node *> MemFs::MemFsNodeDir::children() {
-    LockGuard      l(_lock);
+Vector<SharedPtr<Node>> MemFs::MemFsNodeDir::children() {
+    LockGuard               l(_lock);
 
-    Vector<Node *> out;
+    Vector<SharedPtr<Node>> out;
     for (auto c: _children) {
         out.emplace_back(c.data);
     }
     return out;
 }
 
-NodeDir *MemFs::MemFsNodeDir::mkdir(const String &name) {
+SharedPtr<NodeDir> MemFs::MemFsNodeDir::mkdir(const String &name) {
     LockGuard l(_lock);
-    auto      newnode = new MemFsNodeDir();
-    newnode->_name    = name;
-    _children.add(name, newnode);
-    return newnode;
+    auto      newnode = MemFsNodeDir::create(name);
+    _children.add(name, static_ptr_cast<Node>(newnode));
+    return static_ptr_cast<NodeDir>(newnode);
 }
-NodeFile *MemFs::MemFsNodeDir::mkfile(const String &name) {
+SharedPtr<NodeFile> MemFs::MemFsNodeDir::mkfile(const String &name) {
     LockGuard l(_lock);
-    auto      newfile = new MemFsNodeFile(name);
-    _children.add(name, newfile);
-    return newfile;
+    auto      newfile = MemFsNodeFile::create(name);
+    _children.add(name, static_ptr_cast<Node>(newfile));
+    return static_ptr_cast<NodeFile>(newfile);
 }
 bool MemFs::MemFsNodeFile::read(char *buf, size_t start, size_t num) {
     LockGuard l(_lock);
