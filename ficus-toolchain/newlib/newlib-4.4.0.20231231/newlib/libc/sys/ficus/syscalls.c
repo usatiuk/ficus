@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/types.h>
+#include <dirent.h>
 
 #define SYSCALL_EXIT_ID     0
 
@@ -96,6 +97,10 @@ int _wait(int *status) {}
 
 int _write(int file, char *ptr, int len) {
     return _do_syscall(SYSCALL_WRITE_ID, file, (uint64_t) ptr, len);
+}
+
+int getdents(int fd, struct dirent *dp, int count) {
+    return _do_syscall(SYSCALL_READDIR_ID, fd, (uint64_t) dp, count);
 }
 
 int sleep(int seconds) {

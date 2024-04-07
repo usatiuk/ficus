@@ -26,6 +26,7 @@ public:
     SharedPtr<NodeFile> file() const;
 
     uint64_t            seek(uint64_t pos);
+    uint64_t            pos() { return _pos; }
     uint64_t            read(char *buf, uint64_t size);
     uint64_t            write(const char *buf, uint64_t size);
     uint64_t            size();

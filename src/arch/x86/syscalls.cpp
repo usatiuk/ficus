@@ -7,6 +7,7 @@
 #include "VMA.hpp"
 #include "syscalls_defs.h"
 
+#include <algorithm>
 #include <cstdint>
 
 #include "TtyManager.hpp"
@@ -212,6 +213,42 @@ char *syscall_sbrk(int brk) {
 
     return ret;
 }
+struct dirent {
+    unsigned long  d_fileno;        /* file number of entry */
+    unsigned short d_reclen;        /* length of this record */
+    unsigned char  d_type;          /* file type, see below */
+    unsigned char  d_namlen;        /* length of string in d_name */
+    char           d_name[255 + 1]; /* name must be no longer than this */
+};
+
+
+int64_t syscall_getdents(int fd, struct dirent *dp, int count) {
+    auto f = FDT::current()->get(fd);
+    if (!f) return -1;
+
+    auto dir = f->dir();
+    if (dir.get() == nullptr) return -1;
+
+    auto children = dir->children();
+
+    count /= sizeof(dirent);
+
+    if (f->pos() >= children.size()) return 0;
+
+    count = std::min(children.size() - f->pos(), (size_t) count);
+
+    for (int i = 0; i < count; i++) {
+        auto &child    = children[i + f->pos()];
+        dp[i].d_fileno = i + f->pos() + 1;
+        strncpy(dp[i].d_name, child->name().c_str(), 255);
+        dp[i].d_name[child->name().length() + 1] = '\0';
+        dp[i].d_namlen                           = child->name().length();
+        dp[i].d_reclen                           = sizeof(dirent);
+        dp[i].d_type                             = child->type() == Node::DIR ? 4 : 8;
+    }
+    f->seek(count + f->pos());
+    return count * sizeof(dirent);
+}
 
 extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     assert2(are_interrupts_enabled(), "why wouldn't they be?");
@@ -241,10 +278,13 @@ extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_r
         case SYSCALL_SBRK_ID:
             return reinterpret_cast<uint64_t>(syscall_sbrk(static_cast<int64_t>(a1_rsi)));
         case SYSCALL_OPENDIR_ID:
+            return -1;
         case SYSCALL_READDIR_ID:
+            return syscall_getdents(static_cast<int64_t>(a1_rsi), reinterpret_cast<dirent *>(a2_rdx), static_cast<int64_t>(a3_rcx));
         case SYSCALL_CLOSEDIR_ID:
         case SYSCALL_MKDIR_ID:
         case SYSCALL_UNLINK_ID:
+            return -1;
         case SYSCALL_PRINT_TASKS:
             return syscall_print_tasks();
         case SYSCALL_PRINT_MEM:

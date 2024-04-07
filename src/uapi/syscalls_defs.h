@@ -5,6 +5,8 @@
 #ifndef FICUS_SYSCALLS_DEFS_H
 #define FICUS_SYSCALLS_DEFS_H
 
+// FIXME!: Don't duplicate this please
+
 #ifdef __cplusplus
 #include <cstdint>
 extern "C" {
