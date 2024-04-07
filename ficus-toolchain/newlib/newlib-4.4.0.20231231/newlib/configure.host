@@ -428,8 +428,7 @@ fi
 case "${host}" in
   *-*-ficus*)
     sys_dir=ficus
-	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
-	newlib_cflags="${newlib_cflags} -DREENTRANT_SYSCALLS_PROVIDED"
+	posix_dir=posix
     ;;
   *-*-cygwin*)
 	posix_dir=posix
@@ -594,6 +593,10 @@ esac
 # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
 
 case "${host}" in
+  *-*-ficus*)
+	syscall_dir=syscalls
+	newlib_cflags="${newlib_cflags} -D_NO_POSIX_SPAWN"
+    ;;
   *-*-cygwin*)
 	test -z "$cygwin_srcdir" && cygwin_srcdir="${abs_newlib_basedir}/../winsup/cygwin"
 	export cygwin_srcdir

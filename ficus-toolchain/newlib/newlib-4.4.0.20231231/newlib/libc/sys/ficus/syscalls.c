@@ -36,51 +36,65 @@
 uint64_t _do_syscall(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     uint64_t res;
     asm volatile("syscall; mov (0x10016), %%rsp" // TASK_POINTER->ret_sp_val
-                 : "=r"(res)
-                 : "D"(id_rdi), "S"(a1_rsi), "d"(a2_rdx), "a"(a3_rcx)
-                 : "cc", "rcx", "r8",
-                   "r9", "r10", "r11", "r15", "memory");
+            : "=r"(res)
+            : "D"(id_rdi), "S"(a1_rsi), "d"(a2_rdx), "a"(a3_rcx)
+            : "cc", "rcx", "r8",
+    "r9", "r10", "r11", "r15", "memory");
     return res;
 }
 
 void _exit() {
     _do_syscall(SYSCALL_EXIT_ID, 0, 0, 0);
 }
-int close(int file) {
+
+int _close(int file) {
     return _do_syscall(SYSCALL_CLOSE_ID, file, 0, 0);
 }
+
 char **environ; /* pointer to array of char * strings that define the current environment variables */
-int    execve(char *name, char **argv, char **env) {
+int _execve(char *name, char **argv, char **env) {
     return _do_syscall(SYSCALL_EXECVE_ID, (uint64_t) name, (uint64_t) argv, (uint64_t) env);
 }
-int fork() {}
 
-int getpid() {}
-int isatty(int file) { return file == 0 || file == 1 || file == 2; }
+int _fork() {}
 
-int fstat(int file, struct stat *st) {
-    if (isatty(file)) st->st_mode = S_IFCHR;
+int _getpid() {}
+
+int _isatty(int file) { return file == 0 || file == 1 || file == 2; }
+
+int _fstat(int file, struct stat *st) {
+    if (_isatty(file)) st->st_mode = S_IFCHR;
 }
-int kill(int pid, int sig) {}
-int link(char *old, char *new) {}
-int lseek(int file, int ptr, int dir) {
+
+int _kill(int pid, int sig) {}
+
+int _link(char *old, char *new) {}
+
+int _lseek(int file, int ptr, int dir) {
     return _do_syscall(SYSCALL_LSEEK_ID, file, ptr, dir);
 }
-int open(const char *name, int flags, ...) {
+
+int _open(const char *name, int flags, ...) {
     return _do_syscall(SYSCALL_OPEN_ID, (uint64_t) name, flags, 0);
 }
-int read(int file, char *ptr, int len) {
+
+int _read(int file, char *ptr, int len) {
     return _do_syscall(SYSCALL_READ_ID, file, (uint64_t) ptr, len);
 }
-caddr_t sbrk(int incr) {
+
+caddr_t _sbrk(int incr) {
     return (caddr_t) _do_syscall(SYSCALL_SBRK_ID, (int64_t) incr, 0, 0);
 }
-int     stat(const char *file, struct stat *st) {}
-clock_t times(struct tms *buf) {}
-int     unlink(char *name) {}
-int     wait(int *status) {}
 
-int     write(int file, char *ptr, int len) {
+int _stat(const char *file, struct stat *st) {}
+
+clock_t _times(struct tms *buf) {}
+
+int _unlink(char *name) {}
+
+int _wait(int *status) {}
+
+int _write(int file, char *ptr, int len) {
     return _do_syscall(SYSCALL_WRITE_ID, file, (uint64_t) ptr, len);
 }
 
@@ -93,4 +107,4 @@ int usleep(useconds_t useconds) {
 }
 
 
-int gettimeofday(struct timeval *restrict p, void *restrict z) {}
+int _gettimeofday(struct timeval *restrict p, void *restrict z) {}
