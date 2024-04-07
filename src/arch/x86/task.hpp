@@ -12,7 +12,7 @@
 #include "idt.hpp"
 #include "task_arch.hpp"
 
-#define TASK_SS 16384
+#define TASK_SS 65536
 
 class Mutex;
 struct AddressSpace;
