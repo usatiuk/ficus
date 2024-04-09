@@ -4,7 +4,7 @@
 
 #include "limine_modules.hpp"
 
-#include "asserts.hpp"
+#include "assert.h"
 #include "globals.hpp"
 #include "paging.hpp"
 #include "string.h"

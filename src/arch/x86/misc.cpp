@@ -1,8 +1,8 @@
 //
 // Created by Stepan Usatiuk on 13.08.2023.
 //
-
-extern "C" void _hcf() {
+extern "C" {
+void _hcf() {
     //    *(volatile char *) (0) = 42;
     while (1)
         asm volatile("cli; hlt");
@@ -39,4 +39,5 @@ char *itoa(int value, char *str, int base) {
         *ptr--   = tmp;
     }
     return rc;
+}
 }

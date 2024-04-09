@@ -5,8 +5,8 @@
 #ifndef FICUS_ASSERTS_HPP
 #define FICUS_ASSERTS_HPP
 
-#include "misc.hpp"
-#include "serial.hpp"
+#include "misc.h"
+#include "serial.h"
 
 extern "C" {
 static inline void _assert2(int val, const char *msg) {

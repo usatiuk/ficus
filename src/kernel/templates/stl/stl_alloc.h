@@ -42,7 +42,7 @@
 #  if defined(__STL_NO_BAD_ALLOC) || !defined(__STL_USE_EXCEPTIONS)
 //#    include <stdio.h>
 //#    include <stdlib.h>
-#include "asserts.hpp"
+#include "assert.h"
 #    define __THROW_BAD_ALLOC assert2(false,"out of memory");
 #  else /* Standard conforming out-of-memory handling */
 #    include <new>
@@ -53,7 +53,7 @@
 #include "stddef.h"
 #include "stdlib.h"
 #include "string.h"
-#include "asserts.hpp"
+#include "assert.h"
 #ifndef __RESTRICT
 #  define __RESTRICT
 #endif

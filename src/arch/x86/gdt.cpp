@@ -3,8 +3,8 @@
 //
 
 #include "gdt.hpp"
-#include "asserts.hpp"
-#include "misc.hpp"
+#include "assert.h"
+#include "misc.h"
 #include <cstddef>
 namespace Arch::GDT {
     static tss_entry_struct tss_entry;

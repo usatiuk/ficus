@@ -5,8 +5,8 @@
 #include "memman.hpp"
 #include "LockGuard.hpp"
 #include "Spinlock.hpp"
-#include "asserts.hpp"
-#include "misc.hpp"
+#include "assert.h"
+#include "misc.h"
 #include "mutex.hpp"
 #include "paging.hpp"
 #include <stddef.h>

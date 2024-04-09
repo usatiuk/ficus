@@ -5,7 +5,7 @@
 #ifndef FICUS_CIRCULARBUFFER_HPP
 #define FICUS_CIRCULARBUFFER_HPP
 
-#include "asserts.hpp"
+#include "assert.h"
 
 // FIXME
 template<typename T, auto S>

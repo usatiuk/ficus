@@ -14,7 +14,7 @@ cd newlib
 # rm -rf build
 mkdir -p build
 cd build
-../newlib-4.4.0.20231231/configure --enable-newlib-supplied-syscalls --prefix=/usr --target=$TARGET
+#../newlib-4.4.0.20231231/configure --enable-newlib-supplied-syscalls --prefix=/usr --target=$TARGET
 make -j$(nproc) all
 make DESTDIR="$FICUS_ROOT/sysroot" install
 cp -r "$FICUS_ROOT/sysroot/usr"/x86_64-ficus/* "$FICUS_ROOT/sysroot/usr"

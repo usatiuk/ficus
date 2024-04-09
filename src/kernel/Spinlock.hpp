@@ -5,7 +5,7 @@
 #ifndef FICUS_SPINLOCK_H
 #define FICUS_SPINLOCK_H
 
-#include "asserts.hpp"
+#include "assert.h"
 #include "task.hpp"
 #include <atomic>
 #include <cstdint>

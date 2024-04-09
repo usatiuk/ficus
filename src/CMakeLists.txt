@@ -34,6 +34,14 @@ add_subdirectory(./arch/)
 add_subdirectory(./kernel/)
 add_subdirectory(./uapi/)
 
-add_subdirectory(./test/)
 
-add_subdirectory(./iso/)
+if (TEST_MODE)
+    set_target_properties(kernel.elf PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+    set_target_properties(syscalls_interface PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
+    add_subdirectory(./unit-tests/)
+endif ()
+
+if (NOT TEST_MODE)
+    add_subdirectory(./test/)
+    add_subdirectory(./iso/)
+endif ()

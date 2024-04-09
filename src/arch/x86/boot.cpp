@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <new>
 
-#include "asserts.hpp"
+#include "assert.h"
 #include "gdt.hpp"
 #include "globals.hpp"
 #include "idt.hpp"
@@ -12,7 +12,7 @@
 #include "limine_mm.hpp"
 #include "limine_modules.hpp"
 #include "memman.hpp"
-#include "misc.hpp"
+#include "misc.h"
 #include "paging.hpp"
 
 AddressSpace *BOOT_AddressSpace;

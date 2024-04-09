@@ -13,6 +13,7 @@ target_sources(kernel.elf PRIVATE
         cv.cpp
         BytesFormatter.cpp
         string.c
+        TestTemplates.cpp
 )
 
 add_subdirectory(templates)

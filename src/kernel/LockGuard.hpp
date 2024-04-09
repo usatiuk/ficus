@@ -5,7 +5,7 @@
 #ifndef FICUS_LOCKGUARD_H
 #define FICUS_LOCKGUARD_H
 
-#include "asserts.hpp"
+#include "assert.h"
 
 template<typename T>
 class LockGuard {

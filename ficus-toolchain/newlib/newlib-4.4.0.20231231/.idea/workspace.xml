@@ -4143,8 +4143,51 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a1d64c97-d3a9-4bfe-95e2-d4c818bb425b" name="Changes" comment="we're not using libgloss anyway, disable it">
+    <list default="true" id="a1d64c97-d3a9-4bfe-95e2-d4c818bb425b" name="Changes" comment="more proper newlib setup">
+      <change afterPath="$PROJECT_DIR$/../../../.idea/editor.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../src/unit-tests/CMakeLists.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../src/unit-tests/templates/CMakeLists.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../src/unit-tests/templates/SkipListTest.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../.idea/codeStyles/Project.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../build-newlib.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../../build-newlib.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/boot.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/boot.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/gdt.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/gdt.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/idt.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/idt.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/kmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/kmain.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/kmem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/kmem.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/limine_modules.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/limine_modules.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/memman.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/memman.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/misc.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/misc.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/misc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/misc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/paging.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/paging.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/serial.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/serial.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/serial.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/serial.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/syscalls.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/syscalls.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/arch/x86/task.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/arch/x86/task.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/iso/limine.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/iso/limine.cfg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/LockGuard.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/LockGuard.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/Spinlock.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/Spinlock.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/VMA.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/VMA.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/asserts.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/asserts.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/asserts.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/assert.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/cppsupport.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/cppsupport.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/mutex.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/mutex.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/templates/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/CircularBuffer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/templates/CircularBuffer.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/List.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/templates/List.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/PointersCollection.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/templates/PointersCollection.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/SkipList.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/templates/SkipList.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/String.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/templates/String.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/TestTemplates.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/TestTemplates.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/TestTemplates.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/TestTemplates.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/Vector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/templates/Vector.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/stl/stl_alloc.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/templates/stl/stl_alloc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/kernel/templates/stl/stl_config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/kernel/templates/stl/stl_config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/test/init.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/test/init.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/uapi/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/uapi/CMakeLists.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -4161,6 +4204,54 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/newlib/libc/Makefile.inc" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/include/_syslist.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/include/dirent.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/include/reent.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/include/stdio.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/include/sys/_default_fcntl.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/include/sys/cdefs.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/execl.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/execle.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/execlp.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/execv.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/execve.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/execvp.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/opendir.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/popen.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/posix_spawn.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/readdir.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/readdir_r.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/posix/sleep.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/reent/Makefile.inc" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/reent/closer.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/reent/linkr.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/reent/readr.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/stdio/getc_u.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/stdio/getdelim.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/stdlib/environ.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/stdlib/getenv_r.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/sys/arm/Makefile.inc" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/sys/arm/access.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/sys/arm/sys/fcntl.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/sys/ficus/crt0.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/sys/ficus/sys/dirent.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/sys/ficus/syscalls.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/sys/rtems/crt0.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/sys/rtems/include/sys/dirent.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/unix/getcwd.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/newlib/libc/unix/getlogin.c" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../sysroot/usr/include/dirent.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../sysroot/usr/include/sys/_default_fcntl.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../sysroot/usr/include/sys/cdefs.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../sysroot/usr/include/sys/dirent.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../sysroot/usr/include/sys/features.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../sysroot/usr/include/sys/lock.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../sysroot/usr/include/sys/syslimits.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../sysroot/usr/include/sys/unistd.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../sysroot/usr/include/unistd.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MakefileLocalSettings">
     <option name="toolchainName" value="Ficus" />
@@ -4206,6 +4297,7 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
@@ -4223,6 +4315,12 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/newlib/libc/sys/ficus" />
+      <recent name="$PROJECT_DIR$/newlib/libc/sys/ficus/include" />
+    </key>
+  </component>
   <component name="RunManager" selected="Native Application.all">
     <configuration name="TAGS-bfd" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="newlib-4.4.0.20231231" TARGET_NAME="TAGS-bfd" CONFIG_NAME="TAGS-bfd" version="1">
       <method v="2">
@@ -29023,6 +29121,18 @@
       <workItem from="1711915508976" duration="623000" />
       <workItem from="1711920939451" duration="9000" />
       <workItem from="1711920963007" duration="2000" />
+      <workItem from="1712315024911" duration="1731000" />
+      <workItem from="1712344519577" duration="399000" />
+      <workItem from="1712346585216" duration="1000" />
+      <workItem from="1712350566636" duration="871000" />
+      <workItem from="1712388119459" duration="2026000" />
+      <workItem from="1712411591824" duration="598000" />
+      <workItem from="1712426676821" duration="609000" />
+      <workItem from="1712431079475" duration="5000" />
+      <workItem from="1712515591568" duration="5087000" />
+      <workItem from="1712521110659" duration="2760000" />
+      <workItem from="1712689327895" duration="128000" />
+      <workItem from="1712691199435" duration="1903000" />
     </task>
     <task id="LOCAL-00001" summary="we're not using libgloss anyway, disable it">
       <option name="closed" value="true" />
@@ -29032,7 +29142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1711798946101</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="more proper newlib setup">
+      <option name="closed" value="true" />
+      <created>1712520216357</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1712520216357</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -29040,6 +29158,18 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="we're not using libgloss anyway, disable it" />
-    <option name="LAST_COMMIT_MESSAGE" value="we're not using libgloss anyway, disable it" />
+    <MESSAGE value="more proper newlib setup" />
+    <option name="LAST_COMMIT_MESSAGE" value="more proper newlib setup" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/newlib/libc/sys/ficus/syscalls.c</url>
+          <line>54</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

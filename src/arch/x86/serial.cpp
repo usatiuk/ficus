@@ -2,13 +2,13 @@
 // Created by Stepan Usatiuk on 12.08.2023.
 //
 
-#include "asserts.hpp"
+#include "assert.h"
 
 #include <stdint.h>
 
 #include "io.hpp"
 #include "task.hpp"
-
+extern "C" {
 #define PORT 0x3f8        // COM1
 
 int init_serial() {
@@ -70,4 +70,5 @@ void writestr(const char *a) {
 
 void writestr_no_yield(const char *a) {
     while (*a != '\0') write_serial_no_yield(*a++);
+}
 }

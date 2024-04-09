@@ -4,10 +4,10 @@
 
 #include "paging.hpp"
 #include "LockGuard.hpp"
-#include "asserts.hpp"
+#include "assert.h"
 #include "limine.h"
 #include "memman.hpp"
-#include "misc.hpp"
+#include "misc.h"
 
 #include "FDT.hpp"
 

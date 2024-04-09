@@ -2,9 +2,11 @@
 #define FICUS_MISC_H
 
 #include <stdint.h>
-
-extern "C" void _sse_setup();
-extern "C" void _hcf();
+#ifdef __cplusplus
+extern "C" {
+#endif
+void _sse_setup();
+void _hcf();
 
 #define barrier() __asm__ __volatile__("" :: \
                                                : "memory");
@@ -89,5 +91,8 @@ static inline uint64_t rdmsr(uint64_t msr) {
 }
 
 char *itoa(int value, char *str, int base);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

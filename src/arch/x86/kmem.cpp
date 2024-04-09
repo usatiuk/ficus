@@ -2,7 +2,7 @@
 
 #include "LockGuard.hpp"
 #include "Spinlock.hpp"
-#include "asserts.hpp"
+#include "assert.h"
 #include "globals.hpp"
 #include "memman.hpp"
 #include "paging.hpp"

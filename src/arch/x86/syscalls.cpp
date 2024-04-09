@@ -11,9 +11,9 @@
 #include <cstdint>
 
 #include "TtyManager.hpp"
-#include "asserts.hpp"
+#include "assert.h"
 #include "gdt.hpp"
-#include "misc.hpp"
+#include "misc.h"
 
 #include "BytesFormatter.hpp"
 #include "ElfParser.hpp"

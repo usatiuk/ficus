@@ -6,8 +6,9 @@
 #include <type_traits>
 #include <utility>
 
-#include "asserts.hpp"
-#include "rand.h"
+#include "assert.h"
+
+extern "C" int  rand(void);
 
 template<typename K, typename V>
 class SkipList {

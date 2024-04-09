@@ -1,4 +1,4 @@
 add_library(syscalls_interface syscalls_interface.c)
 target_include_directories(syscalls_interface INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(kernel.elf syscalls_interface)
+target_link_libraries(kernel.elf PRIVATE syscalls_interface)

@@ -3,8 +3,7 @@
 
 #include <new>
 
-#include "asserts.hpp"
-#include "kmem.hpp"
+#include "assert.h"
 #include "string.h"
 
 class VectorTester;
@@ -15,14 +14,14 @@ class Vector {
 
 public:
     Vector() noexcept {
-        data = static_cast<T *>(kmalloc(capacity * sizeof(T)));
+        data = static_cast<T *>(malloc(capacity * sizeof(T)));
     }
 
     Vector(std::initializer_list<T> l) noexcept {
         curSize  = l.size();
         capacity = curSize > 0 ? curSize : 2;
 
-        data     = static_cast<T *>(kmalloc(capacity * sizeof(T)));
+        data     = static_cast<T *>(malloc(capacity * sizeof(T)));
 
         size_t i = 0;
         for (auto const &el: l) {
@@ -34,7 +33,7 @@ public:
         curSize  = vec.curSize;
         capacity = curSize > 0 ? curSize : 2;
 
-        data     = static_cast<T *>(kmalloc(capacity * sizeof(T)));
+        data     = static_cast<T *>(malloc(capacity * sizeof(T)));
 
         for (size_t i = 0; i < curSize; i++)
             new (data + i) T(vec.data[i]);
@@ -67,14 +66,14 @@ public:
         if (capacity == curSize) {
             capacity *= 2;
             //Ugly hack to get around g++ warnings
-            data = (T *) krealloc(reinterpret_cast<char *>(data), capacity * sizeof(T));
+            data = (T *) realloc(reinterpret_cast<char *>(data), capacity * sizeof(T));
             assert(data != nullptr);
         }
         new (data + (curSize++)) T(std::forward<Args>(args)...);
     }
 
     void compact() {
-        data     = (T *) krealloc(reinterpret_cast<char *>(data), curSize * sizeof(T));
+        data     = (T *) realloc(reinterpret_cast<char *>(data), curSize * sizeof(T));
         capacity = curSize;
     }
 

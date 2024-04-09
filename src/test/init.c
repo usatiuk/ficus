@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 void ls() {
     DIR           *rfd = opendir("/");
@@ -44,6 +45,7 @@ int main() {
             print_tasks();
         } else {
             execve(line, 0, 0);
+            sleep(10000);
         }
     }
 }

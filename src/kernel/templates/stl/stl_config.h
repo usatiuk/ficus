@@ -573,7 +573,7 @@
 #define __STL_ASSERTIONS
 
 #ifdef __STL_ASSERTIONS
-# include <asserts.hpp>
+# include <assert.h>
 # define __stl_assert(expr) assert2(expr, "STL Assert fail") ;
 //    if (!(expr)) { fprintf(stderr, "%s:%d STL assertion failure: %s\n", \
 //			  __FILE__, __LINE__, # expr); abort(); }

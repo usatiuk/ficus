@@ -7,7 +7,7 @@
 #include <optional>
 
 #include "LockGuard.hpp"
-#include "asserts.hpp"
+#include "assert.h"
 #include "kmem.hpp"
 #include "memman.hpp"
 #include "paging.hpp"
