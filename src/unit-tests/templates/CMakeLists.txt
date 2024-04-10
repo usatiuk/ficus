@@ -2,6 +2,9 @@ add_executable(
         SkipListTest
         SkipListTest.cpp
 )
+
+target_link_libraries(templates INTERFACE KApi)
+
 target_link_libraries(
         SkipListTest
         templates

@@ -5,13 +5,13 @@
 #include <utility>
 
 #include "assert.h"
-#include "stdlib.h"
+#include "kmem.hpp"
 #include "string.h"
 
 class String {
 public:
     String() noexcept {
-        _data    = static_cast<char *>(malloc(1 * sizeof(char)));
+        _data    = static_cast<char *>(kmalloc(1 * sizeof(char)));
         curLen   = 0;
         _data[0] = '\0';
     }
@@ -19,7 +19,7 @@ public:
     String(const char *in) noexcept {
         curLen   = strlen(in);
 
-        _data    = static_cast<char *>(malloc((curLen + 1) * sizeof(char)));
+        _data    = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
         _data[0] = '\0';
 
         strcat(_data, in);
@@ -28,7 +28,7 @@ public:
     String(String const &str) noexcept {
         curLen   = str.curLen;
 
-        _data    = static_cast<char *>(malloc((curLen + 1) * sizeof(char)));
+        _data    = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
         _data[0] = '\0';
 
         strcat(_data, str._data);
@@ -38,7 +38,7 @@ public:
         _data        = str._data;
         curLen       = str.curLen;
 
-        str._data    = static_cast<char *>(malloc(1 * sizeof(char)));
+        str._data    = static_cast<char *>(kmalloc(1 * sizeof(char)));
         str.curLen   = 0;
         str._data[0] = '\0';
     }
@@ -51,13 +51,13 @@ public:
 
     ~String() noexcept {
         if (_data == nullptr) return;
-        free(_data);
+        kfree(_data);
         _data  = nullptr;
         curLen = 0;
     }
 
     String &operator+=(String const &rhs) {
-        _data = static_cast<char *>(realloc(_data, sizeof(char) * (curLen + rhs.curLen + 1)));
+        _data = static_cast<char *>(krealloc(_data, sizeof(char) * (curLen + rhs.curLen + 1)));
         assert(_data != nullptr);
 
         strcat(_data, rhs._data);
@@ -84,7 +84,7 @@ public:
     }
 
     String &operator+=(char c) {
-        _data = static_cast<char *>(realloc(_data, sizeof(char) * (curLen + 2)));
+        _data = static_cast<char *>(krealloc(_data, sizeof(char) * (curLen + 2)));
         assert(_data != nullptr);
 
         _data[curLen]     = c;
