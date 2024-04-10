@@ -157,9 +157,9 @@ void ktask_main() {
             GlobalTtyManager.all_tty_putstr(saved_modules_names[i]);
             GlobalTtyManager.all_tty_putchar('\n');
 
-            cgistd::vector<char> read_data(mod.size);
+            Vector<char> read_data(mod.size);
             memcpy(read_data.begin(), mod.address, mod.size);
-            ElfParser elfParser(read_data);
+            ElfParser elfParser(std::move(read_data));
 
             Task     *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), saved_modules_names[i]);
             if (elfParser.copy_to(utask))

@@ -11,7 +11,7 @@
 #include "PointersCollection.hpp"
 #include "mutex.hpp"
 
-#include <stl/vector>
+#include <Vector.hpp>
 
 #define PAGE_SIZE          4096
 
@@ -57,7 +57,7 @@ private:
     UniquePtr<FDT>                        _fdt;
     Mutex                                 _fdtLock;
 
-    UniquePtr<cgistd::vector<uint64_t *>> _taken_pages;
+    UniquePtr<Vector<uint64_t *>>         _taken_pages;
 
     Mutex                                 _lock;
 };

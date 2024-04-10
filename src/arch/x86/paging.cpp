@@ -15,7 +15,7 @@
 uint64_t *AddressSpace::get_free_frame() {
     uint64_t *res = static_cast<uint64_t *>(get4k());
     if (_taken_pages.get())
-        _taken_pages->push_back(res);
+        _taken_pages->emplace_back(res);
     assert(res != nullptr);
     for (int j = 0; j < 512; j++)
         res[j] = 0;
@@ -33,8 +33,8 @@ static inline void invlpg(void *m) {
 AddressSpace::AddressSpace() {
     PML4 = static_cast<uint64_t *>(get4k());
     assert(_taken_pages.get() == nullptr);
-    _taken_pages = UniquePtr(new cgistd::vector<uint64_t *>());
-    _taken_pages->push_back(PML4);
+    _taken_pages = UniquePtr(new Vector<uint64_t *>());
+    _taken_pages->emplace_back(PML4);
     for (int j = 0; j < 512; j++)
         PML4[j] = 0;
 }

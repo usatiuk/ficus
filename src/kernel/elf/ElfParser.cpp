@@ -10,8 +10,8 @@
 #include "paging.hpp"
 #include "task.hpp"
 
-ElfParser::ElfParser(const cgistd::vector<char> &data) {
-    auto it = data.begin();
+ElfParser::ElfParser(Vector<char> data) {
+    auto it = data.cbegin();
     if (Serialize::deserialize<char>(it, data.end()) != 0x7F) return;
     if (Serialize::deserialize<char>(it, data.end()) != 'E') return;
     if (Serialize::deserialize<char>(it, data.end()) != 'L') return;
@@ -26,7 +26,7 @@ ElfParser::ElfParser(const cgistd::vector<char> &data) {
         _abi = *val;
     else
         return;
-    if (std::distance(it, data.end()) < 8) return;
+    if (std::distance(it, data.cend()) < 8) return;
     std::advance(it, 8);
 
     if (Serialize::deserialize<uint16_t>(it, data.end()) != 2) return;
@@ -79,16 +79,16 @@ ElfParser::ElfParser(const cgistd::vector<char> &data) {
     else
         return;
 
-    auto hdr_begin = data.begin();
+    auto hdr_begin = data.cbegin();
     std::advance(hdr_begin, _phdrs_pos);
 
     for (int i = 0; i < _hdrs_num; i++) {
         auto hdr = Serialize::deserialize<Elf64_Phdr>(hdr_begin, data.end());
         if (!hdr->valid) return;
-        _headers.push_back(*hdr);
+        _headers.emplace_back(*hdr);
     }
 
-    _data  = data;
+    _data  = std::move(data);
     _valid = true;
 }
 
@@ -133,7 +133,7 @@ bool ElfParser::copy_to(Task *task) {
     return true;
 }
 
-ElfParser::Elf64_Phdr::Elf64_Phdr(cgistd::vector<char>::const_iterator &in, cgistd::vector<char>::const_iterator const &end) {
+ElfParser::Elf64_Phdr::Elf64_Phdr(Vector<char>::const_iterator &in, Vector<char>::const_iterator const &end) {
     if (auto val = Serialize::deserialize<Elf64_Word>(in, end))
         p_type = *val;
     else

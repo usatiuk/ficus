@@ -5,14 +5,16 @@
 #ifndef FICUS_ELFPARSER_HPP
 #define FICUS_ELFPARSER_HPP
 
-#include "stl/vector"
+#include "Vector.hpp"
+
+#include <type_traits>
 
 class Task;
 
 // Just copying everytihng for now
 class ElfParser {
 public:
-    ElfParser(const cgistd::vector<char> &data);
+              ElfParser(Vector<char> data);
     bool      copy_to(Task *task);
 
     uintptr_t get_entrypoint() { return _entrypoint; }
@@ -53,11 +55,11 @@ private:
 
         bool        valid  = false;
         using serializable = std::true_type;
-        Elf64_Phdr(cgistd::vector<char>::const_iterator &in, const cgistd::vector<char>::const_iterator &end);
+        Elf64_Phdr(Vector<char>::const_iterator &in, const Vector<char>::const_iterator &end);
     };
 
-    cgistd::vector<Elf64_Phdr> _headers;
-    cgistd::vector<char>       _data;
+    Vector<Elf64_Phdr> _headers;
+    Vector<char>       _data;
 };
 
 

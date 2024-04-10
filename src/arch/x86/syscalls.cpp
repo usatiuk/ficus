@@ -19,9 +19,9 @@
 #include "ElfParser.hpp"
 #include "FDT.hpp"
 #include "File.hpp"
+#include "Vector.hpp"
 #include "memman.hpp"
 #include "paging.hpp"
-#include "stl/vector"
 #include "task.hpp"
 #include "timer.hpp"
 
@@ -176,7 +176,7 @@ uint64_t syscall_execve(const char *pathname, char *const argv[], char *const en
     File *f = VFSApi::get(fd);
     if (f->dir().get() != nullptr) return -1;
 
-    cgistd::vector<char> read_data(f->size());
+    Vector<char> read_data(f->size());
     f->read(read_data.begin(), f->size());
     VFSApi::close(fd);
 

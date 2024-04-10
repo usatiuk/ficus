@@ -19,8 +19,8 @@
 #include "string.h"
 #include "timer.hpp"
 
-#include <stl/queue>
-#include <stl/vector>
+#include <SkipList.hpp>
+#include <Vector.hpp>
 
 char temp_fxsave[512] __attribute__((aligned(16)));
 
@@ -52,19 +52,11 @@ CV                         TasksToFree_cv;
 List<List<Task *>::Node *> TasksToFree;
 
 // Waiting
-Mutex WaitingTasks_mlock;
-CV    WaitingTasks_cv;
-namespace {
-    struct
-    {
-        bool operator()(List<Task *>::Node *l, List<Task *>::Node *r) const { return l->val->_sleep_until > r->val->_sleep_until; }
-    } WaitingTaskComparator;
-} // namespace
-cgistd::priority_queue<List<Task *>::Node *, cgistd::vector<List<Task *>::Node *>, decltype(WaitingTaskComparator)>
-        WaitingTasks(WaitingTaskComparator);
+Mutex                                    WaitingTasks_mlock;
+CV                                       WaitingTasks_cv;
+SkipList<uint64_t, List<Task *>::Node *> WaitingTasks;
 
-//
-static std::atomic<bool> initialized = false;
+static std::atomic<bool>                 initialized = false;
 
 //
 void Scheduler::remove_self() {
@@ -224,8 +216,7 @@ void Scheduler::sleep_self(uint64_t diff) {
         {
             WaitingTasks_mlock.lock();
             assert(cur_task() != nullptr);
-            cur_task()->_sleep_until = wake_time;
-            WaitingTasks.push(extract_running_task_node());
+            assert(WaitingTasks.add(wake_time, extract_running_task_node()) != nullptr);
             Scheduler::self_block(WaitingTasks_mlock);
         }
     }
@@ -242,11 +233,22 @@ static void task_waker() {
         {
             WaitingTasks_mlock.lock();
 
-            while (!WaitingTasks.empty() && WaitingTasks.top()->val->_sleep_until <= micros) {
-                auto task = WaitingTasks.top();
-                WaitingTasks.pop();
+            while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->key <= micros && WaitingTasks.begin()->data->val->state() != Task::TaskState::TS_RUNNING) {
+                auto *node = &*WaitingTasks.begin();
+                auto  task = WaitingTasks.begin()->data;
+
+                // TODO this is all ugly
+                uint64_t l1 = 0;
+                for (auto cur = node; !cur->end; cur = cur->next[0]) l1++;
+
+                WaitingTasks.erase(node, node->next[0], false);
+
+                uint64_t l2 = 0;
+                for (auto *cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) l2++;
+
                 WaitingTasks_mlock.unlock();
 
+                assert(l1 - l2 == 1);
                 task->val->_sleep_until = 0;
                 task->val->_state       = Task::TaskState::TS_RUNNING;
 

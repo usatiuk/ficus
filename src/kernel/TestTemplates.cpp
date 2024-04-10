@@ -15,12 +15,6 @@
 
 #include "TtyManager.hpp"
 
-#include "stl/map"
-#include "stl/pair.h"
-#include "stl/rope"
-#include "stl/string"
-#include "stl/vector.h"
-
 class SharedPtrTester {
 private:
     auto getThingy() {
@@ -100,7 +94,7 @@ public:
         testv1.emplace_back("H3");
         testv1.emplace_back("H4");
         assert(testv1.size() == 4);
-        assert(testv1.capacity >= 4);
+        assert(testv1._capacity >= 4);
         assert(testv1[0] == "H1");
         assert(testv1[1] == "H2");
         assert(testv1[2] == "H3");
@@ -286,25 +280,6 @@ int test_templates() {
     cowTester.test();
     test_unique_ptr();
     test_list();
-
-    cgistd::vector<int> test;
-    test.push_back(1);
-    test.push_back(2);
-
-    cgistd::map<uint64_t, cgistd::vector<int>> map;
-    map[2] = cgistd::vector<int>();
-    map[2].push_back(2);
-
-    cgistd::string s = "hello world \n";
-    //    writestr_no_yield(s.c_str());
-
-    cgistd::rope r = "e";
-    r.push_back('e');
-    r.append("asd");
-    for (char c: r) {
-        //        write_serial_no_yield(c);
-    }
-    //    write_serial('\n');
 
     return 0;
 }

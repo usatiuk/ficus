@@ -7,10 +7,11 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <type_traits>
 #include <utility>
 
-#include <stl/vector>
+#include "Vector.hpp"
 
 //#ifdef __APPLE__
 //#include <machine/endian.h>
@@ -63,32 +64,32 @@ namespace Serialize {
     /// \param in   Iterator to the first byte of the object
     /// \param end  End iterator of source container
     /// \return     Deserialized value
-    template<typename T>
-    static std::optional<T> deserialize(cgistd::vector<char>::const_iterator &in, const cgistd::vector<char>::const_iterator &end);
+    template<typename T, typename C = Vector<char>>
+    static std::optional<T> deserialize(typename C::const_iterator &in, const typename C::const_iterator &end);
 
     /// Serializes object of type \p T into vector \p out
     /// \tparam T   Type to serialize
     /// \param what Constant reference to the serialized object
     /// \param out  Reference to output vector
-    template<typename T>
-    static void serialize(const T &what, cgistd::vector<char> &out);
+    template<typename T, typename C = Vector<char>>
+    static void serialize(const T &what, C &out);
 
     /// Serializes the object of type \p T and returns the resulting vector
     /// \tparam T   Type to serialize
     /// \param o    Constant reference to the serialized object
     /// \return     Serialized data
-    template<typename T>
-    static cgistd::vector<char> serialize(const T &o);
+    template<typename T, typename C = Vector<char>>
+    static C serialize(const T &o);
 
     /// Deserializes object of type \p T from input vector \p from
     /// \tparam T   Type to deserialize
     /// \param from Constant reference to the serialized object
     /// \return     Deserialized value
-    template<typename T>
-    static std::optional<T> deserialize(const cgistd::vector<char> &from);
+    template<typename T, typename C = Vector<char>>
+    static std::optional<T> deserialize(const C &from);
 
-    template<typename T>
-    std::optional<T> deserialize(cgistd::vector<char>::const_iterator &in, const cgistd::vector<char>::const_iterator &end) {
+    template<typename T, typename C>
+    std::optional<T> deserialize(typename C::const_iterator &in, const typename C::const_iterator &end) {
         if (in >= end) return std::nullopt;
 
         if constexpr (serializable<T>::value) {
@@ -150,8 +151,8 @@ namespace Serialize {
         }
     }
 
-    template<typename T>
-    void serialize(const T &what, cgistd::vector<char> &out) {
+    template<typename T, typename C>
+    void serialize(const T &what, C &out) {
         if constexpr (serializable<T>::value) {
             // If the object declares itself as serializable, call its serialize method
             what.serialize(out);
@@ -183,15 +184,15 @@ namespace Serialize {
         }
     }
 
-    template<typename T>
-    cgistd::vector<char> serialize(const T &o) {
-        cgistd::vector<char> out;
+    template<typename T, typename C>
+    C serialize(const T &o) {
+        C out;
         serialize(o, out);
         return out;
     }
 
-    template<typename T>
-    std::optional<T> deserialize(const cgistd::vector<char> &from) {
+    template<typename T, typename C>
+    std::optional<T> deserialize(const C &from) {
         auto bgwr = from.begin();
         return deserialize<T>(bgwr, from.end());
     }
