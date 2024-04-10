@@ -27,7 +27,7 @@ private:
     uint64_t size = 0;
 
 public:
-    List() = default;
+     List() = default;
     ~List() {
         while (!empty()) {
             pop_back();

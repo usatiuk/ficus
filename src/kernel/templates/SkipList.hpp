@@ -8,7 +8,7 @@
 
 #include "assert.h"
 
-extern "C" int  rand(void);
+extern "C" int rand(void);
 
 template<typename K, typename V>
 class SkipList {
@@ -31,7 +31,7 @@ private:
         int                  top = -1;
 
     public:
-        NodeAllocator() noexcept = default;
+         NodeAllocator() noexcept = default;
 
         ~NodeAllocator() noexcept {
             for (int i = top; i >= 0; i--) {
@@ -360,7 +360,7 @@ public:
         using pointer         = value_type *;
         using reference       = value_type &;
 
-        explicit SkipListIterator(Node *n) : n(std::move(n)){};
+        explicit          SkipListIterator(Node *n) : n(std::move(n)){};
 
         reference         operator*() const { return *n; }
 
