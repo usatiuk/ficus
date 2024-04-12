@@ -307,6 +307,8 @@ void kfree(void *addr) {
 void *krealloc(void *addr, size_t newsize) {
     assert(initialized);
 
+    if (addr == nullptr) return kmalloc(newsize);
+
     struct HeapEntry *info = (struct HeapEntry *) (addr - (sizeof(struct HeapEntry)));
     assert2(info->magic == KERN_HeapMagicTaken, "Bad realloc!");
 

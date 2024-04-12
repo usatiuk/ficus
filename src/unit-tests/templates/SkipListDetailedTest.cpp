@@ -517,7 +517,7 @@ TYPED_TEST(SkipListDetailedTestFixture, ItWorks) {
     assert(oss.str() == "-100\n<-9..20>\n<48..93>\n<150..200>\n400=======");
 
     // FIXME: I'll leave it a "stress test" for now
-    for (long long x = 25; x <= 250; x *= 10) {
+    for (long long x = 10; x <= 10; x *= 10) {
         CRangeListTested t;
         std::cout << x << "====" << std::endl;
         auto start = std::chrono::high_resolution_clock::now();

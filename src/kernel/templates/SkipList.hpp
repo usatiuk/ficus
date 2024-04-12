@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "assert.h"
+#include "kmem.hpp"
 
 extern "C" int rand(void);
 
@@ -19,22 +20,27 @@ class SkipListBase {
 protected:
     static constexpr size_t maxL{31};
 
+    class NodeAllocator;
     struct Node {
+        friend NodeAllocator;
+
         Node *next[maxL + 1] = {nullptr};
         Node *before         = nullptr;
-        bool  end            = false;
 
         Data &get() {
-            assert(!end);
+            assert(!end());
             return *std::launder(reinterpret_cast<Data *>(&_data[0]));
         }
         const Data &get() const {
-            assert(!end);
+            assert(!end());
             return *std::launder(reinterpret_cast<const Data *>(&_data[0]));
         }
 
+        bool end() const { return _end; }
+
     private:
         alignas(Data) std::array<unsigned char, sizeof(Data)> _data;
+        bool _end;
     };
 
     class NodeAllocator {
@@ -42,12 +48,26 @@ protected:
         Node                *nodes[size];
         int                  top = -1;
 
+        Node                *get() {
+            Node *node;
+            if (top == -1)
+                node = static_cast<Node *>(kmalloc(sizeof(Node)));
+            else
+                node = nodes[top--];
+
+            node->_end    = false;
+            node->before  = nullptr;
+            node->next[0] = nullptr;
+
+            return node;
+        }
+
     public:
          NodeAllocator() noexcept = default;
 
         ~NodeAllocator() noexcept {
             for (int i = top; i >= 0; i--) {
-                delete nodes[i];
+                kfree(nodes[i]);
             }
         }
 
@@ -58,26 +78,25 @@ protected:
 
         //
         void push(Node *&e) {
+            if (!e->end()) std::destroy_at(&e->get());
             if (top >= size - 1) {
-                delete e;
+                kfree(e);
                 return;
             }
             nodes[++top] = e;
         }
 
+        template<class... Args>
+        Node *get(Args &&...args) {
+            Node *ret = get();
+            new (&ret->get()) Data(std::forward<Args>(args)...);
+            return ret;
+        }
 
-        Node *get() {
-            if (top == -1) {
-                return new Node;
-            }
-
-            Node *node    = nodes[top--];
-
-            node->end     = false;
-            node->before  = nullptr;
-            node->next[0] = nullptr;
-
-            return node;
+        Node *get_end() {
+            Node *ret = get();
+            ret->_end = true;
+            return ret;
         }
     };
 
@@ -96,10 +115,8 @@ protected:
     size_t        curL = 0;
 
                   SkipListBase() noexcept {
-        root            = (Node *) nodeAllocator.get();
-        root->end       = true;
-        endnode         = (Node *) nodeAllocator.get();
-        endnode->end    = true;
+        root            = (Node *) nodeAllocator.get_end();
+        endnode         = (Node *) nodeAllocator.get_end();
         endnode->before = root;
 
         for (size_t i = 0; i <= maxL; i++) {
@@ -112,9 +129,6 @@ public:
     ~SkipListBase() noexcept {
         auto cur = root;
         while (cur != nullptr) {
-            if (!cur->end)
-                std::destroy_at(&cur->get());
-
             auto prev = cur;
             cur       = cur->next[0];
             nodeAllocator.push(prev);
@@ -124,7 +138,7 @@ public:
     SkipListBase(SkipListBase const &l) noexcept : SkipListBase() {
         toUpdate[0] = root;
 
-        for (auto n = l.root->next[0]; n != nullptr && !n->end; n = n->next[0]) {
+        for (auto n = l.root->next[0]; n != nullptr && !n->end(); n = n->next[0]) {
             size_t newLevel = randomL();
 
             if (newLevel > curL) {
@@ -133,8 +147,7 @@ public:
                 curL = newLevel;
             }
 
-            auto newNode = (Node *) nodeAllocator.get();
-            new (&newNode->get()) Data(n->get());
+            auto newNode    = (Node *) nodeAllocator.get(std::move(n->get()));
             newNode->before = toUpdate[0];
             if (toUpdate[0]->next[0] != nullptr) toUpdate[0]->next[0]->before = newNode;
 
@@ -246,13 +259,13 @@ protected:
 public:
     template<typename L, typename R>
     friend bool operator==(const SkipListBaseIteratorBase<L> &a, const SkipListBaseIteratorBase<R> &b) {
-        if (a.n->end && b.n->end) return true;
+        if (a.n->end() && b.n->end()) return true;
         return a.n == b.n;
     };
 
     template<typename L, typename R>
     friend bool operator!=(const SkipListBaseIteratorBase<L> &a, const SkipListBaseIteratorBase<R> &b) {
-        if (a.n->end && (a.n->end == b.n->end)) return false;
+        if (a.n->end() && (a.n->end() == b.n->end())) return false;
         return a.n != b.n;
     };
 
@@ -271,7 +284,7 @@ protected:
 
         Node *cur = root;
         for (int i = curL; i >= 0; i--) {
-            while (!cur->next[i]->end && Comparator()(cur->next[i]->get(), *begin))
+            while (!cur->next[i]->end() && Comparator()(cur->next[i]->get(), *begin))
                 cur = cur->next[i];
             toUpdate[i] = cur;
         }
@@ -307,13 +320,13 @@ protected:
         Node *cur = root;
 
         for (int i = curL; i >= 0; i--) {
-            while (!cur->next[i]->end && cur->next[i] != k.n)
+            while (!cur->next[i]->end() && cur->next[i] != k.n)
                 cur = cur->next[i];
             toUpdate[i] = cur;
         }
         cur = cur->next[0];
 
-        if (cur->end || cur != k.n) return {cur, false};
+        if (cur->end() || cur != k.n) return {cur, false};
 
         cur->next[0]->before = toUpdate[0];
 
@@ -328,7 +341,6 @@ protected:
                root->next[curL] == nullptr)
             curL--;
 
-        std::destroy_at(&cur->get());
         auto ret = std::make_pair(cur->next[0], true);
         nodeAllocator.push(cur);
         return ret;
@@ -341,13 +353,13 @@ protected:
         Node *cur = root;
 
         for (int i = curL; i >= 0; i--) {
-            while (!cur->next[i]->end && Comparator()(cur->next[i]->get(), newNode->get()))
+            while (!cur->next[i]->end() && Comparator()(cur->next[i]->get(), newNode->get()))
                 cur = cur->next[i];
             toUpdate[i] = cur;
         }
         cur = cur->next[0];
         if constexpr (!Duplicate)
-            if (!cur->end && Comparator().eq(cur->get(), newNode->get())) return {cur, false};
+            if (!cur->end() && Comparator().eq(cur->get(), newNode->get())) return {cur, false};
 
         size_t newLevel = randomL();
 
@@ -371,16 +383,18 @@ protected:
 
     template<class Comparator, bool Duplicate>
     std::pair<Node *, bool> insert(Data d) {
-        Node *n = nodeAllocator.get();
-        new (n->data) Data(std::move(d));
-        return insert<Comparator, Duplicate>(n);
+        Node *n   = nodeAllocator.get(std::move(d));
+        auto  ret = insert<Comparator, Duplicate>(n);
+        if (!ret.second) nodeAllocator.push(n);
+        return ret;
     }
 
     template<class Comparator, bool Duplicate, class... Args>
     std::pair<Node *, bool> emplace(Args &&...args) {
-        Node *n = nodeAllocator.get();
-        new (&n->get()) Data(std::forward<Args>(args)...);
-        return insert<Comparator, Duplicate>(n);
+        Node *n   = nodeAllocator.get(std::forward<Args>(args)...);
+        auto  ret = insert<Comparator, Duplicate>(n);
+        if (!ret.second) nodeAllocator.push(n);
+        return ret;
     }
 
     // Comparator true if less than, 0 if equal
@@ -389,13 +403,13 @@ protected:
         Node *cur = root;
 
         for (int i = curL; i >= 0; i--) {
-            while (!cur->next[i]->end && Comparator()(cur->next[i]->get(), k))
+            while (!cur->next[i]->end() && Comparator()(cur->next[i]->get(), k))
                 cur = cur->next[i];
             toUpdate[i] = cur;
         }
         cur = cur->next[0];
 
-        if (cur->end || !Comparator().eq(cur->get(), k)) return {cur, false};
+        if (cur->end() || !Comparator().eq(cur->get(), k)) return {cur, false};
 
         cur->next[0]->before = toUpdate[0];
 
@@ -410,7 +424,6 @@ protected:
                root->next[curL] == nullptr)
             curL--;
 
-        std::destroy_at(&cur->get());
         auto ret = std::make_pair(cur->next[0], true);
         nodeAllocator.push(cur);
         return ret;
@@ -421,9 +434,9 @@ protected:
         Node *cur = root;
 
         for (int i = curL; i >= 0; i--)
-            while (!cur->next[i]->end && (Comparator()(cur->next[i]->get(), k) || Comparator().eq(cur->next[i]->get(), k)))
+            while (!cur->next[i]->end() && (Comparator()(cur->next[i]->get(), k) || Comparator().eq(cur->next[i]->get(), k)))
                 cur = cur->next[i];
-        if (!cur->end && (Comparator()(cur->get(), k) || Comparator().eq(cur->get(), k)))
+        if (!cur->end() && (Comparator()(cur->get(), k) || Comparator().eq(cur->get(), k)))
             cur = cur->next[0];
         return cur;
     }
@@ -433,7 +446,7 @@ protected:
         Node *cur = root;
 
         for (int i = curL; i >= 0; i--)
-            while (!cur->next[i]->end && Comparator()(cur->next[i]->get(), k))
+            while (!cur->next[i]->end() && Comparator()(cur->next[i]->get(), k))
                 cur = cur->next[i];
 
         return cur->next[0];
@@ -444,13 +457,13 @@ public:
         auto n  = root->next[0];
         auto n2 = r.root->next[0];
 
-        while (!n->end && !n2->end) {
+        while (!n->end() && !n2->end()) {
             if (!(n->get() == n2->get())) return false;
             n  = n->next[0];
             n2 = n2->next[0];
         }
 
-        if ((n->end || n2->end) && n->end != n2->end) return false;
+        if ((n->end() || n2->end()) && n->end() != n2->end()) return false;
 
         return true;
     }
@@ -529,43 +542,43 @@ public:
 
     const_iterator find(const K &k) const {
         typename BaseT::Node *n = BaseT::template lower_bound<Cmp>(k);
-        if (n->end || n->get().first != k) return end();
+        if (n->end() || n->get().first != k) return end();
         return const_iterator(n);
     }
 
     iterator find(const K &k) {
         typename BaseT::Node *n = BaseT::template lower_bound<Cmp>(k);
-        if (n->end || n->get().first != k) return end();
+        if (n->end() || n->get().first != k) return end();
         return iterator(n);
     }
 
     const_iterator upper_bound(const K &k) const {
         typename BaseT::Node *n = BaseT::template upper_bound<Cmp>(k);
-        if (n->end) return end();
+        if (n->end()) return end();
         return const_iterator(n);
     }
 
     iterator upper_bound(const K &k) {
         typename BaseT::Node *n = BaseT::template upper_bound<Cmp>(k);
-        if (n->end) return end();
+        if (n->end()) return end();
         return iterator(n);
     }
 
     iterator erase(const K &k) {
         std::pair<typename BaseT::Node *, bool> n = BaseT::template erase<Cmp>(k);
-        if (n.first->end) return end();
+        if (n.first->end()) return end();
         return iterator(n.first);
     }
 
     iterator erase(const_iterator first, const_iterator last) {
         std::pair<typename BaseT::Node *, bool> n = BaseT::template erase<Cmp>(first, last);
-        if (n.first->end) return end();
+        if (n.first->end()) return end();
         return iterator(n.first);
     }
 
     iterator erase(const_iterator el) {
         std::pair<typename BaseT::Node *, bool> n = BaseT::erase(el);
-        if (n.first->end) return end();
+        if (n.first->end()) return end();
         return iterator(n.first);
     }
 };

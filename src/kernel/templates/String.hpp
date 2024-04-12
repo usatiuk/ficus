@@ -8,66 +8,57 @@
 #include "kmem.hpp"
 #include "string.h"
 
+// Null terminated string
 class String {
 public:
-    String() noexcept {
-        _data    = static_cast<char *>(kmalloc(1 * sizeof(char)));
-        curLen   = 0;
-        _data[0] = '\0';
+    String() {
+        //FIXME:
+        _data = static_cast<char *>(kmalloc(_cur_len + 1));
     }
 
     String(const char *in) noexcept {
-        curLen   = strlen(in);
-
-        _data    = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
-        _data[0] = '\0';
-
-        strcat(_data, in);
+        _cur_len = strlen(in);
+        _data    = static_cast<char *>(kmalloc(_cur_len + 1));
+        memcpy(_data, in, _cur_len + 1);
     }
 
     String(String const &str) noexcept {
-        curLen   = str.curLen;
-
-        _data    = static_cast<char *>(kmalloc((curLen + 1) * sizeof(char)));
-        _data[0] = '\0';
-
-        strcat(_data, str._data);
+        _cur_len = str._cur_len;
+        _data    = static_cast<char *>(kmalloc(_cur_len + 1));
+        memcpy(_data, str._data, _cur_len + 1);
     }
 
     String(String &&str) noexcept {
         _data        = str._data;
-        curLen       = str.curLen;
+        _cur_len     = str._cur_len;
 
-        str._data    = static_cast<char *>(kmalloc(1 * sizeof(char)));
-        str.curLen   = 0;
-        str._data[0] = '\0';
+        str._cur_len = 0;
+        str._data    = nullptr;
     }
 
     String &operator=(String str) noexcept {
         std::swap(_data, str._data);
-        std::swap(curLen, str.curLen);
+        std::swap(_cur_len, str._cur_len);
         return *this;
     }
 
     ~String() noexcept {
         if (_data == nullptr) return;
         kfree(_data);
-        _data  = nullptr;
-        curLen = 0;
     }
 
     String &operator+=(String const &rhs) {
-        _data = static_cast<char *>(krealloc(_data, sizeof(char) * (curLen + rhs.curLen + 1)));
+        _data = static_cast<char *>(krealloc(_data, _cur_len + rhs._cur_len + 1));
         assert(_data != nullptr);
 
         strcat(_data, rhs._data);
-        curLen += rhs.curLen;
+        _cur_len += rhs._cur_len;
 
         return *this;
     }
 
     String &operator+=(unsigned long value) {
-        char buf[20];
+        char buf[32];
         itoa(value, buf, 10);
 
         *this += buf;
@@ -75,7 +66,7 @@ public:
         return *this;
     }
     String &operator+=(unsigned long long value) {
-        char buf[32];
+        char buf[64];
         itoa(value, buf, 10);
 
         *this += buf;
@@ -84,12 +75,12 @@ public:
     }
 
     String &operator+=(char c) {
-        _data = static_cast<char *>(krealloc(_data, sizeof(char) * (curLen + 2)));
+        _data = static_cast<char *>(krealloc(_data, _cur_len + 2));
         assert(_data != nullptr);
 
-        _data[curLen]     = c;
-        _data[curLen + 1] = '\0';
-        curLen++;
+        _data[_cur_len]     = c;
+        _data[_cur_len + 1] = '\0';
+        _cur_len++;
         return *this;
     }
 
@@ -102,11 +93,11 @@ public:
     }
 
     size_t length() const {
-        return curLen;
+        return _cur_len;
     }
 
     bool empty() const {
-        return curLen == 0;
+        return _cur_len == 0;
     }
 
     bool operator==(String const &rhs) const {
@@ -130,8 +121,8 @@ public:
     }
 
 private:
-    size_t curLen = 0;
-    char  *_data;
+    size_t _cur_len = 0;
+    char  *_data    = nullptr;
 };
 
 #endif

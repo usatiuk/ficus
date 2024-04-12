@@ -41,6 +41,9 @@ if (TEST_MODE)
     add_compile_options(-fsanitize=address -fsanitize=undefined -fno-sanitize-recover)
     add_link_options(-fsanitize=address -fsanitize=undefined -fno-sanitize-recover)
 
+    add_compile_options(-rdynamic)
+    add_link_options(-rdynamic)
+
     set_target_properties(kernel.elf PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     set_target_properties(syscalls_interface PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     add_subdirectory(./unit-tests/)

@@ -8,6 +8,7 @@ add_executable(
 target_link_libraries(
         SkipListTest
         templates
+        KApi
         GTest::gtest_main
 )
 add_executable(
@@ -18,6 +19,7 @@ add_executable(
 target_link_libraries(
         SkipListDetailedTest
         templates
+        KApi
         GTest::gtest_main
 )
 
