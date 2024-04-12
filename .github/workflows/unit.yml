@@ -25,7 +25,7 @@ jobs:
         if: env.ACT=='true'
 
       - name: install everything
-        run: sudo apt-get update && sudo apt-get install -y cmake build-essential gcc g++
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential gcc g++ nasm
 
       - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
