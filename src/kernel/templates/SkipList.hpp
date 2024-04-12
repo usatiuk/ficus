@@ -24,23 +24,18 @@ protected:
         Node *before         = nullptr;
         bool  end            = false;
 
-        alignas(Data) std::array<unsigned char, sizeof(Data)> data;
-
         Data &get() {
             assert(!end);
-            return *std::launder(reinterpret_cast<Data *>(&data[0]));
+            return *std::launder(reinterpret_cast<Data *>(&_data[0]));
         }
         const Data &get() const {
             assert(!end);
-            return *std::launder(reinterpret_cast<const Data *>(&data[0]));
+            return *std::launder(reinterpret_cast<const Data *>(&_data[0]));
         }
-    };
 
-    // static_assert(std::is_trivially_constructible<Node>::value);
-    // static_assert(std::is_trivially_destructible<Node>::value);
-    // static_assert(std::is_trivially_copyable<Node>::value);
-    // static_assert(std::is_trivially_move_assignable<Node>::value);
-    // static_assert(std::is_trivially_move_constructible<Node>::value);
+    private:
+        alignas(Data) std::array<unsigned char, sizeof(Data)> _data;
+    };
 
     class NodeAllocator {
         static constexpr int size{64};
@@ -138,8 +133,8 @@ public:
                 curL = newLevel;
             }
 
-            auto newNode    = (Node *) nodeAllocator.get();
-            newNode->data   = n->data;
+            auto newNode = (Node *) nodeAllocator.get();
+            new (&newNode->get()) Data(n->get());
             newNode->before = toUpdate[0];
             if (toUpdate[0]->next[0] != nullptr) toUpdate[0]->next[0]->before = newNode;
 
