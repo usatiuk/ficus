@@ -152,12 +152,12 @@ public:
     using iterator       = T *;
     using const_iterator = const T *;
 
-    iterator       begin() { return _cur_size > 0 ? data() : end(); }
-    iterator       end() { return data() + _cur_size + 1; }
-    const_iterator begin() const { return _cur_size > 0 ? data() : end(); }
-    const_iterator end() const { return data() + _cur_size + 1; }
-    const_iterator cbegin() const { return _cur_size > 0 ? data() : end(); }
-    const_iterator cend() const { return data() + _cur_size + 1; }
+    iterator       begin() { return _cur_size > 0 ? _data : end(); }
+    iterator       end() { return _data + _cur_size; }
+    const_iterator begin() const { return _cur_size > 0 ? _data : end(); }
+    const_iterator end() const { return _data + _cur_size; }
+    const_iterator cbegin() const { return _cur_size > 0 ? _data : end(); }
+    const_iterator cend() const { return _data + _cur_size; }
 
 private:
     size_t _capacity = 2;
