@@ -56,7 +56,7 @@ private:
     ListEntry *get_entry(uintptr_t v_addr, size_t length);
 
     //
-    SkipList<uintptr_t, ListEntry> regions;
+    SkipListMap<uintptr_t, ListEntry> regions;
     Mutex                          regions_lock;
 };
 

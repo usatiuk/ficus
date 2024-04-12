@@ -37,14 +37,14 @@ void sanity_check_frame(Arch::TaskFrame *cur_frame) {
     assert2((cur_frame->cs == Arch::GDT::gdt_code.selector() || (cur_frame->ss == Arch::GDT::gdt_code_user.selector()) | 0x3), "CS wrong!");
 }
 
-std::atomic<uint64_t>               max_pid = 0;
-Mutex                               AllTasks_lock;
-SkipList<uint64_t, UniquePtr<Task>> AllTasks;
+std::atomic<uint64_t>                  max_pid = 0;
+Mutex                                  AllTasks_lock;
+SkipListMap<uint64_t, UniquePtr<Task>> AllTasks;
 
-static List<Task *>::Node          *RunningTask;
+static List<Task *>::Node             *RunningTask;
 
-static Spinlock                     NextTasks_lock;
-static List<Task *>                 NextTasks;
+static Spinlock                        NextTasks_lock;
+static List<Task *>                    NextTasks;
 
 // Task freer
 Mutex                      TasksToFree_lock;
@@ -52,11 +52,11 @@ CV                         TasksToFree_cv;
 List<List<Task *>::Node *> TasksToFree;
 
 // Waiting
-Mutex                                    WaitingTasks_mlock;
-CV                                       WaitingTasks_cv;
-SkipList<uint64_t, List<Task *>::Node *> WaitingTasks;
+Mutex                                            WaitingTasks_mlock;
+CV                                               WaitingTasks_cv;
+SkipListMultiMap<uint64_t, List<Task *>::Node *> WaitingTasks;
 
-static std::atomic<bool>                 initialized = false;
+static std::atomic<bool>                         initialized = false;
 
 //
 void Scheduler::remove_self() {
@@ -147,7 +147,7 @@ Task::Task(Task::TaskMode mode, void (*entrypoint)(), const char *name) {
     sanity_check_frame(&_frame);
     {
         LockGuard l(AllTasks_lock);
-        AllTasks.add(_pid, UniquePtr(this));
+        AllTasks.emplace(_pid, UniquePtr(this));
     }
 }
 
@@ -155,12 +155,12 @@ Task::~Task() {
     assert(_state != TaskState::TS_RUNNING);
 }
 
-SkipList<uint64_t, std::pair<String, Task::TaskPID>> Scheduler::getTaskTimePerPid() {
-    SkipList<uint64_t, std::pair<String, Task::TaskPID>> ret;
+SkipListMap<uint64_t, std::pair<String, Task::TaskPID>> Scheduler::getTaskTimePerPid() {
+    SkipListMap<uint64_t, std::pair<String, Task::TaskPID>> ret;
     {
         LockGuard l(AllTasks_lock);
         for (const auto &t: AllTasks) {
-            ret.add(t.data->pid(), std::make_pair(t.data->name(), t.data->used_time()));
+            ret.emplace(t.second->pid(), std::make_pair(t.second->name(), t.second->used_time()));
         }
     }
     return ret;
@@ -216,7 +216,7 @@ void Scheduler::sleep_self(uint64_t diff) {
         {
             WaitingTasks_mlock.lock();
             assert(cur_task() != nullptr);
-            assert(WaitingTasks.add(wake_time, extract_running_task_node()) != nullptr);
+            WaitingTasks.emplace(wake_time, extract_running_task_node());
             Scheduler::self_block(WaitingTasks_mlock);
         }
     }
@@ -233,22 +233,17 @@ static void task_waker() {
         {
             WaitingTasks_mlock.lock();
 
-            while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->key <= micros && WaitingTasks.begin()->data->val->state() != Task::TaskState::TS_RUNNING) {
-                auto *node = &*WaitingTasks.begin();
-                auto  task = WaitingTasks.begin()->data;
+            while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->first <= micros && WaitingTasks.begin()->second->val->state() != Task::TaskState::TS_RUNNING) {
+                auto node  = WaitingTasks.begin();
+                // FIXME:
+                auto node2 = node;
+                ++node2;
+                auto task = WaitingTasks.begin()->second;
 
-                // TODO this is all ugly
-                uint64_t l1 = 0;
-                for (auto cur = node; !cur->end; cur = cur->next[0]) l1++;
-
-                WaitingTasks.erase(node, node->next[0], false);
-
-                uint64_t l2 = 0;
-                for (auto *cur = &*WaitingTasks.begin(); !cur->end; cur = cur->next[0]) l2++;
+                WaitingTasks.erase(node, node2);
 
                 WaitingTasks_mlock.unlock();
 
-                assert(l1 - l2 == 1);
                 task->val->_sleep_until = 0;
                 task->val->_state       = Task::TaskState::TS_RUNNING;
 

@@ -15,7 +15,7 @@
 FDT::FD FDT::open(const Path &p, FileOpts opts) {
     if (auto n = VFSGlobals::root.traverse(p); n.get() != nullptr) {
         LockGuard l(_mtx);
-        _files.add(_cur_fd++, UniquePtr<File>(new File(n, opts)));
+        _files.emplace(_cur_fd++, UniquePtr<File>(new File(n, opts)));
         return _cur_fd - 1;
     }
     if (opts & FileOpts::O_CREAT) {
@@ -27,18 +27,13 @@ FDT::FD FDT::open(const Path &p, FileOpts opts) {
 
 void FDT::close(FDT::FD fd) {
     LockGuard l(_mtx);
-    if (auto f = _files.find(fd))
-        if (!f->end)
-            if (f->key == fd) {
-                _files.erase(fd);
-            }
+    if (auto f = _files.find(fd); f != _files.end())
+        _files.erase(fd);
 }
 File *FDT::get(FDT::FD fd) const {
     LockGuard l(_mtx);
-    if (auto f = _files.find(fd))
-        if (!f->end)
-            if (f->key == fd)
-                return f->data.get();
+    if (auto f = _files.find(fd); f != _files.end())
+        return f->second.get();
     return nullptr;
 }
 
@@ -46,8 +41,8 @@ FDT *FDT::current() {
     return Scheduler::cur_task()->_addressSpace->getFdt();
 }
 FDT::FDT() {
-    _files.add(0, UniquePtr(new File(static_ptr_cast<Node>(TtyPipe::create()), O_RDONLY)));
-    _files.add(1, UniquePtr(new File(static_ptr_cast<Node>(TtyPipe::create()), O_RDWR)));
+    _files.emplace(0, UniquePtr(new File(static_ptr_cast<Node>(TtyPipe::create()), O_RDONLY)));
+    _files.emplace(1, UniquePtr(new File(static_ptr_cast<Node>(TtyPipe::create()), O_RDWR)));
 }
 FDHandle::FDHandle(FDT::FD fd) : _fd(fd) {
 }

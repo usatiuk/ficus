@@ -106,7 +106,7 @@ namespace Scheduler {
     extern "C" void     switch_task(Arch::TaskFrame *cur_frame);
 
     // TODO: that's quite inefficient!
-    SkipList<uint64_t, std::pair<String, Task::TaskPID>> getTaskTimePerPid();
+    SkipListMap<uint64_t, std::pair<String, Task::TaskPID>> getTaskTimePerPid();
 
     void                                                 yield_self();
 } // namespace Scheduler

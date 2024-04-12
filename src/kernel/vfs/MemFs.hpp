@@ -26,7 +26,7 @@ class MemFs : public Filesystem {
 
     private:
         MemFsNodeDir(const String &name) { _name = name; }
-        SkipList<String, SharedPtr<Node>> _children;
+        SkipListMap<String, SharedPtr<Node>> _children;
     };
 
     struct MemFsNodeFile : public NodeFile {

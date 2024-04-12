@@ -14,7 +14,7 @@
 
 VMA::VMA(AddressSpace *space) : space(space) {
     LockGuard l(regions_lock);
-    regions.add(0x1000, {0x1000, 0xFFF8000000000000ULL - 0x20000, EntryType::FREE});
+    regions.emplace(std::make_pair<uintptr_t, ListEntry>(0x1000, {0x1000, 0xFFF8000000000000ULL - 0x20000, EntryType::FREE}));
 }
 
 VMA::ListEntry *VMA::get_entry(uintptr_t v_addr, size_t length) {
@@ -24,7 +24,9 @@ VMA::ListEntry *VMA::get_entry(uintptr_t v_addr, size_t length) {
 
         // Find the region with start before or at v_addr
         if (v_addr) {
-            found = &regions.find(v_addr)->data;
+            auto ub = regions.upper_bound(v_addr);
+            --ub;
+            found = &ub->second;
             // Check if it fits
             if (found->length < length || found->type != EntryType::FREE) found = nullptr;
         }
@@ -32,8 +34,8 @@ VMA::ListEntry *VMA::get_entry(uintptr_t v_addr, size_t length) {
         // Otherwise try to find something else
         if (!found)
             for (auto &n: regions) {
-                if (n.data.type == EntryType::FREE && n.data.length >= length) {
-                    found = &n.data;
+                if (n.second.type == EntryType::FREE && n.second.length >= length) {
+                    found = &n.second;
                     break;
                 }
             }
@@ -46,13 +48,13 @@ VMA::ListEntry *VMA::get_entry(uintptr_t v_addr, size_t length) {
 
         // If our region actually starts before what we requested, then cut it up
         if ((tmpFound.begin < v_addr) && (tmpFound.length > ((v_addr - tmpFound.begin) + length))) {
-            regions.add(tmpFound.begin, {tmpFound.begin, v_addr - tmpFound.begin, EntryType::FREE});
+            regions.emplace(std::make_pair<uintptr_t, ListEntry>((uintptr_t) tmpFound.begin, {tmpFound.begin, v_addr - tmpFound.begin, EntryType::FREE}));
             tmpFound.begin = v_addr;
             tmpFound.length -= v_addr - tmpFound.begin;
         }
 
-        regions.add(tmpFound.begin + length, {tmpFound.begin + length, tmpFound.length - length, EntryType::FREE});
-        found = &regions.add(tmpFound.begin, {tmpFound.begin, length, EntryType::ANON})->data;
+        regions.emplace(std::make_pair<uintptr_t, ListEntry>(tmpFound.begin + length, {tmpFound.begin + length, tmpFound.length - length, EntryType::FREE}));
+        found = &regions.emplace(std::make_pair<uintptr_t, ListEntry>((uintptr_t) tmpFound.begin, {tmpFound.begin, length, EntryType::ANON})).first->second;
     }
     return found;
 }
@@ -106,11 +108,11 @@ int VMA::munmap(void *addr, size_t length) {
 }
 VMA::~VMA() {
     for (const auto &e: regions) {
-        if (e.data.type == EntryType::ANON) {
-            assert((e.data.length & (PAGE_SIZE - 1)) == 0);
-            uint64_t page_len = e.data.length / PAGE_SIZE;
+        if (e.second.type == EntryType::ANON) {
+            assert((e.second.length & (PAGE_SIZE - 1)) == 0);
+            uint64_t page_len = e.second.length / PAGE_SIZE;
             for (int i = 0; i < page_len; i++) {
-                free4k((void *) HHDM_P2V(space->virt2real(reinterpret_cast<void *>(e.data.begin + i * PAGE_SIZE))));
+                free4k((void *) HHDM_P2V(space->virt2real(reinterpret_cast<void *>(e.second.begin + i * PAGE_SIZE))));
             }
         }
     }

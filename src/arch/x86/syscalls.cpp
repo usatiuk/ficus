@@ -107,36 +107,36 @@ uint64_t syscall_lseek(uint64_t fd, uint64_t off, uint64_t whence) {
 }
 
 uint64_t syscall_print_tasks() {
-    static SkipList<uint64_t, std::pair<String, uint64_t>> last_times      = Scheduler::getTaskTimePerPid();
-    static std::atomic<uint64_t>                           last_print_time = micros;
+    static SkipListMap<uint64_t, std::pair<String, uint64_t>> last_times      = Scheduler::getTaskTimePerPid();
+    static std::atomic<uint64_t>                              last_print_time = micros;
 
-    uint64_t                                               prev_print_time = last_print_time;
-    last_print_time                                                        = micros;
-    SkipList<uint64_t, std::pair<String, uint64_t>> prev_times             = std::move(last_times);
-    last_times                                                             = Scheduler::getTaskTimePerPid();
+    uint64_t                                                  prev_print_time = last_print_time;
+    last_print_time                                                           = micros;
+    SkipListMap<uint64_t, std::pair<String, uint64_t>> prev_times             = std::move(last_times);
+    last_times                                                                = Scheduler::getTaskTimePerPid();
 
-    uint64_t slice                                                         = last_print_time - prev_print_time;
+    uint64_t slice                                                            = last_print_time - prev_print_time;
     if (slice == 0) return 0;
 
     for (const auto &t: prev_times) {
-        auto f = last_times.find(t.key);
-        if (!f->end && f->key == t.key) {
-            assert(f->data.second >= t.data.second);
+        auto f = last_times.find(t.first);
+        if (f != last_times.end()) {
+            assert(f->second.second >= t.second.second);
             String buf;
             buf += "PID: ";
-            buf += t.key;
+            buf += t.first;
             buf += " ";
-            buf += t.data.first;
+            buf += t.second.first;
             buf += " usage: ";
-            buf += (((f->data.second - t.data.second) * 100ULL) / slice);
+            buf += (((f->second.second - t.second.second) * 100ULL) / slice);
             buf += "%\n";
             GlobalTtyManager.all_tty_putstr(buf.c_str());
         } else {
             String buf;
             buf += "PID: ";
-            buf += t.key;
+            buf += t.first;
             buf += " ";
-            buf += t.data.first;
+            buf += t.second.first;
             buf += " dead \n";
             GlobalTtyManager.all_tty_putstr(buf.c_str());
         }

@@ -24,7 +24,7 @@ public:
     static FDT *current();
 
 private:
-    SkipList<FD, UniquePtr<File>> _files;
+    SkipListMap<FD, UniquePtr<File>> _files;
     int64_t                       _cur_fd = 10;
     mutable Mutex                 _mtx;
 };

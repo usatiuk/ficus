@@ -5,13 +5,13 @@
 #include "TestTemplates.hpp"
 
 
-#include "assert.h"
 #include "List.hpp"
 #include "PointersCollection.hpp"
 #include "SkipList.hpp"
 #include "SkipListSet.hpp"
 #include "String.hpp"
 #include "Vector.hpp"
+#include "assert.h"
 
 #include "TtyManager.hpp"
 
@@ -153,28 +153,28 @@ public:
 class SkipListTester {
 public:
     bool test() {
-        SkipList<int, String> test1;
+        SkipListMap<int, String> test1;
 
-        test1.add(5, "test5", false);
-        test1.add(999, "test999", false);
-        test1.add(5, "test5", false);
-        test1.add(1, "test1", false);
-        test1.add(999, "test999", false);
+        test1.emplace(5, "test5");
+        test1.emplace(999, "test999");
+        test1.emplace(5, "test5");
+        test1.emplace(1, "test1");
+        test1.emplace(999, "test999");
 
-        assert(test1.find(5)->data == "test5");
-        assert(test1.find(1)->data == "test1");
-        assert(test1.find(999)->data == "test999");
+        assert(test1.find(5)->second == "test5");
+        assert(test1.find(1)->second == "test1");
+        assert(test1.find(999)->second == "test999");
+
+        typename decltype(test1)::iterator       tit  = test1.begin();
+        typename decltype(test1)::const_iterator tcit = tit;
 
         test1.erase(1);
-        assert(test1.find(1)->data != "test1");
-        test1.add(87, "test87", false);
-        assert(test1.find(87)->data == "test87");
+        assert(test1.find(1) == test1.cend());
+        test1.emplace(87, "test87");
+        assert(test1.find(87)->second == "test87");
 
-        auto p2 = test1.lower_bound_update(78);
-        assert(p2->data == "test87");
-        test1.add(78, "test78", true);
-        assert(test1.find(78)->data == "test78");
-
+        test1.emplace(78, "test78");
+        assert(test1.find(78)->second == "test78");
         // GlobalTtyManager.all_tty_putstr("SkipList tests ok!\n");
         return true;
     }

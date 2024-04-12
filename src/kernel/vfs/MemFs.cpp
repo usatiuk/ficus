@@ -12,7 +12,7 @@ Vector<SharedPtr<Node>> MemFs::MemFsNodeDir::children() {
 
     Vector<SharedPtr<Node>> out;
     for (auto c: _children) {
-        out.emplace_back(c.data);
+        out.emplace_back(c.second);
     }
     return out;
 }
@@ -20,13 +20,13 @@ Vector<SharedPtr<Node>> MemFs::MemFsNodeDir::children() {
 SharedPtr<NodeDir> MemFs::MemFsNodeDir::mkdir(const String &name) {
     LockGuard l(_lock);
     auto      newnode = MemFsNodeDir::create(name);
-    _children.add(name, static_ptr_cast<Node>(newnode));
+    _children.emplace(name, static_ptr_cast<Node>(newnode));
     return static_ptr_cast<NodeDir>(newnode);
 }
 SharedPtr<NodeFile> MemFs::MemFsNodeDir::mkfile(const String &name) {
     LockGuard l(_lock);
     auto      newfile = MemFsNodeFile::create(name);
-    _children.add(name, static_ptr_cast<Node>(newfile));
+    _children.emplace(name, static_ptr_cast<Node>(newfile));
     return static_ptr_cast<NodeFile>(newfile);
 }
 int64_t MemFs::MemFsNodeFile::read(char *buf, size_t start, size_t num) {
