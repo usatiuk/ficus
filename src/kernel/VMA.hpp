@@ -37,6 +37,8 @@ public:
     std::optional<char*> brk_end_fake;
     std::optional<char*> brk_end_real;
 
+    void clone_from(const VMA& vma);
+
 private:
     AddressSpace *space = nullptr;
     Mutex         space_lock;
@@ -51,6 +53,7 @@ private:
         uintptr_t begin;
         uint64_t  length;
         EntryType type = EntryType::FREE;
+        int flags;
     };
 
     ListEntry *get_entry(uintptr_t v_addr, size_t length);

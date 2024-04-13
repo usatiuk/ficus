@@ -6,8 +6,8 @@
 #include "VFSApi.hpp"
 #include "VMA.hpp"
 
-#include <sys/syscalls.h>
 #include <sys/dirent.h>
+#include <sys/syscalls.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -24,6 +24,7 @@
 #include "Vector.hpp"
 #include "memman.hpp"
 #include "paging.hpp"
+#include "sys/types.h"
 #include "task.hpp"
 #include "timer.hpp"
 
@@ -245,6 +246,15 @@ int64_t syscall_getdents(int fd, struct dirent *dp, int count) {
     return count * sizeof(dirent);
 }
 
+pid_t syscall_fork() {
+    Task *utask       = Scheduler::cur_task()->clone();
+    utask->_frame.rax = 0;
+    utask->_frame.ip  = (uint64_t) &_syscall_ret;
+    utask->start();
+    return utask->pid();
+}
+
+
 extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     assert2(are_interrupts_enabled(), "why wouldn't they be?");
     switch (id_rdi) {
@@ -268,6 +278,8 @@ extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_r
             return syscall_write(a1_rsi, reinterpret_cast<const char *>(a2_rdx), a3_rcx);
         case SYSCALL_LSEEK_ID:
             return syscall_lseek(a1_rsi, a2_rdx, a3_rcx);
+        case SYSCALL_FORK_ID:
+            return syscall_fork();
         case SYSCALL_EXECVE_ID:
             return syscall_execve(reinterpret_cast<const char *>(a1_rsi), reinterpret_cast<char *const *>(a2_rdx), reinterpret_cast<char *const *>(a3_rcx));
         case SYSCALL_SBRK_ID:

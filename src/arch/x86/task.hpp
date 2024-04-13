@@ -33,10 +33,10 @@ public:
         TS_BLOCKED
     };
 
-    Task(TaskMode mode, void (*entrypoint)(), const char *name);
+                                Task(TaskMode mode, void (*entrypoint)(), const char *name);
 
-    Task(const Task &)                                  = delete;
-    Task(Task &&)                                       = delete;
+                                Task(const Task &)      = delete;
+                                Task(Task &&)           = delete;
     Task                       &operator=(const Task &) = delete;
     Task                       &operator=(Task &&)      = delete;
 
@@ -47,7 +47,9 @@ public:
     [[nodiscard]] uint64_t      used_time() const { return _used_time; }
     [[nodiscard]] TaskState     state() const { return _state; }
 
-    ~Task();
+    ~                           Task();
+
+    Task                       *clone();
 
     //private:
     struct KernStack {
@@ -59,7 +61,7 @@ public:
     } __attribute__((aligned(16)));
 
     uint64_t              _entry_ksp_val;
-    Arch::TaskFrame             _frame;
+    Arch::TaskFrame       _frame;
     TaskPID               _pid;
     std::atomic<uint64_t> _used_time;
 
@@ -83,6 +85,7 @@ struct task_pointer {
     uint64_t entry_ksp_val;
     uint64_t ret_sp;
     uint64_t ret_flags;
+    uint64_t ret_ip;
 } __attribute__((packed));
 
 namespace Scheduler {
@@ -108,7 +111,7 @@ namespace Scheduler {
     // TODO: that's quite inefficient!
     SkipListMap<uint64_t, std::pair<String, Task::TaskPID>> getTaskTimePerPid();
 
-    void                                                 yield_self();
+    void                                                    yield_self();
 } // namespace Scheduler
 
 // Expects the caller to save interrupt state

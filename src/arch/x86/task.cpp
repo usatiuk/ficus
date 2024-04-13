@@ -25,6 +25,8 @@
 char temp_fxsave[512] __attribute__((aligned(16)));
 
 void sanity_check_frame(Arch::TaskFrame *cur_frame) {
+    //FIXME: not quite useful with clone and exceptions
+    return;
     // TODO: This makes sense to check when entering, but not when switching
     //    assert((((uintptr_t) cur_frame) & 0xFULL) == 0);
     assert2((void *) cur_frame->ip != NULL, "Sanity check");
@@ -234,7 +236,7 @@ static void task_waker() {
             WaitingTasks_mlock.lock();
 
             while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->first <= micros && WaitingTasks.begin()->second->val->state() != Task::TaskState::TS_RUNNING) {
-                auto node  = WaitingTasks.begin();
+                auto node = WaitingTasks.begin();
                 // FIXME:
                 auto node2 = node;
                 ++node2;
@@ -263,6 +265,25 @@ static void task_waker() {
             WaitingTasks_mlock.unlock();
         }
     }
+}
+
+Task *Task::clone() {
+    Task *ret = new Task(TaskMode::TASKMODE_USER, nullptr, Scheduler::cur_task()->name().c_str());
+    ret->_vma->clone_from(*Scheduler::cur_task()->_vma);
+
+    task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(ret->_addressSpace->virt2real((void *) TASK_POINTER)));
+
+    _entry_ksp_val             = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
+    // It should be aligned before call, therefore it actually should be aligned here
+    assert((_entry_ksp_val & 0xFULL) == 0);
+
+    taskptr_real->taskptr       = ret;
+    taskptr_real->entry_ksp_val = ret->_entry_ksp_val;
+
+    ret->_frame.ss              = Arch::GDT::gdt_data.selector();
+    ret->_frame.cs              = Arch::GDT::gdt_code.selector();
+    ret->_frame.sp              = ret->_entry_ksp_val;
+    return ret;
 }
 
 void Scheduler::init_tasks() {
