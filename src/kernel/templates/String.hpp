@@ -48,7 +48,8 @@ public:
     }
 
     String &operator+=(String const &rhs) {
-        _data = static_cast<char *>(krealloc(_data, _cur_len + rhs._cur_len + 1));
+        _data           = static_cast<char *>(krealloc(_data, _cur_len + rhs._cur_len + 1));
+        _data[_cur_len] = '\0';
         assert(_data != nullptr);
 
         strcat(_data, rhs._data);
