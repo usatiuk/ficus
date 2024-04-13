@@ -11,16 +11,17 @@
 #include "VFSApi.hpp"
 #include "VFSGlobals.hpp"
 #include "paging.hpp"
+#include <sys/fcntl.h>
 
-FDT::FD FDT::open(const Path &p, FileOpts opts) {
+FDT::FD FDT::open(const Path &p, int opts) {
     if (auto n = VFSGlobals::root.traverse(p); n.get() != nullptr) {
         LockGuard l(_mtx);
         _files.emplace(_cur_fd++, UniquePtr<File>(new File(n, opts)));
         return _cur_fd - 1;
     }
-    if (opts & FileOpts::O_CREAT) {
+    if (opts & O_CREAT) {
         if (!VFSApi::touch(p)) return -1;
-        return FDT::open(p, static_cast<FileOpts>(opts ^ FileOpts::O_CREAT));
+        return FDT::open(p, opts ^ O_CREAT);
     }
     return -1;
 }

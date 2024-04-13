@@ -27,7 +27,6 @@
 #include "mutex.hpp"
 #include "rand.h"
 #include "syscalls.hpp"
-#include "syscalls_interface.h"
 #include "task.hpp"
 #include "timer.hpp"
 

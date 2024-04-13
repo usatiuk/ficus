@@ -7,6 +7,8 @@
 #include "File.hpp"
 #include "Node.hpp"
 
+#include <sys/fcntl.h>
+
 bool VFSApi::mkdir(const Path &path) {
     auto     root    = path.subvector(0, path.size() - 1);
     FDHandle root_fd = FDHandle(FDT::current()->open(root, O_RDWR));

@@ -8,9 +8,9 @@
 
 #include "Node.hpp"
 
-File::File(SharedPtr<Node> node, FileOpts opts) : _n(std::move(node)), _opts(opts) {
-    if (opts & FileOpts::O_WRONLY)
-        assert(opts & FileOpts::O_RDONLY);
+#include <sys/fcntl.h>
+
+File::File(SharedPtr<Node> node, int opts) : _n(std::move(node)), _opts(opts) {
 }
 File::~File() {
 }
@@ -37,7 +37,7 @@ uint64_t File::read(char *buf, uint64_t size) {
     }
 }
 uint64_t File::write(const char *buf, uint64_t size) {
-    if (!(_opts & FileOpts::O_WRONLY)) return -1;
+    if (_opts & O_RDONLY) return -1;
     if (file().get() != nullptr) {
         int64_t fret = file()->write(buf, _pos, size);
         _pos += fret;

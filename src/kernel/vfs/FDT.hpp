@@ -17,7 +17,7 @@ public:
     FDT();
 
     using FD = int64_t;
-    FD          open(const Path &p, FileOpts opts);
+    FD          open(const Path &p, int opts);
     void        close(FD fd);
     File       *get(FD fd) const;
 

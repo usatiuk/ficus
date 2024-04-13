@@ -1,20 +1,13 @@
 //
-// Created by Stepan Usatiuk on 26.10.2023.
+// Created by Stepan Usatiuk on 13.04.2024.
 //
 
-#ifndef FICUS_SYSCALLS_DEFS_H
-#define FICUS_SYSCALLS_DEFS_H
-
-// FIXME!: Don't duplicate this please
+#ifndef _SYS_SYSCALLS_H
+#define _SYS_SYSCALLS_H
 
 #ifdef __cplusplus
-#include <cstdint>
 extern "C" {
-#else
-#include <stdint.h>
 #endif
-
-#include "FileOpts.h"
 
 #define SYSCALL_EXIT_ID     0
 
@@ -36,13 +29,18 @@ extern "C" {
 #define SYSCALL_UNLINK_ID   13
 
 #define SYSCALL_EXECVE_ID   50
+#define SYSCALL_FORK_ID     51
 #define SYSCALL_SBRK_ID     100
+
 
 #define SYSCALL_PRINT_MEM   1000
 #define SYSCALL_PRINT_TASKS 1001
+
+void     print_mem();
+void     print_tasks();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //FICUS_SYSCALLS_DEFS_H
+#endif //_SYS_SYSCALLS_H

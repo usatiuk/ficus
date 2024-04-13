@@ -33,8 +33,6 @@ target_include_directories(kernel.elf PRIVATE ${tools}/limine/prefix/include)
 
 add_subdirectory(./arch/)
 add_subdirectory(./kernel/)
-add_subdirectory(./uapi/)
-
 
 if (TEST_MODE)
     add_compile_options(-Wall -O0 -Wextra -pedantic -fno-omit-frame-pointer -Wshadow -Wformat=2 -Wfloat-equal -D_GLIBCXX_DEBUG -Wconversion -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2)
@@ -45,7 +43,6 @@ if (TEST_MODE)
     add_link_options(-rdynamic)
 
     set_target_properties(kernel.elf PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
-    set_target_properties(syscalls_interface PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
     add_subdirectory(./unit-tests/)
 endif ()
 

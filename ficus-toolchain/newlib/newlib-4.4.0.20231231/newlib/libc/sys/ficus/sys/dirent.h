@@ -36,6 +36,10 @@
 #ifndef    _SYS_DIRENT_H_
 #define    _SYS_DIRENT_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/cdefs.h>
 #include <sys/syslimits.h>
 
@@ -95,5 +99,9 @@ typedef struct _dirdesc {
 } DIR;
 
 //#define    dirfd(dirp)    ((dirp)->dd_fd)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !_SYS_DIRENT_H_ */

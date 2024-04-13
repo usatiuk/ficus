@@ -5,7 +5,9 @@
 #include "syscalls.hpp"
 #include "VFSApi.hpp"
 #include "VMA.hpp"
-#include "syscalls_defs.h"
+
+#include <sys/syscalls.h>
+#include <sys/dirent.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -78,7 +80,7 @@ uint64_t syscall_readchar() {
 }
 
 uint64_t syscall_open(const char *pathname, int flags) {
-    FDT::FD res = FDT::current()->open(StrToPath(pathname), static_cast<FileOpts>(flags));
+    FDT::FD res = FDT::current()->open(StrToPath(pathname), flags);
     return res;
 }
 
@@ -214,14 +216,6 @@ char *syscall_sbrk(int brk) {
 
     return ret;
 }
-struct dirent {
-    unsigned long  d_fileno;        /* file number of entry */
-    unsigned short d_reclen;        /* length of this record */
-    unsigned char  d_type;          /* file type, see below */
-    unsigned char  d_namlen;        /* length of string in d_name */
-    char           d_name[255 + 1]; /* name must be no longer than this */
-};
-
 
 int64_t syscall_getdents(int fd, struct dirent *dp, int count) {
     auto f = FDT::current()->get(fd);

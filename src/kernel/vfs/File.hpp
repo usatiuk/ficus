@@ -5,7 +5,6 @@
 #ifndef FICUS_FILE_HPP
 #define FICUS_FILE_HPP
 
-#include "FileOpts.h"
 #include "PointersCollection.hpp"
 
 #include <cstdint>
@@ -16,7 +15,7 @@ class NodeFile;
 
 class File {
 public:
-    File(SharedPtr<Node> n, FileOpts opts);
+    File(SharedPtr<Node> n, int opts);
     ~File();
     File(const File &f)                          = delete;
     File               &operator=(const File &o) = delete;
@@ -34,7 +33,7 @@ public:
 private:
     SharedPtr<Node> _n;
     uint64_t        _pos = 0;
-    FileOpts        _opts;
+    int        _opts;
 };
 
 #endif //FICUS_FILE_HPP
