@@ -237,12 +237,10 @@ static void task_waker() {
 
             while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->first <= micros && WaitingTasks.begin()->second->val->state() != Task::TaskState::TS_RUNNING) {
                 auto node = WaitingTasks.begin();
-                // FIXME:
-                auto node2 = node;
-                ++node2;
-                auto task = WaitingTasks.begin()->second;
 
-                WaitingTasks.erase(node, node2);
+                auto task = node->second;
+
+                WaitingTasks.erase(node);
 
                 WaitingTasks_mlock.unlock();
 
@@ -256,11 +254,6 @@ static void task_waker() {
 
                 WaitingTasks_mlock.lock();
             }
-            WaitingTasks_mlock.unlock();
-        }
-        {
-            // TODO: this is ugly
-            WaitingTasks_mlock.lock();
             WaitingTasks_cv.wait(WaitingTasks_mlock);
             WaitingTasks_mlock.unlock();
         }
