@@ -316,11 +316,12 @@ protected:
     }
 
     // Comparator true if less than, 0 if equal
+    template<class Comparator>
     std::pair<Node *, bool> erase(const const_iterator &k) {
         Node *cur = root;
 
         for (int i = curL; i >= 0; i--) {
-            while (!cur->next[i]->end() && cur->next[i] != k.n)
+            while (!cur->next[i]->end() && Comparator()(cur->next[i]->get(), *k))
                 cur = cur->next[i];
             toUpdate[i] = cur;
         }
@@ -577,7 +578,7 @@ public:
     }
 
     iterator erase(const_iterator el) {
-        std::pair<typename BaseT::Node *, bool> n = BaseT::erase(el);
+        std::pair<typename BaseT::Node *, bool> n = BaseT::template erase<Cmp>(el);
         if (n.first->end()) return end();
         return iterator(n.first);
     }
