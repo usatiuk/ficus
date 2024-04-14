@@ -21,7 +21,11 @@ void SerialTty::putstr(const char *str) {
 static int read() {
     if (!(inb(PORT + 5) & 1)) return -1;
     char r = inb(PORT);
-    write_serial(r);
+    if (r == '\n' || r == '\r') {
+        write_serial('\n');
+        write_serial('\r');
+    } else
+        write_serial(r);
     return r;
 }
 
