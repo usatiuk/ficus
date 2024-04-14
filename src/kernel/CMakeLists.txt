@@ -14,6 +14,7 @@ target_sources(kernel.elf PRIVATE
         BytesFormatter.cpp
         string.c
         TestTemplates.cpp
+        Framebuffer.cpp
 )
 
 add_subdirectory(templates)

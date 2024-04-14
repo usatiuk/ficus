@@ -79,7 +79,7 @@ void *__dso_handle = nullptr;
 
 // Do we really care about destructors at kernel exit?
 int __cxa_atexit(void (*f)(void *), void *objptr, void *dso) {
-    writestr_no_yield("Something registered\n");
+    // writestr_no_yield("Something registered\n");
     return 0;
 };
 
