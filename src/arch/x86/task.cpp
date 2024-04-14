@@ -54,9 +54,9 @@ CV                         TasksToFree_cv;
 List<List<Task *>::Node *> TasksToFree;
 
 // Waiting
-Mutex                                            WaitingTasks_mlock;
-CV                                               WaitingTasks_cv;
-SkipListMultiMap<uint64_t, List<Task *>::Node *> WaitingTasks;
+Mutex                                               WaitingTasks_mlock;
+CV                                                  WaitingTasks_cv;
+SkipListMap<uint64_t, Vector<List<Task *>::Node *>> WaitingTasks;
 
 static std::atomic<bool>                         initialized = false;
 
@@ -218,7 +218,10 @@ void Scheduler::sleep_self(uint64_t diff) {
         {
             WaitingTasks_mlock.lock();
             assert(cur_task() != nullptr);
-            WaitingTasks.emplace(wake_time, extract_running_task_node());
+            if (auto found = WaitingTasks.find(wake_time); found != WaitingTasks.end())
+                found->second.emplace_back(extract_running_task_node());
+            else
+                WaitingTasks.emplace(std::make_pair(wake_time, std::move(Vector<List<Task *>::Node *>{extract_running_task_node()})));
             Scheduler::self_block(WaitingTasks_mlock);
         }
     }
@@ -235,21 +238,33 @@ static void task_waker() {
         {
             WaitingTasks_mlock.lock();
 
-            while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->first <= micros && WaitingTasks.begin()->second->val->state() != Task::TaskState::TS_RUNNING) {
-                auto node = WaitingTasks.begin();
+            while (WaitingTasks.begin() != WaitingTasks.end() && WaitingTasks.begin()->first <= micros) {
+                auto node  = WaitingTasks.begin();
+                auto tasks = node->second;
 
-                auto task = node->second;
+                bool ok    = true;
+                for (const auto &task: tasks) {
+                    if (task->val->state() == Task::TaskState::TS_RUNNING) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (!ok) break;
+
+                Vector<List<Task *>::Node *> to_wake = std::move(tasks);
 
                 WaitingTasks.erase(node);
 
                 WaitingTasks_mlock.unlock();
 
-                task->val->_sleep_until = 0;
-                task->val->_state       = Task::TaskState::TS_RUNNING;
+                for (auto &task: to_wake) {
+                    task->val->_sleep_until = 0;
+                    task->val->_state       = Task::TaskState::TS_RUNNING;
 
-                {
-                    SpinlockLockNoInt l(NextTasks_lock);
-                    NextTasks.emplace_front(task);
+                    {
+                        SpinlockLockNoInt l(NextTasks_lock);
+                        NextTasks.emplace_front(task);
+                    }
                 }
 
                 WaitingTasks_mlock.lock();

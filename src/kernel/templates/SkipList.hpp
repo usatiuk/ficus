@@ -587,8 +587,8 @@ public:
 template<typename K, typename V, typename CmpBase = std::less<K>>
 using SkipListMap = SkipListMapBase<false, K, V, CmpBase>;
 
-//FIXME: erase is probably janky with this
-template<typename K, typename V, typename CmpBase = std::less<K>>
-using SkipListMultiMap = SkipListMapBase<true, K, V, CmpBase>;
+//FIXME: erase is janky with this
+// template<typename K, typename V, typename CmpBase = std::less<K>>
+// using SkipListMultiMap = SkipListMapBase<true, K, V, CmpBase>;
 
 #endif
