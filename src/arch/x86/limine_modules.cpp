@@ -17,7 +17,7 @@ limine_file saved_modules[max_saved_modules];
 char        saved_modules_names[max_saved_modules][max_saved_module_name] __attribute__((aligned(4096)));
 unsigned    saved_modules_size = 0;
 
-void        limine_modules_remap() {
+void limine_modules_remap() {
     for (int i = 0; i < module_request.response->module_count; i++) {
         assert2(i < max_saved_modules, "Too many modules");
 

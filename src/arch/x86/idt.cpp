@@ -13,7 +13,7 @@ namespace Arch::IDT {
     __attribute__((aligned(0x10))) static IdtEntry idt[256]; // Create an array of IDT entries; aligned for performance
 
     //
-    static Idtr     idtr;
+    static Idtr idtr;
 
     extern "C" void pic1_irq_0();
     extern "C" void pic1_irq_1();
@@ -34,8 +34,8 @@ namespace Arch::IDT {
     extern "C" void pic2_irq_7();
 
 
-    void            idt_set_descriptor(uint8_t vector, void (*isr)(), uint8_t flags) {
-        IdtEntry *descriptor   = &idt[vector];
+    void idt_set_descriptor(uint8_t vector, void (*isr)(), uint8_t flags) {
+        IdtEntry *descriptor = &idt[vector];
 
         descriptor->isr_low    = (uint64_t) isr & 0xFFFF;
         descriptor->kernel_cs  = Arch::GDT::gdt_code.selector();

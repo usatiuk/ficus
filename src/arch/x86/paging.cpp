@@ -55,10 +55,10 @@ void *AddressSpace::virt2real(void *virt) {
     assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HHDM!");
     assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HHDM!");
 
-    uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
-    uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
-    uint64_t  pdei  = (uint64_t) virt >> 21 & 0x01FF;
-    uint64_t  ptsi  = (uint64_t) virt >> 12 & 0x01FF;
+    uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
+    uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;
+    uint64_t pdei  = (uint64_t) virt >> 21 & 0x01FF;
+    uint64_t ptsi  = (uint64_t) virt >> 12 & 0x01FF;
 
     uint64_t *pml4e = PML4 + pml4i;
     if (!((*pml4e) & PAGE_PRESENT)) return 0;
@@ -89,10 +89,10 @@ int AddressSpace::map(void *virt, void *real, uint32_t flags) {
     assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HHDM!");
     assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HHDM!");
 
-    uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
-    uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
-    uint64_t  pdei  = (uint64_t) virt >> 21 & 0x01FF;
-    uint64_t  ptsi  = (uint64_t) virt >> 12 & 0x01FF;
+    uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
+    uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;
+    uint64_t pdei  = (uint64_t) virt >> 21 & 0x01FF;
+    uint64_t ptsi  = (uint64_t) virt >> 12 & 0x01FF;
 
 
     uint64_t *pml4e = PML4 + pml4i;
@@ -144,10 +144,10 @@ int AddressSpace::unmap(void *virt) {
     assert2((uint64_t) PML4 >= HHDM_BEGIN, "CR3 here must be in HHDM!");
     assert2((uint64_t) PML4 < kernel_virt_base, "CR3 here must be in HHDM!");
 
-    uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
-    uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
-    uint64_t  pdei  = (uint64_t) virt >> 21 & 0x01FF;
-    uint64_t  ptsi  = (uint64_t) virt >> 12 & 0x01FF;
+    uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
+    uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;
+    uint64_t pdei  = (uint64_t) virt >> 21 & 0x01FF;
+    uint64_t ptsi  = (uint64_t) virt >> 12 & 0x01FF;
 
     uint64_t *pml4e = PML4 + pml4i;
 
@@ -193,10 +193,10 @@ void limine_kern_save_response() {
 static uint64_t early_pages[EARLY_PAGES_SIZE][512] __attribute__((aligned(PAGE_SIZE)));
 static uint64_t early_pages_used = 0;
 
-uintptr_t       kernel_phys_base;
-uintptr_t       kernel_virt_base;
+uintptr_t kernel_phys_base;
+uintptr_t kernel_virt_base;
 
-uint64_t       *get_early_frame() {
+uint64_t *get_early_frame() {
     assert2(early_pages_used < EARLY_PAGES_SIZE, "Couldn't get a page for HHDM!");
     uint64_t *newp = early_pages[early_pages_used++];
     for (int i = 0; i < 512; i++)
@@ -221,16 +221,16 @@ void map_hhdm(uint64_t *pml4) {
         // Assuming everything related to paging is HHDM
         assert2((uint64_t) pml4 < 0x8000000000000000ULL, "CR3 here must be physical!");
 
-        uint64_t  pml4i = (uint64_t) virt >> 39 & 0x01FF;
-        uint64_t  pdpei = (uint64_t) virt >> 30 & 0x01FF;
-        uint64_t  pdei  = (uint64_t) virt >> 21 & 0x01FF;
+        uint64_t pml4i = (uint64_t) virt >> 39 & 0x01FF;
+        uint64_t pdpei = (uint64_t) virt >> 30 & 0x01FF;
+        uint64_t pdei  = (uint64_t) virt >> 21 & 0x01FF;
 
         uint64_t *pml4e = pml4 + pml4i;
 
         if (!(*pml4e & PAGE_PRESENT)) {
             uint64_t *newp = get_early_frame();
 
-            *pml4e         = PAGE_PRESENT | PAGE_RW | PAGE_USER;
+            *pml4e = PAGE_PRESENT | PAGE_RW | PAGE_USER;
             *pml4e |= (uint64_t) KERN_V2P(newp) & (uint64_t) 0x000FFFFFFFFFF000ULL;
         }
 
@@ -240,7 +240,7 @@ void map_hhdm(uint64_t *pml4) {
         if (!(*pdpee & PAGE_PRESENT)) {
             uint64_t *newp = get_early_frame();
 
-            *pdpee         = PAGE_PRESENT | PAGE_RW | PAGE_USER;
+            *pdpee = PAGE_PRESENT | PAGE_RW | PAGE_USER;
             *pdpee |= (uint64_t) KERN_V2P(newp) & (uint64_t) 0x000FFFFFFFFFF000ULL;
         }
 

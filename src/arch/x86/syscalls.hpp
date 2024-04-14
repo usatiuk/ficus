@@ -7,12 +7,12 @@
 
 #include <cstdint>
 
-void                setup_syscalls();
+void setup_syscalls();
 
-extern "C" void     _syscall_entrypoint();
-extern "C" void     _execve_entrypoint();
+extern "C" void _syscall_entrypoint();
+extern "C" void _execve_entrypoint();
 
-extern "C" void     _syscall_ret();
+extern "C" void _syscall_ret();
 
 extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx);
 

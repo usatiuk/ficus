@@ -115,12 +115,12 @@ uint64_t syscall_print_tasks() {
     static SkipListMap<pid_t, std::pair<String, uint64_t>> last_times      = Scheduler::getTaskTimePerPid();
     static std::atomic<uint64_t>                           last_print_time = micros;
 
-    uint64_t                                               prev_print_time = last_print_time;
-    last_print_time                                                        = micros;
-    SkipListMap<pid_t, std::pair<String, uint64_t>> prev_times             = std::move(last_times);
-    last_times                                                             = Scheduler::getTaskTimePerPid();
+    uint64_t prev_print_time                                   = last_print_time;
+    last_print_time                                            = micros;
+    SkipListMap<pid_t, std::pair<String, uint64_t>> prev_times = std::move(last_times);
+    last_times                                                 = Scheduler::getTaskTimePerPid();
 
-    uint64_t slice                                                         = last_print_time - prev_print_time;
+    uint64_t slice = last_print_time - prev_print_time;
     if (slice == 0) return 0;
 
     for (const auto &t: prev_times) {
@@ -187,7 +187,7 @@ uint64_t syscall_execve(const char *pathname, char *const argv[], char *const en
 
     ElfParser elfParser(read_data);
 
-    uint64_t  flags_bak = ((task_pointer *) (TASK_POINTER))->ret_flags;
+    uint64_t flags_bak = ((task_pointer *) (TASK_POINTER))->ret_flags;
     Scheduler::cur_task()->user_reset();
 
     if (!elfParser.copy_to(Scheduler::cur_task()))
@@ -208,7 +208,7 @@ uint64_t syscall_execve(const char *pathname, char *const argv[], char *const en
 }
 
 char *syscall_sbrk(int brk) {
-    auto  vma = Scheduler::cur_task()->_vma.get();
+    auto vma = Scheduler::cur_task()->_vma.get();
 
     char *ret = reinterpret_cast<char *>(-1);
 

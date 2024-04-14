@@ -69,7 +69,7 @@ void ktask() {
 
 static Mutex testmutex;
 
-void         mtest1() {
+void mtest1() {
     {
         LockGuard l(testmutex);
         GlobalTtyManager.all_tty_putstr("Locked1\n");
@@ -160,7 +160,7 @@ void ktask_main() {
             memcpy(read_data.begin(), mod.address, mod.size);
             ElfParser elfParser(std::move(read_data));
 
-            Task     *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), saved_modules_names[i]);
+            Task *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), saved_modules_names[i]);
             if (elfParser.copy_to(utask))
                 utask->start();
             else
@@ -180,7 +180,7 @@ void dummy_task() {
 extern void (*ctors_begin[])();
 extern void (*ctors_end[])();
 
-void        kmain() {
+void kmain() {
     for (void (**ctor)() = ctors_begin; ctor < ctors_end; ctor++)
         (*ctor)();
 

@@ -29,9 +29,9 @@ public:
         _cur_size = l.size();
         _capacity = _cur_size > 0 ? _cur_size : 2;
 
-        _data     = static_cast<T *>(kmalloc(_capacity * sizeof(T)));
+        _data = static_cast<T *>(kmalloc(_capacity * sizeof(T)));
 
-        size_t i  = 0;
+        size_t i = 0;
         for (auto const &el: l) {
             new (_data + (i++)) T(el);
         }
@@ -41,7 +41,7 @@ public:
         _cur_size = vec._cur_size;
         _capacity = _cur_size > 0 ? _cur_size : 2;
 
-        _data     = static_cast<T *>(kmalloc(_capacity * sizeof(T)));
+        _data = static_cast<T *>(kmalloc(_capacity * sizeof(T)));
 
         for (size_t i = 0; i < _cur_size; i++)
             new (_data + i) T(vec._data[i]);

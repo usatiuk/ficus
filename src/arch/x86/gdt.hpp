@@ -73,7 +73,7 @@ namespace Arch::GDT {
     extern volatile struct gdt_tss_entry_bits gdt_tss;
     extern volatile struct gdt_tss_entry_bits gdt_tss_user;
 
-    extern volatile struct gdt_entry_bits     gdt_end; // It is not a pointer!
+    extern volatile struct gdt_entry_bits gdt_end; // It is not a pointer!
 
     extern struct {
         uint16_t limit;

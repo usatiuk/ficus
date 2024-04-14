@@ -14,9 +14,9 @@
 class MemFs : public Filesystem {
     struct MemFsNodeDir : public NodeDir {
     public:
-        Vector<SharedPtr<Node>>        children() override;
-        SharedPtr<NodeDir>             mkdir(const String &name) override;
-        SharedPtr<NodeFile>            mkfile(const String &name) override;
+        Vector<SharedPtr<Node>> children() override;
+        SharedPtr<NodeDir>      mkdir(const String &name) override;
+        SharedPtr<NodeFile>     mkfile(const String &name) override;
 
         static SharedPtr<MemFsNodeDir> create(const String &name) {
             auto shared        = SharedPtr(new MemFsNodeDir(name));
@@ -31,10 +31,10 @@ class MemFs : public Filesystem {
 
     struct MemFsNodeFile : public NodeFile {
     public:
-        int64_t                         read(char *buf, size_t start, size_t num) override;
-        int64_t                         write(const char *buf, size_t start, size_t num) override;
-        size_t                          size() override;
-        bool                            is_tty() override { return false; }
+        int64_t read(char *buf, size_t start, size_t num) override;
+        int64_t write(const char *buf, size_t start, size_t num) override;
+        size_t  size() override;
+        bool    is_tty() override { return false; }
 
         static SharedPtr<MemFsNodeFile> create(const String &name) {
             auto shared        = SharedPtr(new MemFsNodeFile(name));

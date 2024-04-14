@@ -32,12 +32,12 @@ public:
     void *mmap_mem(void *v_addr, size_t length, int prot, int flags);
     int   munmap(void *addr, size_t length);
 
-    static constexpr size_t kBrkSize = 16ULL*1024ULL*1024ULL;
-    std::optional<char*> brk_start;
-    std::optional<char*> brk_end_fake;
-    std::optional<char*> brk_end_real;
+    static constexpr size_t kBrkSize = 16ULL * 1024ULL * 1024ULL;
+    std::optional<char *>   brk_start;
+    std::optional<char *>   brk_end_fake;
+    std::optional<char *>   brk_end_real;
 
-    void clone_from(const VMA& vma);
+    void clone_from(const VMA &vma);
 
 private:
     AddressSpace *space = nullptr;
@@ -53,14 +53,14 @@ private:
         uintptr_t begin;
         uint64_t  length;
         EntryType type = EntryType::FREE;
-        int flags;
+        int       flags;
     };
 
     ListEntry *get_entry(uintptr_t v_addr, size_t length);
 
     //
     SkipListMap<uintptr_t, ListEntry> regions;
-    Mutex                          regions_lock;
+    Mutex                             regions_lock;
 };
 
 

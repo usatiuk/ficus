@@ -15,7 +15,7 @@
 #define STACK_CHK_GUARD 0x2e61e13e4d5ae23c
 #endif
 
-__attribute__((used)) uintptr_t                 __stack_chk_guard = STACK_CHK_GUARD;
+__attribute__((used)) uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
 
 extern "C" __attribute__((noreturn, used)) void __stack_chk_fail(void) {
     assert2(false, "Stack protection triggered!");
@@ -32,11 +32,11 @@ namespace __cxxabiv1 {
     /* The ABI requires a 64-bit type.  */
     __extension__ typedef int __guard __attribute__((mode(__DI__)));
 
-    extern "C" int            __cxa_guard_acquire(__guard *);
-    extern "C" void           __cxa_guard_release(__guard *);
-    extern "C" void           __cxa_guard_abort(__guard *);
+    extern "C" int  __cxa_guard_acquire(__guard *);
+    extern "C" void __cxa_guard_release(__guard *);
+    extern "C" void __cxa_guard_abort(__guard *);
 
-    extern "C" int            __cxa_guard_acquire(__guard *g) {
+    extern "C" int __cxa_guard_acquire(__guard *g) {
         return !*(char *) (g);
     }
 
@@ -102,7 +102,7 @@ struct type_mismatch_info {
     uint8_t                 type_check_kind;
 };
 
-#define SAN_STOP                     true
+#define SAN_STOP true
 
 #define is_aligned(value, alignment) !(value & (alignment - 1))
 __attribute__((used)) void __ubsan_handle_type_mismatch_v1(struct type_mismatch_info *type_mismatch,

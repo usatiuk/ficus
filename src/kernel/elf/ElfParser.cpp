@@ -107,10 +107,10 @@ bool ElfParser::copy_to(Task *task) {
                 flags |= PAGE_RW;
             }
 
-            auto      rounded_vaddr = hdr.p_vaddr & 0x000FFFFFFFFFF000ULL;
-            auto      real_memsz    = hdr.p_memsz + (hdr.p_vaddr - rounded_vaddr);
+            auto rounded_vaddr = hdr.p_vaddr & 0x000FFFFFFFFFF000ULL;
+            auto real_memsz    = hdr.p_memsz + (hdr.p_vaddr - rounded_vaddr);
 
-            uintptr_t real_ptr      = reinterpret_cast<uintptr_t>(task->_vma->mmap_mem(reinterpret_cast<void *>(rounded_vaddr), real_memsz, 0, flags | PAGE_USER));
+            uintptr_t real_ptr = reinterpret_cast<uintptr_t>(task->_vma->mmap_mem(reinterpret_cast<void *>(rounded_vaddr), real_memsz, 0, flags | PAGE_USER));
             if (real_ptr != rounded_vaddr) return false;
 
             auto *file_ptr = _data.begin();

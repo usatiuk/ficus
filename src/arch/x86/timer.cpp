@@ -10,7 +10,7 @@
 volatile std::atomic<uint64_t> ticks;
 volatile std::atomic<uint64_t> micros;
 
-unsigned                       read_pit_count(void) {
+unsigned read_pit_count(void) {
     unsigned count = 0;
 
     // Disable interrupts

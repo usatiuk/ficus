@@ -25,12 +25,12 @@ struct HeapEntry {
 extern struct HeapEntry *KERN_HeapBegin;
 extern uintptr_t         KERN_HeapEnd; // Past the end
 
-void                    *kmalloc(size_t n);
-void                     kfree(void *addr);
-void                    *krealloc(void *addr, size_t newsize);
+void *kmalloc(size_t n);
+void  kfree(void *addr);
+void *krealloc(void *addr, size_t newsize);
 
-uint64_t                 get_heap_allocated();
-uint64_t                 get_heap_used();
+uint64_t get_heap_allocated();
+uint64_t get_heap_used();
 
 #ifdef __cplusplus
 }

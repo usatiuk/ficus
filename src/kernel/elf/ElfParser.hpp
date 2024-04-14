@@ -14,8 +14,8 @@ class Task;
 // Just copying everytihng for now
 class ElfParser {
 public:
-              ElfParser(Vector<char> data);
-    bool      copy_to(Task *task);
+    ElfParser(Vector<char> data);
+    bool copy_to(Task *task);
 
     uintptr_t get_entrypoint() { return _entrypoint; }
 
@@ -53,7 +53,7 @@ private:
         Elf64_Xword p_memsz;  /* Size of segment in memory */
         Elf64_Xword p_align;  /* Alignment of segment */
 
-        bool        valid  = false;
+        bool valid         = false;
         using serializable = std::true_type;
         Elf64_Phdr(Vector<char>::const_iterator &in, const Vector<char>::const_iterator &end);
     };

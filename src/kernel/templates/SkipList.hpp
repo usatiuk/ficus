@@ -48,7 +48,7 @@ protected:
         Node                *nodes[size];
         int                  top = -1;
 
-        Node                *get() {
+        Node *get() {
             Node *node;
             if (top == -1)
                 node = static_cast<Node *>(kmalloc(sizeof(Node)));
@@ -63,7 +63,7 @@ protected:
         }
 
     public:
-         NodeAllocator() noexcept = default;
+        NodeAllocator() noexcept = default;
 
         ~NodeAllocator() noexcept {
             for (int i = top; i >= 0; i--) {
@@ -114,7 +114,7 @@ protected:
     mutable Node *toUpdate[maxL + 1];
     size_t        curL = 0;
 
-                  SkipListBase() noexcept {
+    SkipListBase() noexcept {
         root            = (Node *) nodeAllocator.get_end();
         endnode         = (Node *) nodeAllocator.get_end();
         endnode->before = root;
@@ -220,11 +220,11 @@ protected:
         using pointer           = value_type *;
         using reference         = value_type &;
 
-        explicit                  SkipListBaseIteratorBase(Node *n) : n(std::move(n)){};
+        explicit SkipListBaseIteratorBase(Node *n) : n(std::move(n)){};
 
-        reference                 operator*() const { return n->get(); }
+        reference operator*() const { return n->get(); }
 
-        pointer                   operator->() const { return &n->get(); }
+        pointer operator->() const { return &n->get(); }
 
         SkipListBaseIteratorBase &operator--() {
             if (n->before)
@@ -469,8 +469,8 @@ public:
         return true;
     }
 
-    iterator       begin() { return iterator(root->next[0]); }
-    iterator       end() { return iterator(endnode); }
+    iterator begin() { return iterator(root->next[0]); }
+    iterator end() { return iterator(endnode); }
 
     const_iterator begin() const { return const_iterator(root->next[0]); }
     const_iterator end() const { return const_iterator(endnode); }

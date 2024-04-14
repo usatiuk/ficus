@@ -29,8 +29,8 @@ public:
     }
 
     String(String &&str) noexcept {
-        _data        = str._data;
-        _cur_len     = str._cur_len;
+        _data    = str._data;
+        _cur_len = str._cur_len;
 
         str._cur_len = 0;
         str._data    = nullptr;

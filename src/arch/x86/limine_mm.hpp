@@ -13,6 +13,6 @@ extern unsigned int               limine_mm_count;
 extern struct limine_memmap_entry limine_mm_entries[LIMINE_MM_MAX];
 extern unsigned int               limine_mm_overflow;
 
-void                              limine_mm_save_response();
+void limine_mm_save_response();
 
 #endif //FICUS_LIMINE_MM_H

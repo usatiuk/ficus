@@ -39,27 +39,27 @@ public:
     /// or -1, wait for anything, then it's set by the zombified process to its PID
     pid_t _woken_pid = -1;
     /// Place to put list node when waiting for pid/being zombified
-    List<Task *>::Node         *_waitpid_node;
+    List<Task *>::Node *_waitpid_node;
 
-                                Task(TaskMode mode, void (*entrypoint)(), const char *name);
+    Task(TaskMode mode, void (*entrypoint)(), const char *name);
 
-                                Task(const Task &)      = delete;
-                                Task(Task &&)           = delete;
-    Task                       &operator=(const Task &) = delete;
-    Task                       &operator=(Task &&)      = delete;
+    Task(const Task &)            = delete;
+    Task(Task &&)                 = delete;
+    Task &operator=(const Task &) = delete;
+    Task &operator=(Task &&)      = delete;
 
-    void                        start();
+    void start();
 
     [[nodiscard]] const String &name() const { return _name; }
     [[nodiscard]] pid_t         pid() const { return _pid; }
     [[nodiscard]] uint64_t      used_time() const { return _used_time; }
     [[nodiscard]] TaskState     state() const { return _state; }
 
-    ~                           Task();
+    ~Task();
 
-    Task                       *clone();
-    void                        user_setup();
-    void                        user_reset();
+    Task *clone();
+    void  user_setup();
+    void  user_reset();
 
     //private:
     struct KernStack {
@@ -79,15 +79,15 @@ public:
     // as VMA frees what it had allocated there too
     UniquePtr<AddressSpace> _ownAddressSpace;
 
-    AddressSpace           *_addressSpace;
-    UniquePtr<VMA>          _vma;
-    UniquePtr<KernStack>    _kstack{new KernStack()};
-    UniquePtr<FxSave>       _fxsave{new FxSave()};
-    String                  _name;
-    TaskMode                _mode;
-    uint64_t                _sleep_until;
-    TaskState               _state;
-    pid_t                   _parent = -1;
+    AddressSpace        *_addressSpace;
+    UniquePtr<VMA>       _vma;
+    UniquePtr<KernStack> _kstack{new KernStack()};
+    UniquePtr<FxSave>    _fxsave{new FxSave()};
+    String               _name;
+    TaskMode             _mode;
+    uint64_t             _sleep_until;
+    TaskState            _state;
+    pid_t                _parent = -1;
 };
 
 
@@ -104,32 +104,32 @@ namespace Scheduler {
     Task               *cur_task();
     List<Task *>::Node *extract_running_task_node();
 
-    void                init_tasks();
+    void init_tasks();
 
-    void                sleep_self(uint64_t diff);
+    void sleep_self(uint64_t diff);
 
-    void                remove_self();
-    void                dispose_self();
-    void                zombify_self();
-    void                dispose_zombie(Task *zombie);
+    void remove_self();
+    void dispose_self();
+    void zombify_self();
+    void dispose_zombie(Task *zombie);
 
-    void                self_block();
-    void                self_block(Spinlock &to_unlock);
-    void                self_block(Mutex &to_unlock);
+    void self_block();
+    void self_block(Spinlock &to_unlock);
+    void self_block(Mutex &to_unlock);
 
-    void                unblock(Task *what);
-    void                unblock(List<Task *>::Node *what);
-    void                unblock_nolock(List<Task *>::Node *what);
+    void unblock(Task *what);
+    void unblock(List<Task *>::Node *what);
+    void unblock_nolock(List<Task *>::Node *what);
 
-    void                waitpid_block();
-    pid_t               waitpid(pid_t pid, int *status, int options);
+    void  waitpid_block();
+    pid_t waitpid(pid_t pid, int *status, int options);
 
-    extern "C" void     switch_task(Arch::TaskFrame *cur_frame);
+    extern "C" void switch_task(Arch::TaskFrame *cur_frame);
 
     // TODO: that's quite inefficient!
     SkipListMap<pid_t, std::pair<String, uint64_t>> getTaskTimePerPid();
 
-    void                                            yield_self();
+    void yield_self();
 } // namespace Scheduler
 
 // Expects the caller to save interrupt state

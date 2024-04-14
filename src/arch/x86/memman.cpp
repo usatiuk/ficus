@@ -18,13 +18,13 @@
 // Expected to be nulled by the bootloader
 static struct FourPages used_bitmap[BITMAP_SIZE];
 
-static Mutex            memman_lock;
+static Mutex memman_lock;
 
-static uint64_t         maxPid   = 0; // Past the end
-static uint64_t         minPid   = 0;
-static uint64_t         totalMem = 0; // Past the end
+static uint64_t maxPid   = 0; // Past the end
+static uint64_t minPid   = 0;
+static uint64_t totalMem = 0; // Past the end
 
-static uint64_t         roundup4k(uint64_t addr) {
+static uint64_t roundup4k(uint64_t addr) {
     if ((addr & 0xFFF) == 0) return addr;
     else {
         return (addr + 0x1000) & (~(0xFFFULL));

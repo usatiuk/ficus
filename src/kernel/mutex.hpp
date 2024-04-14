@@ -31,11 +31,11 @@ public:
 private:
     std::atomic<bool> locked = false;
 
-    List<Task *>      waiters;
-    Spinlock          waiters_lock;
+    List<Task *> waiters;
+    Spinlock     waiters_lock;
 
-    Task             *_owner       = nullptr;
-    uint8_t           spin_success = 127;
+    Task   *_owner       = nullptr;
+    uint8_t spin_success = 127;
 };
 
 

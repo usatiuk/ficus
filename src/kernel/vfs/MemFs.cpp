@@ -8,7 +8,7 @@
 #include <algorithm>
 
 Vector<SharedPtr<Node>> MemFs::MemFsNodeDir::children() {
-    LockGuard               l(_lock);
+    LockGuard l(_lock);
 
     Vector<SharedPtr<Node>> out;
     for (auto c: _children) {

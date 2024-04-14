@@ -43,10 +43,10 @@ std::atomic<uint64_t>                  max_pid = 0;
 Mutex                                  AllTasks_lock;
 SkipListMap<uint64_t, UniquePtr<Task>> AllTasks;
 
-static List<Task *>::Node             *RunningTask;
+static List<Task *>::Node *RunningTask;
 
-static Spinlock                        NextTasks_lock;
-static List<Task *>                    NextTasks;
+static Spinlock     NextTasks_lock;
+static List<Task *> NextTasks;
 
 // Task freer
 Mutex                      TasksToFree_lock;
@@ -58,10 +58,10 @@ Mutex                                               WaitingTasks_mlock;
 CV                                                  WaitingTasks_cv;
 SkipListMap<uint64_t, Vector<List<Task *>::Node *>> WaitingTasks;
 
-static std::atomic<bool>                            initialized = false;
+static std::atomic<bool> initialized = false;
 
 
-void                                                Scheduler::dispose_self() {
+void Scheduler::dispose_self() {
     {
         LockGuard l(TasksToFree_lock);
         // TasksToFree is expected to do nothing with TS_RUNNING tasks
@@ -189,10 +189,10 @@ static void trampoline(void *rdi, void (*rsi_entrypoint)()) {
 
 void Task::user_setup() {
     assert(_mode == TaskMode::TASKMODE_USER);
-    _frame.cs             = Arch::GDT::gdt_code_user.selector() | 0x3;
-    _frame.ss             = Arch::GDT::gdt_data_user.selector() | 0x3;
-    _ownAddressSpace      = UniquePtr(new AddressSpace());
-    _vma                  = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
+    _frame.cs        = Arch::GDT::gdt_code_user.selector() | 0x3;
+    _frame.ss        = Arch::GDT::gdt_data_user.selector() | 0x3;
+    _ownAddressSpace = UniquePtr(new AddressSpace());
+    _vma             = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
 
     task_pointer *taskptr = static_cast<task_pointer *>(
             _vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
@@ -201,7 +201,7 @@ void Task::user_setup() {
 
     task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(_ownAddressSpace->virt2real(taskptr)));
 
-    _entry_ksp_val             = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
+    _entry_ksp_val = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
     // It should be aligned before call, therefore it actually should be aligned here
     assert((_entry_ksp_val & 0xFULL) == 0);
 
@@ -209,7 +209,7 @@ void Task::user_setup() {
     taskptr_real->entry_ksp_val = _entry_ksp_val;
     taskptr_real->ret_sp        = 0x0;
 
-    void *ustack                = _vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
+    void *ustack = _vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
     _vma->map_kern();
 
     // Ensure 16byte alignment
@@ -222,7 +222,7 @@ void Task::user_reset() {
     // FIXME:
     // delete _ownAddressSpace.release();
 
-    _vma                  = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
+    _vma = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
 
     task_pointer *taskptr = static_cast<task_pointer *>(
             _vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
@@ -231,14 +231,14 @@ void Task::user_reset() {
 
     task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(_ownAddressSpace->virt2real(taskptr)));
 
-    _entry_ksp_val             = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
+    _entry_ksp_val = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
     // It should be aligned before call, therefore it actually should be aligned here
     assert((_entry_ksp_val & 0xFULL) == 0);
 
     taskptr_real->taskptr       = this;
     taskptr_real->entry_ksp_val = _entry_ksp_val;
 
-    void *ustack                = _vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
+    void *ustack = _vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
     _vma->map_kern();
 
     // Ensure 16byte alignment
@@ -376,7 +376,7 @@ static void task_waker() {
                 auto node  = WaitingTasks.begin();
                 auto tasks = node->second;
 
-                bool ok    = true;
+                bool ok = true;
                 for (const auto &task: tasks) {
                     if (task->val->state() == Task::TaskState::TS_RUNNING) {
                         ok = false;
@@ -415,17 +415,17 @@ Task *Task::clone() {
 
     task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(ret->_addressSpace->virt2real((void *) TASK_POINTER)));
 
-    _entry_ksp_val             = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
+    _entry_ksp_val = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
     // It should be aligned before call, therefore it actually should be aligned here
     assert((_entry_ksp_val & 0xFULL) == 0);
 
     taskptr_real->taskptr       = ret;
     taskptr_real->entry_ksp_val = ret->_entry_ksp_val;
 
-    ret->_frame.ss              = Arch::GDT::gdt_data.selector();
-    ret->_frame.cs              = Arch::GDT::gdt_code.selector();
-    ret->_frame.sp              = ret->_entry_ksp_val;
-    ret->_parent                = Scheduler::cur_task()->_pid;
+    ret->_frame.ss = Arch::GDT::gdt_data.selector();
+    ret->_frame.cs = Arch::GDT::gdt_code.selector();
+    ret->_frame.sp = ret->_entry_ksp_val;
+    ret->_parent   = Scheduler::cur_task()->_pid;
     return ret;
 }
 
@@ -458,9 +458,9 @@ extern "C" void Scheduler::switch_task(Arch::TaskFrame *cur_frame) {
     {
         SpinlockLockNoIntAssert ntl(NextTasks_lock);
 
-        static uint64_t         lastSwitchMicros = 0;
-        uint64_t                prevSwitchMicros = lastSwitchMicros;
-        lastSwitchMicros                         = micros;
+        static uint64_t lastSwitchMicros = 0;
+        uint64_t        prevSwitchMicros = lastSwitchMicros;
+        lastSwitchMicros                 = micros;
 
         if (RunningTask) {
             RunningTask->val->_frame = *cur_frame;

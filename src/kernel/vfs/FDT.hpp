@@ -17,16 +17,16 @@ public:
     FDT();
 
     using FD = int64_t;
-    FD          open(const Path &p, int opts);
-    void        close(FD fd);
-    File       *get(FD fd) const;
+    FD    open(const Path &p, int opts);
+    void  close(FD fd);
+    File *get(FD fd) const;
 
     static FDT *current();
 
 private:
     SkipListMap<FD, UniquePtr<File>> _files;
-    int64_t                       _cur_fd = 10;
-    mutable Mutex                 _mtx;
+    int64_t                          _cur_fd = 10;
+    mutable Mutex                    _mtx;
 };
 
 class FDHandle {
@@ -36,7 +36,7 @@ public:
     FDHandle(const File &f)            = delete;
     FDHandle &operator=(const File &o) = delete;
 
-    FDT::FD   get() { return _fd; }
+    FDT::FD get() { return _fd; }
 
 private:
     FDT::FD _fd;

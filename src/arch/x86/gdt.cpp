@@ -13,8 +13,8 @@ namespace Arch::GDT {
     static constexpr size_t INT_STACK_SIZE = 16384;
     static constexpr size_t RSP_STACK_SIZE = 16384;
 
-    static uint64_t         int_stack[INT_STACK_SIZE];
-    static uint64_t         rsp_stack[RSP_STACK_SIZE];
+    static uint64_t int_stack[INT_STACK_SIZE];
+    static uint64_t rsp_stack[RSP_STACK_SIZE];
 
     //
     void gdt_setup() {
@@ -33,7 +33,7 @@ namespace Arch::GDT {
         gdt_tss.gran       = 0;
         gdt_tss.base_high  = (tss_base >> 24) & 0xFFFFFFFFFF;
 
-        tss_entry.ist1     = (((uintptr_t) int_stack + (INT_STACK_SIZE - 9) - 1) & (~0xFULL)) + 8;
+        tss_entry.ist1 = (((uintptr_t) int_stack + (INT_STACK_SIZE - 9) - 1) & (~0xFULL)) + 8;
         assert((tss_entry.ist1 & 0xFULL) == 8);
 
         tss_entry.rsp0 = (((uintptr_t) rsp_stack + (RSP_STACK_SIZE - 9) - 1) & (~0xFULL)) + 8;

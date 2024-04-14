@@ -9,10 +9,10 @@
 #include "Node.hpp"
 class TtyPipe : public NodeFile {
 public:
-    int64_t                   read(char *buf, size_t start, size_t num) override;
-    int64_t                   write(const char *buf, size_t start, size_t num) override;
-    size_t                    size() override;
-    bool                      is_tty() override { return true; }
+    int64_t read(char *buf, size_t start, size_t num) override;
+    int64_t write(const char *buf, size_t start, size_t num) override;
+    size_t  size() override;
+    bool    is_tty() override { return true; }
 
     static SharedPtr<TtyPipe> create() {
         auto shared        = SharedPtr(new TtyPipe());

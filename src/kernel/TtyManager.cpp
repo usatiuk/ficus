@@ -8,11 +8,11 @@
 #include "Vector.hpp"
 #include "mutex.hpp"
 
-TtyManager         GlobalTtyManager;
+TtyManager GlobalTtyManager;
 
 Vector<TtyManager> ttys;
 
-void               TtyManager::add_tty(Tty *tty) {
+void TtyManager::add_tty(Tty *tty) {
     LockGuard l(lock);
     ttys.emplace_back(tty);
 }

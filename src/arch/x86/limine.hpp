@@ -204,14 +204,14 @@ struct limine_framebuffer_request {
 #define LIMINE_TERMINAL_CB_MODE          70
 #define LIMINE_TERMINAL_CB_LINUX         80
 
-#define LIMINE_TERMINAL_CTX_SIZE         ((uint64_t) (-1))
-#define LIMINE_TERMINAL_CTX_SAVE         ((uint64_t) (-2))
-#define LIMINE_TERMINAL_CTX_RESTORE      ((uint64_t) (-3))
-#define LIMINE_TERMINAL_FULL_REFRESH     ((uint64_t) (-4))
+#define LIMINE_TERMINAL_CTX_SIZE     ((uint64_t) (-1))
+#define LIMINE_TERMINAL_CTX_SAVE     ((uint64_t) (-2))
+#define LIMINE_TERMINAL_CTX_RESTORE  ((uint64_t) (-3))
+#define LIMINE_TERMINAL_FULL_REFRESH ((uint64_t) (-4))
 
 /* Response revision 1 */
-#define LIMINE_TERMINAL_OOB_OUTPUT_GET    ((uint64_t) (-10))
-#define LIMINE_TERMINAL_OOB_OUTPUT_SET    ((uint64_t) (-11))
+#define LIMINE_TERMINAL_OOB_OUTPUT_GET ((uint64_t) (-10))
+#define LIMINE_TERMINAL_OOB_OUTPUT_SET ((uint64_t) (-11))
 
 #define LIMINE_TERMINAL_OOB_OUTPUT_OCRNL  (1 << 0)
 #define LIMINE_TERMINAL_OOB_OUTPUT_OFDEL  (1 << 1)
@@ -226,8 +226,8 @@ LIMINE_DEPRECATED_IGNORE_START
 
 struct LIMINE_DEPRECATED limine_terminal;
 
-typedef void             (*limine_terminal_write)(struct limine_terminal *, const char *, uint64_t);
-typedef void             (*limine_terminal_callback)(struct limine_terminal *, uint64_t, uint64_t, uint64_t, uint64_t);
+typedef void (*limine_terminal_write)(struct limine_terminal *, const char *, uint64_t);
+typedef void (*limine_terminal_callback)(struct limine_terminal *, uint64_t, uint64_t, uint64_t, uint64_t);
 
 struct LIMINE_DEPRECATED limine_terminal {
     uint64_t columns;

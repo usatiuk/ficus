@@ -11,15 +11,15 @@
 #include "mutex.hpp"
 #include "string.h"
 
-struct HeapEntry     *KERN_HeapBegin;
-uintptr_t             KERN_HeapEnd; // Past the end
+struct HeapEntry *KERN_HeapBegin;
+uintptr_t         KERN_HeapEnd; // Past the end
 
-static bool           initialized = false;
+static bool initialized = false;
 
-std::atomic<uint64_t> allocated   = 0;
-std::atomic<uint64_t> used        = 0;
+std::atomic<uint64_t> allocated = 0;
+std::atomic<uint64_t> used      = 0;
 
-uint64_t              get_heap_allocated() {
+uint64_t get_heap_allocated() {
     return allocated;
 }
 uint64_t get_heap_used() {
@@ -28,7 +28,7 @@ uint64_t get_heap_used() {
 
 static Mutex kmem_lock;
 
-void         init_kern_heap() {
+void init_kern_heap() {
     KERN_HeapBegin = static_cast<HeapEntry *>(get4k());
     allocated.fetch_add(PAGE_SIZE);
     KERN_HeapBegin->magic = KERN_HeapMagicFree;
@@ -160,13 +160,13 @@ void *kmalloc(size_t n) {
             assert2(entry->magic == KERN_HeapMagicFree, "Expected last tried entry to be free");
             assert2(entry->next == NULL, "Expected last tried entry to be the last");
 
-            size_t            data_needed  = n + (2 * sizeof(struct HeapEntry));
+            size_t data_needed = n + (2 * sizeof(struct HeapEntry));
 
-            size_t            pages_needed = ((data_needed & 0xFFF) == 0)
-                                                     ? data_needed >> 12
-                                                     : ((data_needed & (~0xFFF)) + 0x1000) >> 12;
+            size_t pages_needed = ((data_needed & 0xFFF) == 0)
+                                          ? data_needed >> 12
+                                          : ((data_needed & (~0xFFF)) + 0x1000) >> 12;
 
-            struct HeapEntry *new_entry    = (struct HeapEntry *) KERN_HeapEnd;
+            struct HeapEntry *new_entry = (struct HeapEntry *) KERN_HeapEnd;
             extend_heap(pages_needed);
             new_entry->next  = NULL;
             new_entry->prev  = entry;
@@ -280,7 +280,7 @@ static struct HeapEntry *try_shrink_heap(struct HeapEntry *entry) {
 
 void kfree(void *addr) {
     assert(initialized);
-    LockGuard         l(kmem_lock);
+    LockGuard l(kmem_lock);
 
     struct HeapEntry *freed = (struct HeapEntry *) (addr - (sizeof(struct HeapEntry)));
     used.fetch_sub(freed->len);

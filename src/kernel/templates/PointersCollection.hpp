@@ -19,15 +19,15 @@ public:
 
     explicit UniquePtr(T *data) : ptr(data) {}
 
-    ~        UniquePtr() {
+    ~UniquePtr() {
         if (ptr == nullptr) return;
         delete ptr;
     }
 
-               UniquePtr(UniquePtr const &other) = delete;
+    UniquePtr(UniquePtr const &other)            = delete;
     UniquePtr &operator=(UniquePtr const &other) = delete;
 
-               UniquePtr(UniquePtr &&other) {
+    UniquePtr(UniquePtr &&other) {
         delete ptr;
         ptr       = other.ptr;
         other.ptr = nullptr;
@@ -133,12 +133,12 @@ class SharedPtr {
     friend SharedPtrTester;
 
 public:
-             SharedPtr() = default;
+    SharedPtr() = default;
 
     explicit SharedPtr(T *data) : _ptr(data), _base(new SharedPtr_Base{SharedPtr_Base::UsesBlock{1, 1}}) {}
-             SharedPtr(std::nullptr_t a_nullptr) : _ptr(nullptr), _base(nullptr) {}
+    SharedPtr(std::nullptr_t a_nullptr) : _ptr(nullptr), _base(nullptr) {}
 
-    ~        SharedPtr() {
+    ~SharedPtr() {
         unref();
     }
 
@@ -188,7 +188,7 @@ private:
 
     explicit SharedPtr(T *ptr, SharedPtr_Base *base) : _ptr(ptr), _base(base) {}
 
-    void     unref() {
+    void unref() {
         if (!_base) return;
         if (_base->strong_release())
             delete _ptr;
@@ -204,10 +204,10 @@ private:
 template<typename T>
 class WeakPtr {
 public:
-     WeakPtr() = default;
+    WeakPtr() = default;
 
-     WeakPtr(const SharedPtr<T> &shared) : _base(shared._base), _ptr(shared._ptr) { _base->weak_lock(); }
-     WeakPtr(std::nullptr_t a_nullptr) : _ptr(nullptr), _base(nullptr) {}
+    WeakPtr(const SharedPtr<T> &shared) : _base(shared._base), _ptr(shared._ptr) { _base->weak_lock(); }
+    WeakPtr(std::nullptr_t a_nullptr) : _ptr(nullptr), _base(nullptr) {}
 
     ~WeakPtr() {
         unref();
@@ -283,29 +283,29 @@ private:
     friend COWTester;
     SharedPtr<T> ptr;
 
-    void         copy() {
+    void copy() {
         if (ptr.get() && ptr.useCount() > 1) {
             ptr = SharedPtr<T>(new T(*ptr));
         }
     }
 
 public:
-                COWPointer() = default;
+    COWPointer() = default;
 
-    explicit    COWPointer(T *data) : ptr(data) {}
+    explicit COWPointer(T *data) : ptr(data) {}
 
-    explicit    COWPointer(SharedPtr<T> data) : ptr(std::move(data)) {}
+    explicit COWPointer(SharedPtr<T> data) : ptr(std::move(data)) {}
 
-                COWPointer(COWPointer &&other)     = default;
+    COWPointer(COWPointer &&other) = default;
 
-                COWPointer(COWPointer const &data) = default;
+    COWPointer(COWPointer const &data) = default;
 
     COWPointer &operator=(COWPointer other) {
         std::swap(ptr, other.ptr);
         return *this;
     }
 
-    ~  COWPointer() = default;
+    ~COWPointer() = default;
 
     T *get() const {
         return ptr.get();
@@ -316,7 +316,7 @@ public:
         return ptr.get();
     }
 
-    int      useCount() { return ptr.useCount(); };
+    int useCount() { return ptr.useCount(); };
 
     const T &operator*() const {
         return *ptr;

@@ -14,10 +14,10 @@ class TtyManager {
     Vector<Tty *> ttys;
 
 public:
-    void     add_tty(Tty *tty);
+    void add_tty(Tty *tty);
 
-    void     all_tty_putchar(char c);
-    void     all_tty_putstr(const char *str);
+    void all_tty_putchar(char c);
+    void all_tty_putstr(const char *str);
 
     unsigned get_num_ttys();
     Tty     *get_tty(unsigned n);

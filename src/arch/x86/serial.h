@@ -9,7 +9,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int  init_serial();
+int init_serial();
 
 int  serial_received();
 char read_serial();

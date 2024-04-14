@@ -26,12 +26,12 @@ using IntType = long long;
 
 class CRange {
 public:
-    IntType l        = 0;
-    IntType r        = 0;
+    IntType l = 0;
+    IntType r = 0;
 
-            CRange() = default;
+    CRange() = default;
 
-            CRange(IntType l, IntType r) : l(l), r(r) {
+    CRange(IntType l, IntType r) : l(l), r(r) {
         if (l > r)
             throw std::logic_error("CRange bad initialisation");
     }
@@ -239,9 +239,9 @@ public:
                 this->it++;
         }
 
-        reference           operator*() const { return (it->second.first); }
+        reference operator*() const { return (it->second.first); }
 
-        pointer             operator->() const { return &(it->second.first); }
+        pointer operator->() const { return &(it->second.first); }
 
         CRangeListIterator &operator++() {
             ++it;
