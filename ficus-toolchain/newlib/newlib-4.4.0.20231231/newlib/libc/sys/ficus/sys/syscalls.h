@@ -30,8 +30,8 @@ extern "C" {
 
 #define SYSCALL_EXECVE_ID   50
 #define SYSCALL_FORK_ID     51
+#define SYSCALL_WAITPID_ID  52
 #define SYSCALL_SBRK_ID     100
-
 
 #define SYSCALL_PRINT_MEM   1000
 #define SYSCALL_PRINT_TASKS 1001

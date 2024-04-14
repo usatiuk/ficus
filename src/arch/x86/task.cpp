@@ -58,25 +58,129 @@ Mutex                                               WaitingTasks_mlock;
 CV                                                  WaitingTasks_cv;
 SkipListMap<uint64_t, Vector<List<Task *>::Node *>> WaitingTasks;
 
-static std::atomic<bool>                         initialized = false;
+static std::atomic<bool>                            initialized = false;
 
-//
-void Scheduler::remove_self() {
-    assert(RunningTask != nullptr);
+
+void                                                Scheduler::dispose_self() {
     {
         LockGuard l(TasksToFree_lock);
         // TasksToFree is expected to do nothing with TS_RUNNING tasks
         TasksToFree.emplace_front(RunningTask);
+        // This might not cause freeing of this task, as it might be preempted
+        // and still be running and task freer won't delete it
+        // But eventually it will get cleaned
+        TasksToFree_cv.notify_one();
     }
-    // This might not cause freeing of this task, as it might be preempted
-    // and still be running and task freer won't delete it
-    // But eventually it will get cleaned
-    TasksToFree_cv.notify_one();
-
     Scheduler::self_block();
+    assert(false);
+}
+//
+
+void Scheduler::zombify_self() {
+    NO_INT(
+            {
+                {
+                    SpinlockLockNoInt l(NextTasks_lock);
+                    RunningTask->val->_state        = Task::TaskState::TS_ZOMBIE;
+                    RunningTask->val->_waitpid_node = extract_running_task_node();
+                    AllTasks_lock.unlock_nolock();
+                }
+                Scheduler::yield_self();
+            })
+}
+
+void Scheduler::remove_self() {
+    assert(RunningTask != nullptr);
+    if (cur_task()->_parent == -1) {
+        dispose_self();
+    } else {
+        AllTasks_lock.lock();
+        if (auto foundp = AllTasks.find(cur_task()->_parent); foundp != AllTasks.end()) {
+            if (foundp->second->state() == Task::TaskState::TS_WAITPID_BLOCKED &&
+                (foundp->second->_woken_pid == cur_task()->_pid || foundp->second->_woken_pid == -1)) {
+                // Parent found and waiting, notify and wake
+                SpinlockLockNoInt l(NextTasks_lock);
+                foundp->second->_woken_pid = cur_task()->_pid;
+                foundp->second->_state     = Task::TaskState::TS_RUNNING;
+                List<Task *>::Node *node   = nullptr;
+                std::swap(foundp->second->_waitpid_node, node);
+                NextTasks.emplace_front(node);
+            }
+            zombify_self();
+        } else {
+            // Parent not found!
+            AllTasks_lock.unlock();
+            dispose_self();
+        }
+    }
+
     assert2(0, "should be removed!");
 }
 
+
+void Scheduler::waitpid_block() {
+    NO_INT(
+            {
+                {
+                    SpinlockLockNoInt l(NextTasks_lock);
+                    RunningTask->val->_state        = Task::TaskState::TS_WAITPID_BLOCKED;
+                    RunningTask->val->_waitpid_node = extract_running_task_node();
+                    AllTasks_lock.unlock_nolock();
+                }
+                Scheduler::yield_self();
+            })
+    AllTasks_lock.lock();
+}
+
+
+void Scheduler::dispose_zombie(Task *zombie) {
+    LockGuard l(TasksToFree_lock);
+    zombie->_state           = Task::TaskState::TS_BLOCKED;
+    List<Task *>::Node *node = nullptr;
+    std::swap(zombie->_waitpid_node, node);
+    TasksToFree.emplace_front(node);
+    TasksToFree_cv.notify_one();
+}
+
+pid_t Scheduler::waitpid(pid_t pid, int *status, int options) {
+    AllTasks_lock.lock();
+    if (pid != -1) {
+        // Wait for specific thing
+        if (auto found = AllTasks.find(pid); found != AllTasks.end()) {
+            if (found->second->_parent != cur_task()->_pid) return -1;  // Task not our child
+            if (found->second->state() != Task::TaskState::TS_ZOMBIE) { // Already dead
+                cur_task()->_woken_pid = pid;
+                waitpid_block();
+                assert(cur_task()->_woken_pid == pid);
+            }
+            dispose_zombie(found->second.get());
+            AllTasks_lock.unlock();
+            return pid;
+        } else {
+            AllTasks_lock.unlock();
+            return -1; // Task not found
+        }
+    } else {
+        // Wait for anything
+        pid_t found_zombie = -1;
+        for (const auto &t: AllTasks) { // Check if we have anything already dead, FIXME: it's slow
+            if (t.second->_parent == cur_task()->_pid && t.second->state() == Task::TaskState::TS_ZOMBIE) {
+                found_zombie = t.first;
+                break;
+            }
+        }
+        if (found_zombie == -1) {
+            cur_task()->_woken_pid = -1;
+            waitpid_block();
+            found_zombie = cur_task()->_woken_pid;
+        }
+        auto found = AllTasks.find(found_zombie);
+        AllTasks_lock.unlock();
+        dispose_zombie(found->second.get());
+        return found_zombie;
+    }
+    assert(false);
+}
 
 static void trampoline(void *rdi, void (*rsi_entrypoint)()) {
     rsi_entrypoint();
@@ -157,8 +261,8 @@ Task::~Task() {
     assert(_state != TaskState::TS_RUNNING);
 }
 
-SkipListMap<uint64_t, std::pair<String, Task::TaskPID>> Scheduler::getTaskTimePerPid() {
-    SkipListMap<uint64_t, std::pair<String, Task::TaskPID>> ret;
+SkipListMap<pid_t, std::pair<String, uint64_t>> Scheduler::getTaskTimePerPid() {
+    SkipListMap<pid_t, std::pair<String, uint64_t>> ret;
     {
         LockGuard l(AllTasks_lock);
         for (const auto &t: AllTasks) {
@@ -291,6 +395,7 @@ Task *Task::clone() {
     ret->_frame.ss              = Arch::GDT::gdt_data.selector();
     ret->_frame.cs              = Arch::GDT::gdt_code.selector();
     ret->_frame.sp              = ret->_entry_ksp_val;
+    ret->_parent                = Scheduler::cur_task()->_pid;
     return ret;
 }
 

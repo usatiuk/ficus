@@ -12,6 +12,8 @@
 #include "idt.hpp"
 #include "task_arch.hpp"
 
+#include <sys/types.h>
+
 #define TASK_SS 65536
 
 class Mutex;
@@ -21,8 +23,6 @@ class Spinlock;
 
 class Task {
 public:
-    using TaskPID = uint64_t;
-
     enum class TaskMode {
         TASKMODE_KERN,
         TASKMODE_USER
@@ -30,8 +30,16 @@ public:
 
     enum class TaskState {
         TS_RUNNING,
-        TS_BLOCKED
+        TS_BLOCKED,
+        TS_ZOMBIE,
+        TS_WAITPID_BLOCKED
     };
+
+    /// PID of processor that we're waiting for
+    /// or -1, wait for anything, then it's set by the zombified process to its PID
+    pid_t _woken_pid = -1;
+    /// Place to put list node when waiting for pid/being zombified
+    List<Task *>::Node         *_waitpid_node;
 
                                 Task(TaskMode mode, void (*entrypoint)(), const char *name);
 
@@ -43,7 +51,7 @@ public:
     void                        start();
 
     [[nodiscard]] const String &name() const { return _name; }
-    [[nodiscard]] TaskPID       pid() const { return _pid; }
+    [[nodiscard]] pid_t         pid() const { return _pid; }
     [[nodiscard]] uint64_t      used_time() const { return _used_time; }
     [[nodiscard]] TaskState     state() const { return _state; }
 
@@ -62,7 +70,7 @@ public:
 
     uint64_t              _entry_ksp_val;
     Arch::TaskFrame       _frame;
-    TaskPID               _pid;
+    pid_t                 _pid;
     std::atomic<uint64_t> _used_time;
 
     // Note that address space must be destroyed after VMA!
@@ -77,6 +85,7 @@ public:
     TaskMode                _mode;
     uint64_t                _sleep_until;
     TaskState               _state;
+    pid_t                   _parent = -1;
 };
 
 
@@ -97,6 +106,9 @@ namespace Scheduler {
     void                sleep_self(uint64_t diff);
 
     void                remove_self();
+    void                dispose_self();
+    void                zombify_self();
+    void                dispose_zombie(Task *zombie);
 
     void                self_block();
     void                self_block(Spinlock &to_unlock);
@@ -106,12 +118,15 @@ namespace Scheduler {
     void                unblock(List<Task *>::Node *what);
     void                unblock_nolock(List<Task *>::Node *what);
 
+    void                waitpid_block();
+    pid_t               waitpid(pid_t pid, int *status, int options);
+
     extern "C" void     switch_task(Arch::TaskFrame *cur_frame);
 
     // TODO: that's quite inefficient!
-    SkipListMap<uint64_t, std::pair<String, Task::TaskPID>> getTaskTimePerPid();
+    SkipListMap<pid_t, std::pair<String, uint64_t>> getTaskTimePerPid();
 
-    void                                                    yield_self();
+    void                                            yield_self();
 } // namespace Scheduler
 
 // Expects the caller to save interrupt state

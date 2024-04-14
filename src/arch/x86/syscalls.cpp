@@ -110,15 +110,15 @@ uint64_t syscall_lseek(uint64_t fd, uint64_t off, uint64_t whence) {
 }
 
 uint64_t syscall_print_tasks() {
-    static SkipListMap<uint64_t, std::pair<String, uint64_t>> last_times      = Scheduler::getTaskTimePerPid();
-    static std::atomic<uint64_t>                              last_print_time = micros;
+    static SkipListMap<pid_t, std::pair<String, uint64_t>> last_times      = Scheduler::getTaskTimePerPid();
+    static std::atomic<uint64_t>                           last_print_time = micros;
 
-    uint64_t                                                  prev_print_time = last_print_time;
-    last_print_time                                                           = micros;
-    SkipListMap<uint64_t, std::pair<String, uint64_t>> prev_times             = std::move(last_times);
-    last_times                                                                = Scheduler::getTaskTimePerPid();
+    uint64_t                                               prev_print_time = last_print_time;
+    last_print_time                                                        = micros;
+    SkipListMap<pid_t, std::pair<String, uint64_t>> prev_times             = std::move(last_times);
+    last_times                                                             = Scheduler::getTaskTimePerPid();
 
-    uint64_t slice                                                            = last_print_time - prev_print_time;
+    uint64_t slice                                                         = last_print_time - prev_print_time;
     if (slice == 0) return 0;
 
     for (const auto &t: prev_times) {
@@ -127,7 +127,7 @@ uint64_t syscall_print_tasks() {
             assert(f->second.second >= t.second.second);
             String buf;
             buf += "PID: ";
-            buf += t.first;
+            buf += (unsigned long) t.first;
             buf += " ";
             buf += t.second.first;
             buf += " usage: ";
@@ -137,7 +137,7 @@ uint64_t syscall_print_tasks() {
         } else {
             String buf;
             buf += "PID: ";
-            buf += t.first;
+            buf += (unsigned long) t.first;
             buf += " ";
             buf += t.second.first;
             buf += " dead \n";
@@ -218,6 +218,10 @@ char *syscall_sbrk(int brk) {
     return ret;
 }
 
+pid_t syscall_waitpid(pid_t pid, int *status, int options) {
+    return Scheduler::waitpid(pid, status, options);
+}
+
 int64_t syscall_getdents(int fd, struct dirent *dp, int count) {
     auto f = FDT::current()->get(fd);
     if (!f) return -1;
@@ -282,6 +286,8 @@ extern "C" uint64_t syscall_impl(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_r
             return syscall_fork();
         case SYSCALL_EXECVE_ID:
             return syscall_execve(reinterpret_cast<const char *>(a1_rsi), reinterpret_cast<char *const *>(a2_rdx), reinterpret_cast<char *const *>(a3_rcx));
+        case SYSCALL_WAITPID_ID:
+            return syscall_waitpid(static_cast<pid_t>(a1_rsi), reinterpret_cast<int *>(a2_rdx), static_cast<int>(a3_rcx));
         case SYSCALL_SBRK_ID:
             return reinterpret_cast<uint64_t>(syscall_sbrk(static_cast<int64_t>(a1_rsi)));
         case SYSCALL_OPENDIR_ID:

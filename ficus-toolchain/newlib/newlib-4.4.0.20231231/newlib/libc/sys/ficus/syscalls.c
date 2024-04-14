@@ -8,6 +8,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 uint64_t _do_syscall(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     register uint64_t res asm("rax");
@@ -92,6 +93,11 @@ int _unlink(char *name) {
 }
 
 int _wait(int *status) {
+    return waitpid(-1, &status, 0);
+}
+
+pid_t waitpid(pid_t pid, int *status, int options) {
+    return _do_syscall(SYSCALL_WAITPID_ID, (uint64_t) pid, (uint64_t) status, (uint64_t) options);
 }
 
 int _write(int file, char *ptr, int len) {
