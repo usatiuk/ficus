@@ -10,6 +10,7 @@
 void                setup_syscalls();
 
 extern "C" void     _syscall_entrypoint();
+extern "C" void     _execve_entrypoint();
 
 extern "C" void     _syscall_ret();
 

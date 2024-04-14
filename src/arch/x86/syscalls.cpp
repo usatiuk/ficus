@@ -28,6 +28,8 @@
 #include "task.hpp"
 #include "timer.hpp"
 
+#include <globals.hpp>
+
 // Don't forget the correct order
 // Shockingly, it doesn't immediately break and even something simple as putchar works
 // even with completely broken 16-bit segments somehow
@@ -185,11 +187,22 @@ uint64_t syscall_execve(const char *pathname, char *const argv[], char *const en
 
     ElfParser elfParser(read_data);
 
-    Task     *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), pathname);
-    if (elfParser.copy_to(utask))
-        utask->start();
-    else
-        return -1;
+    uint64_t  flags_bak = ((task_pointer *) (TASK_POINTER))->ret_flags;
+    Scheduler::cur_task()->user_reset();
+
+    if (!elfParser.copy_to(Scheduler::cur_task()))
+        assert(false);
+
+    // FIXME: that seems... hacky
+    char *trampoline   = (char *) Scheduler::cur_task()->_vma->mmap_mem((void *) 0x5000, 4096, 0, PAGE_USER | PAGE_RW);
+    char *trampoline_w = (char *) HHDM_P2V(Scheduler::cur_task()->_addressSpace->virt2real(trampoline));
+    for (int i = 0; i < 100; i++) {
+        *(trampoline_w + i) = *(((char *) &_execve_entrypoint) + i);
+    }
+
+    ((task_pointer *) (TASK_POINTER))->ret_ip    = (uint64_t) trampoline;
+    ((task_pointer *) (TASK_POINTER))->exec_ip   = elfParser.get_entrypoint();
+    ((task_pointer *) (TASK_POINTER))->ret_flags = flags_bak;
 
     return 0;
 }

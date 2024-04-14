@@ -187,6 +187,64 @@ static void trampoline(void *rdi, void (*rsi_entrypoint)()) {
     Scheduler::remove_self();
 }
 
+void Task::user_setup() {
+    assert(_mode == TaskMode::TASKMODE_USER);
+    _frame.cs             = Arch::GDT::gdt_code_user.selector() | 0x3;
+    _frame.ss             = Arch::GDT::gdt_data_user.selector() | 0x3;
+    _ownAddressSpace      = UniquePtr(new AddressSpace());
+    _vma                  = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
+
+    task_pointer *taskptr = static_cast<task_pointer *>(
+            _vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
+                           sizeof(task_pointer), 0, PAGE_RW | PAGE_USER)); // FIXME: this is probably unsafe
+    assert((uintptr_t) taskptr == TASK_POINTER);
+
+    task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(_ownAddressSpace->virt2real(taskptr)));
+
+    _entry_ksp_val             = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
+    // It should be aligned before call, therefore it actually should be aligned here
+    assert((_entry_ksp_val & 0xFULL) == 0);
+
+    taskptr_real->taskptr       = this;
+    taskptr_real->entry_ksp_val = _entry_ksp_val;
+    taskptr_real->ret_sp        = 0x0;
+
+    void *ustack                = _vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
+    _vma->map_kern();
+
+    // Ensure 16byte alignment
+    _frame.sp = ((((uintptr_t) ustack) + (TASK_SS - 17) - 1) & (~0xFULL)) + 8;
+}
+
+void Task::user_reset() {
+    assert(_mode == TaskMode::TASKMODE_USER);
+
+    // FIXME:
+    // delete _ownAddressSpace.release();
+
+    _vma                  = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
+
+    task_pointer *taskptr = static_cast<task_pointer *>(
+            _vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
+                           sizeof(task_pointer), 0, PAGE_RW | PAGE_USER)); // FIXME: this is probably unsafe
+    assert((uintptr_t) taskptr == TASK_POINTER);
+
+    task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(_ownAddressSpace->virt2real(taskptr)));
+
+    _entry_ksp_val             = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
+    // It should be aligned before call, therefore it actually should be aligned here
+    assert((_entry_ksp_val & 0xFULL) == 0);
+
+    taskptr_real->taskptr       = this;
+    taskptr_real->entry_ksp_val = _entry_ksp_val;
+
+    void *ustack                = _vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
+    _vma->map_kern();
+
+    // Ensure 16byte alignment
+    taskptr_real->ret_sp = ((((uintptr_t) ustack) + (TASK_SS - 17) - 1) & (~0xFULL)) + 8;
+}
+
 Task::Task(Task::TaskMode mode, void (*entrypoint)(), const char *name) {
     _name = name;
 
@@ -199,51 +257,23 @@ Task::Task(Task::TaskMode mode, void (*entrypoint)(), const char *name) {
     if (mode == TaskMode::TASKMODE_KERN) {
         _frame.cs = Arch::GDT::gdt_code.selector();
         _frame.ss = Arch::GDT::gdt_data.selector();
-    } else if (mode == TaskMode::TASKMODE_USER) {
-        _frame.cs = Arch::GDT::gdt_code_user.selector() | 0x3;
-        _frame.ss = Arch::GDT::gdt_data_user.selector() | 0x3;
-    } else {
-        assert(false);
     }
 
     for (int i = 0; i < 512; i++) _fxsave->_fxsave[i] = 0;
 
     _frame.flags = flags();
     _frame.guard = Arch::kIDT_GUARD;
-    if (mode == TaskMode::TASKMODE_USER) {
-        _ownAddressSpace = UniquePtr(new AddressSpace());
-        _vma             = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
-    }
+    _state       = TaskState::TS_BLOCKED;
+    _mode        = mode;
+    _pid         = max_pid.fetch_add(1);
+    _used_time   = 0;
+
+    if (mode == TaskMode::TASKMODE_USER)
+        user_setup();
+
     _addressSpace = mode == TaskMode::TASKMODE_KERN ? KERN_AddressSpace : _ownAddressSpace.get();
-    _state        = TaskState::TS_BLOCKED;
-    _mode         = mode;
-    _pid          = max_pid.fetch_add(1);
-    _used_time    = 0;
 
-    if (mode == TaskMode::TASKMODE_USER) {
-        task_pointer *taskptr = static_cast<task_pointer *>(
-                _vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
-                               sizeof(task_pointer), 0, PAGE_RW | PAGE_USER)); // FIXME: this is probably unsafe
-        assert((uintptr_t) taskptr == TASK_POINTER);
-
-        task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(_addressSpace->virt2real(taskptr)));
-
-        _entry_ksp_val             = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)); // Ensure 16byte alignment
-        // It should be aligned before call, therefore it actually should be aligned here
-        assert((_entry_ksp_val & 0xFULL) == 0);
-
-        taskptr_real->taskptr       = this;
-        taskptr_real->entry_ksp_val = _entry_ksp_val;
-        taskptr_real->ret_sp        = 0x0;
-    }
-
-    if (mode == TaskMode::TASKMODE_USER) {
-        void *ustack = _vma->mmap_mem(NULL, TASK_SS, 0, PAGE_RW | PAGE_USER);
-        _vma->map_kern();
-
-        // Ensure 16byte alignment
-        _frame.sp = ((((uintptr_t) ustack) + (TASK_SS - 17) - 1) & (~0xFULL)) + 8;
-    } else {
+    if (mode == TaskMode::TASKMODE_KERN) {
         _frame.sp = ((((uintptr_t) _kstack->_ptr) + (TASK_SS - 9) - 1) & (~0xFULL)) + 8;
     }
 

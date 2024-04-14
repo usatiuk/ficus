@@ -58,6 +58,8 @@ public:
     ~                           Task();
 
     Task                       *clone();
+    void                        user_setup();
+    void                        user_reset();
 
     //private:
     struct KernStack {
@@ -95,6 +97,7 @@ struct task_pointer {
     uint64_t ret_sp;
     uint64_t ret_flags;
     uint64_t ret_ip;
+    uint64_t exec_ip;
 } __attribute__((packed));
 
 namespace Scheduler {

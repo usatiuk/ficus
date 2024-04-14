@@ -33,7 +33,10 @@ int main() {
         printf("\n %s \n", buf);
     }
     while (1) {
-        execve("hello2", 0, 0);
+        if (fork() == 0)
+            execve("hello2", 0, 0);
+        else
+            wait(NULL);
         print_mem();
         sleep(500);
     }
@@ -49,8 +52,10 @@ int main() {
         } else if (strcmp(line, "tasks") == 0) {
             print_tasks();
         } else {
-            execve(line, 0, 0);
-            // sleep(10000);
+            if (fork() == 0)
+                execve(line, 0, 0);
+            else
+                wait(NULL);
         }
     }
 }

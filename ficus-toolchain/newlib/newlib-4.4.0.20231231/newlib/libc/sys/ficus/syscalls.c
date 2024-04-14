@@ -13,13 +13,13 @@
 uint64_t _do_syscall(uint64_t id_rdi, uint64_t a1_rsi, uint64_t a2_rdx, uint64_t a3_rcx) {
     register uint64_t res asm("rax");
     if (id_rdi != SYSCALL_FORK_ID)
-        asm volatile("syscall; mov (0x10016), %%rsp;" // TASK_POINTER->ret_sp_val
+        asm volatile("syscall; mov (0x10010), %%rsp;" // TASK_POINTER->ret_sp_val
                      : "=ra"(res)
                      : "D"(id_rdi), "S"(a1_rsi), "d"(a2_rdx), "a"(a3_rcx)
                      : "cc", "rcx", "r8",
                        "r9", "r10", "r11", "r15", "memory");
     else
-        asm volatile("syscall; mov (0x10016), %%rsp;" // TASK_POINTER->ret_sp_val
+        asm volatile("syscall; mov (0x10010), %%rsp;" // TASK_POINTER->ret_sp_val
                      "pop %%r15;"
                      "pop %%r14;"
                      "pop %%r13;"
