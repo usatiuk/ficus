@@ -32,14 +32,6 @@ int main() {
         close(test123);
         printf("\n %s \n", buf);
     }
-    while (1) {
-        if (fork() == 0)
-            execve("hello2", 0, 0);
-        else
-            wait(NULL);
-        print_mem();
-        sleep(500);
-    }
 
     while (1) {
         printf("\n> ");

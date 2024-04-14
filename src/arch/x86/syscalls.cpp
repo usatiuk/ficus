@@ -215,14 +215,30 @@ char *syscall_sbrk(int brk) {
     if (!vma) return reinterpret_cast<char *>(-1);
 
     if (!vma->brk_start) {
-        vma->brk_start = (char *) vma->mmap_mem(nullptr, VMA::kBrkSize /* 16MB */, 0, PAGE_RW | PAGE_USER);
+        vma->brk_start = (char *) vma->mmap_mem((void *) 0x100000000ULL, VMA::kBrkSize, 0, PAGE_RW | PAGE_USER);
         if (!vma->brk_start) return reinterpret_cast<char *>(-1); // FIXME:
         vma->brk_end_real = *vma->brk_start + VMA::kBrkSize;
         vma->brk_end_fake = vma->brk_start;
     }
 
-    if (*vma->brk_end_fake + brk >= *vma->brk_start + VMA::kBrkSize) {
-        return ret;
+    if (*vma->brk_end_fake + brk > *vma->brk_end_real) {
+        size_t new_len = PAGE_ROUND_UP((*vma->brk_end_fake + brk - *vma->brk_end_real));
+        void  *new_end = vma->mmap_mem(*vma->brk_end_real, new_len, 0, PAGE_RW | PAGE_USER);
+        if (new_end != *vma->brk_end_real) {
+            writestr_no_yield("\nSBRK fail!\n");
+            if (!vma->munmap(new_end, PAGE_ROUND_UP(*vma->brk_end_fake + brk - *vma->brk_end_real)))
+                writestr_no_yield("\nunmap fail after SBRK fail!\n");
+            return reinterpret_cast<char *>(-1);
+        }
+        vma->brk_end_real = (char *) new_end + new_len;
+    } else if (*vma->brk_end_real - (*vma->brk_end_fake + brk) > 3 * PAGE_SIZE) {
+        uintptr_t new_end     = PAGE_ROUND_UP((uintptr_t) (*vma->brk_end_fake + brk));
+        uintptr_t length_diff = (uintptr_t) *vma->brk_end_real - new_end;
+
+        if (vma->munmap((void *) new_end, length_diff) == -1)
+            writestr_no_yield("\nunmap fail in sbrk!\n");
+        else
+            *vma->brk_end_real = (char *) new_end;
     }
 
     ret               = *vma->brk_end_fake;

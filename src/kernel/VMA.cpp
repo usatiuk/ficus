@@ -81,13 +81,7 @@ void *VMA::mmap_phys(void *v_addr, void *real_addr, size_t length, int flags) {
 }
 
 void *VMA::mmap_mem(void *v_addr, size_t length, int prot, int flags) {
-    size_t origlen = length;
-    if ((length & (PAGE_SIZE - 1)) != 0) {
-        length += PAGE_SIZE - 1;
-        length &= ~(PAGE_SIZE - 1);
-    }
     assert((length & (PAGE_SIZE - 1)) == 0);
-    assert(length >= origlen);
 
     uint64_t page_len = length / PAGE_SIZE;
 
@@ -107,6 +101,73 @@ void *VMA::mmap_mem(void *v_addr, size_t length, int prot, int flags) {
     return reinterpret_cast<void *>(found->begin);
 }
 int VMA::munmap(void *addr, size_t length) {
+    assert((length & (PAGE_SIZE - 1)) == 0);
+    assert((((uintptr_t) addr) & (PAGE_SIZE - 1)) == 0);
+
+    uint64_t page_len = length / PAGE_SIZE;
+
+    uintptr_t end = (uintptr_t) addr + length;
+    uintptr_t cur = (uintptr_t) addr;
+
+    while (cur < end) {
+        LockGuard l(regions_lock);
+        auto      found = regions.upper_bound(cur);
+        --found;
+
+        if (found->second.type == EntryType::FREE) {
+            cur += found->second.length;
+            continue;
+        }
+
+        ListEntry old = found->second;
+        regions.erase(found);
+
+        if (old.begin < cur)
+            regions.emplace(std::make_pair<uintptr_t, ListEntry>((uintptr_t) old.begin, {old.begin, cur - old.begin, old.type, old.flags}));
+
+        old.length = old.length - (cur - old.begin);
+        old.begin  = cur;
+
+        if (old.begin + old.length > end)
+            regions.emplace(std::make_pair<uintptr_t, ListEntry>((uintptr_t) end, {end, (old.begin + old.length) - end, old.type, old.flags}));
+
+        old.length = std::min(old.length, length);
+
+        size_t new_free_len = old.length;
+
+
+        uint64_t cur_page_len = new_free_len / PAGE_SIZE;
+
+        for (int i = 0; i < cur_page_len; i++) {
+            free4k((void *) HHDM_P2V(space->virt2real(reinterpret_cast<void *>(old.begin + i * PAGE_SIZE))));
+            {
+                LockGuard l(space_lock);
+                space->unmap(reinterpret_cast<void *>(old.begin + i * PAGE_SIZE));
+            }
+        }
+
+        // Merge free pages together
+        auto ub = regions.upper_bound(cur);
+        while (ub != regions.end() && ub->second.begin == (cur + new_free_len) && ub->second.type == EntryType::FREE) {
+            auto ubold = ub;
+            ++ub;
+            new_free_len += ubold->second.length;
+            regions.erase(ubold);
+        }
+        ub = regions.upper_bound(cur);
+        --ub;
+        while (ub != regions.end() && (ub->second.begin + ub->second.length) == cur && ub->second.type == EntryType::FREE) {
+            auto ubold = ub;
+            --ub;
+            cur = ubold->second.begin;
+            new_free_len += ubold->second.length;
+            regions.erase(ubold);
+        }
+
+        regions.emplace(std::make_pair<uintptr_t, ListEntry>((uintptr_t) cur, {cur, new_free_len, EntryType::FREE, old.flags}));
+
+        cur = cur + new_free_len;
+    }
     return 0;
 }
 VMA::~VMA() {

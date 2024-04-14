@@ -16,11 +16,11 @@ class AddressSpace;
 
 class VMA {
 public:
-    VMA(AddressSpace *space);
+     VMA(AddressSpace *space);
     ~VMA();
 
-    VMA(const VMA &)            = delete;
-    VMA(VMA &&)                 = delete;
+         VMA(const VMA &)       = delete;
+         VMA(VMA &&)            = delete;
     VMA &operator=(const VMA &) = delete;
     VMA &operator=(VMA &&)      = delete;
 
@@ -32,7 +32,7 @@ public:
     void *mmap_mem(void *v_addr, size_t length, int prot, int flags);
     int   munmap(void *addr, size_t length);
 
-    static constexpr size_t kBrkSize = 16ULL * 1024ULL * 1024ULL;
+    static constexpr size_t kBrkSize =   4096ULL * 20ULL;
     std::optional<char *>   brk_start;
     std::optional<char *>   brk_end_fake;
     std::optional<char *>   brk_end_real;

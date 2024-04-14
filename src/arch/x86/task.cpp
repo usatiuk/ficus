@@ -194,9 +194,10 @@ void Task::user_setup() {
     _ownAddressSpace = UniquePtr(new AddressSpace());
     _vma             = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
 
+    static_assert(sizeof(task_pointer) <= PAGE_SIZE);
     task_pointer *taskptr = static_cast<task_pointer *>(
             _vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
-                           sizeof(task_pointer), 0, PAGE_RW | PAGE_USER)); // FIXME: this is probably unsafe
+                           PAGE_SIZE, 0, PAGE_RW | PAGE_USER)); // FIXME: this is probably unsafe
     assert((uintptr_t) taskptr == TASK_POINTER);
 
     task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(_ownAddressSpace->virt2real(taskptr)));
@@ -224,9 +225,10 @@ void Task::user_reset() {
 
     _vma = UniquePtr<VMA>(new VMA(_ownAddressSpace.get()));
 
+    static_assert(sizeof(task_pointer) <= PAGE_SIZE);
     task_pointer *taskptr = static_cast<task_pointer *>(
             _vma->mmap_mem(reinterpret_cast<void *>(TASK_POINTER),
-                           sizeof(task_pointer), 0, PAGE_RW | PAGE_USER)); // FIXME: this is probably unsafe
+                           PAGE_SIZE, 0, PAGE_RW | PAGE_USER)); // FIXME: this is probably unsafe
     assert((uintptr_t) taskptr == TASK_POINTER);
 
     task_pointer *taskptr_real = reinterpret_cast<task_pointer *>(HHDM_P2V(_ownAddressSpace->virt2real(taskptr)));
