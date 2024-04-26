@@ -14,6 +14,7 @@ FbTty::FbTty(Framebuffer *fb) : _fb(fb) {
 void FbTty::putchar(char c) {
     if (c == '\n') {
         next_row();
+        return;
     }
 
     for (int x = 0; x < 8; x++) {
