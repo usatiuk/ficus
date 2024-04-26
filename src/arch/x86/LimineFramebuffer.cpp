@@ -15,5 +15,5 @@ int LimineFramebuffer::get(size_t x, size_t y) {
     return *coord_to_ptr(x, y);
 }
 uint32_t *LimineFramebuffer::coord_to_ptr(size_t x, size_t y) {
-    return &((uint32_t *) _backing->address)[x * (_backing->pitch / 4) + y];
+    return &((uint32_t *) _backing->address)[y * (_backing->pitch / 4) + x];
 }

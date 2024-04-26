@@ -30,6 +30,7 @@
 #include "task.hpp"
 #include "timer.hpp"
 
+#include <FbTty.hpp>
 #include <LimineFramebuffer.hpp>
 
 void templates_tester() {
@@ -46,6 +47,8 @@ void vfs_tester() {
 
 void ktask_main() {
     GlobalTtyManager.add_tty(new SerialTty());
+    for (int i = 0; i < framebuffer_count; i++)
+        GlobalTtyManager.add_tty(new FbTty(new LimineFramebuffer(&framebuffers[i])));
 
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester"))->start();
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester2"))->start();

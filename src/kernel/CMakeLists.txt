@@ -15,6 +15,7 @@ target_sources(kernel.elf PRIVATE
         string.c
         TestTemplates.cpp
         Framebuffer.cpp
+        FbTty.cpp
 )
 
 add_subdirectory(templates)
