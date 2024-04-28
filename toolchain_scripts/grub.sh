@@ -17,7 +17,7 @@ mkdir -p prefix
 
 if [ ! -d "grub-2.06" ]; then
     wget https://ftp.gnu.org/gnu/grub/grub-2.06.tar.xz
-    tar xvf grub-2.06.tar.xz
+    tar xf grub-2.06.tar.xz
     rm grub-2.06.tar.xz
 fi
 
@@ -42,5 +42,9 @@ export PATH="$PREFIX/bin:$PATH"
 
 make -j$(nproc)
 make install
+
+cd ..
+rm -rf build
+rm -rf grub-2.06
 
 touch -m ../done

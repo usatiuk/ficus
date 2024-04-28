@@ -15,7 +15,7 @@ pushd gcc-x86_64-elf
 
 if [ ! -d gcc-13.2.0 ]; then
     wget https://ftp.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz
-    tar xvf gcc-13.2.0.tar.xz
+    tar xf gcc-13.2.0.tar.xz
     rm gcc-13.2.0.tar.xz
 fi
 
@@ -56,6 +56,9 @@ EOF
 
 sed -i.bak 's/x86_64-\*-elf\*)/x86_64-\*-elf\*)\n\ttmake_file="\${tmake_file} i386\/t-x86_64-elf"/g' "../gcc-13.2.0/gcc/config.gcc"
 
+pushd ../gcc-13.2.0/
+./contrib/download_prerequisites
+popd
 ../gcc-13.2.0/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --with-newlib --without-headers --enable-version-specific-runtime-libs $ADDONS
 make -j$(nproc) all-gcc
 make -j$(nproc) all-target-libgcc

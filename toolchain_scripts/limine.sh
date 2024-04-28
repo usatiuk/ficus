@@ -17,7 +17,7 @@ mkdir -p prefix
 
 if [ ! -d "limine-5.20230830.0" ]; then
     wget https://github.com/limine-bootloader/limine/releases/download/v5.20230830.0/limine-5.20230830.0.tar.xz
-    tar xvf limine-5.20230830.0.tar.xz
+    tar xf limine-5.20230830.0.tar.xz
     rm limine-5.20230830.0.tar.xz
 fi
 
@@ -43,5 +43,9 @@ grep -rl "define DEFAULT_VAR =" ../limine-5.20230830.0 | xargs sed -i.bak -e 's/
     --prefix="$PREFIX"
 
 make -j$(nproc) install
+
+cd ..
+rm -rf build
+rm -rf limine-5.20230830.0
 
 touch -m ../done

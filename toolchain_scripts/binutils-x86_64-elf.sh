@@ -15,7 +15,7 @@ pushd binutils-x86_64-elf
 
 if [ ! -d "binutils-2.41" ]; then
     wget https://ftp.gnu.org/gnu/binutils/binutils-2.41.tar.xz
-    tar xvf binutils-2.41.tar.xz
+    tar xf binutils-2.41.tar.xz
     rm binutils-2.41.tar.xz
 fi
 

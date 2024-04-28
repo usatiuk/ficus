@@ -16,3 +16,10 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 "$SCRIPT_DIR"/grub.sh
 "$SCRIPT_DIR"/limine.sh
+
+rm -rf "$FICUS_ROOT/toolchain/binutils-i686-elf"
+rm -rf "$FICUS_ROOT/toolchain/gcc-i686-elf"
+rm -rf "$FICUS_ROOT/toolchain/binutils-x86_64-elf"
+rm -rf "$FICUS_ROOT/toolchain/gcc-x86_64-elf"
+
+find "$FICUS_ROOT/toolchain" -exec strip {} \;
