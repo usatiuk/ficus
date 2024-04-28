@@ -173,7 +173,10 @@ namespace Arch::IDT {
         Scheduler::switch_task(frame);
         PIC_sendEOI(0);
     }
-    extern "C" void pic1_irq_real_1() {
+    extern "C" __attribute__((force_align_arg_pointer))  void pic1_irq_real_1() {
+        if (handlers[1] != nullptr) {
+            handlers[1](handlers_args[1]);
+        }
         PIC_sendEOI(1);
     }
     extern "C" void pic1_irq_real_2() {

@@ -4,6 +4,7 @@
 
 #ifndef FBTTY_HPP
 #define FBTTY_HPP
+#include <PS2Keyboard.hpp>
 #include <Tty.hpp>
 
 
@@ -28,6 +29,8 @@ private:
 
     void next_col();
     void next_row();
+
+    PS2Keyboard kbd;
 };
 
 

@@ -42,9 +42,9 @@ int _close(int file) {
     return _do_syscall(SYSCALL_CLOSE_ID, file, 0, 0);
 }
 
-char **environ; /* pointer to array of char * strings that define the current environment variables */
+char **environ = 0; /* pointer to array of char * strings that define the current environment variables */
 
-int    _execve(char *name, char **argv, char **env) {
+int _execve(char *name, char **argv, char **env) {
     return _do_syscall(SYSCALL_EXECVE_ID, (uint64_t) name, (uint64_t) argv, (uint64_t) env);
 }
 
@@ -53,6 +53,7 @@ int _fork() {
 }
 
 int _getpid() {
+    return -1;
 }
 
 int _isatty(int file) { return file == 0 || file == 1 || file == 2; }
@@ -62,9 +63,11 @@ int _fstat(int file, struct stat *st) {
 }
 
 int _kill(int pid, int sig) {
+    return -1;
 }
 
 int _link(char *old, char *new) {
+    return -1;
 }
 
 int _lseek(int file, int ptr, int dir) {
@@ -84,12 +87,19 @@ caddr_t _sbrk(int incr) {
 }
 
 int _stat(const char *file, struct stat *st) {
+    return -1;
 }
 
 clock_t _times(struct tms *buf) {
+    buf->tms_cstime = 0;
+    buf->tms_cutime = 0;
+    buf->tms_stime  = 0;
+    buf->tms_utime  = 0;
+    return 0;
 }
 
 int _unlink(char *name) {
+    return -1;
 }
 
 int _wait(int *status) {
@@ -118,6 +128,9 @@ int usleep(useconds_t useconds) {
 
 
 int _gettimeofday(struct timeval *restrict p, void *restrict z) {
+    p->tv_sec  = 0;
+    p->tv_usec = 0;
+    return 0;
 }
 
 void print_mem() {

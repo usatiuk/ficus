@@ -27,6 +27,7 @@ target_sources(kernel.elf PRIVATE
         limine_modules.cpp
         handle_exception.cpp
         LimineFramebuffer.cpp
+        PS2Keyboard.cpp
 )
 
 target_include_directories(kernel.elf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

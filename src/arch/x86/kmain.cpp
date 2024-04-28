@@ -34,10 +34,10 @@
 #include <LimineFramebuffer.hpp>
 
 void templates_tester() {
-    GlobalTtyManager.all_tty_putstr("Testing templates\n");
+    // GlobalTtyManager.all_tty_putstr("Testing templates\n");
     for (int i = 0; i < 5; i++)
         test_templates();
-    GlobalTtyManager.all_tty_putstr("Testing templates OK\n");
+    // GlobalTtyManager.all_tty_putstr("Testing templates OK\n");
 }
 
 void vfs_tester() {
@@ -46,9 +46,9 @@ void vfs_tester() {
 }
 
 void ktask_main() {
-    GlobalTtyManager.add_tty(new SerialTty());
     for (int i = 0; i < framebuffer_count; i++)
         GlobalTtyManager.add_tty(new FbTty(new LimineFramebuffer(&framebuffers[i])));
+    GlobalTtyManager.add_tty(new SerialTty());
 
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester"))->start();
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester2"))->start();

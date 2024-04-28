@@ -32,6 +32,10 @@ void FbTty::putstr(const char *str) {
     }
 }
 char FbTty::readchar() {
+    char r = kbd.readchar();
+    if (r != '\r')
+        putchar(r);
+    return r;
 }
 void FbTty::next_col() {
     _cur_col++;
