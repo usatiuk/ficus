@@ -20,7 +20,7 @@ struct HeapEntry {
     struct HeapEntry *prev;
     uint64_t          len;
     char              data[] __attribute__((aligned(16)));
-} __attribute__((packed, aligned(1)));
+} __attribute__((packed, aligned(16)));
 
 extern struct HeapEntry *KERN_HeapBegin;
 extern uintptr_t         KERN_HeapEnd; // Past the end
