@@ -28,24 +28,24 @@ class LockGuardTry {
 public:
     LockGuardTry(T &lock) : _lock(&lock) {
         assert2(are_interrupts_enabled(), "Trying to lock with disabled interrupts!");
-        suc = _lock->try_lock();
+        _locked = _lock->try_lock();
     }
     ~LockGuardTry() {
-        if (suc)
+        if (_locked)
             _lock->unlock();
     }
 
     LockGuardTry(LockGuardTry const &d) = delete;
 
-    bool locked() { return suc; }
+    bool locked() { return _locked; }
     void lock() {
         _lock->lock();
-        suc = true;
+        _locked = true;
     }
 
 private:
     T   *_lock;
-    bool suc;
+    bool _locked;
 };
 
 
