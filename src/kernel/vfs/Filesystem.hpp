@@ -7,12 +7,15 @@
 
 #include "Node.hpp"
 
+#include "PointersCollection.hpp"
+
 class Filesystem {
 public:
-    Filesystem(NodeDir *mounted_on);
+             Filesystem(NodeDir *mounted_on);
+    virtual ~Filesystem() = 0;
 
-    virtual NodeDir *root() = 0;
-    virtual ~Filesystem()   = 0;
+    virtual SharedPtr<NodeDir> root()                = 0;
+    virtual SharedPtr<Node>    get_node(ino_t inode) = 0;
 
     NodeDir *_mounted_on;
 };

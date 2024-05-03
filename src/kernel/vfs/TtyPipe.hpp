@@ -15,13 +15,14 @@ public:
     bool    is_tty() override { return true; }
 
     static SharedPtr<TtyPipe> create() {
-        auto shared        = SharedPtr(new TtyPipe());
+        auto shared        = SharedPtr(new TtyPipe(nullptr, -1));
         shared->_self_weak = static_ptr_cast<Node>(shared);
         return shared;
     }
 
 private:
-    TtyPipe() = default;
+    TtyPipe(Filesystem *fs, ino_t ino)
+        : NodeFile(fs, ino) {}
 };
 
 

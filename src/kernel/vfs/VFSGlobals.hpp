@@ -10,15 +10,18 @@
 
 class RootNode : public NodeDir {
 public:
-    Vector<SharedPtr<Node>> children() override;
-    SharedPtr<NodeDir>      mkdir(const String &name) override;
-    SharedPtr<NodeFile>     mkfile(const String &name) override;
+    RootNode()
+        : NodeDir(nullptr, -1) {}
+
+    Vector<DirEntry> children() override;
+    ino_t            mkdir(const String &name) override;
+    ino_t            mkfile(const String &name) override;
 };
 
 namespace VFSGlobals {
     extern RootNode   root;
     extern MountTable mounts;
-}; // namespace VFSGlobals
+};     // namespace VFSGlobals
 
 
 #endif //FICUS_VFSGLOBALS_HPP

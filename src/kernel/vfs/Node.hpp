@@ -25,37 +25,41 @@ public:
     };
     virtual ~Node() = 0;
 
-    Type          type() const { return _type; }
-    const String &name() const {
-        LockGuard l(_lock);
-        return _name;
-    }
+    Type                    type() const { return _type; }
     virtual SharedPtr<Node> traverse(const Path &path);
 
 protected:
-    Node(Type type) : _type(type) {}
+    Node(Type type, Filesystem *fs, ino_t ino) : _type(type), _fs(fs), _ino(ino) {}
 
     const Type _type = Type::INVALID;
 
-    // This is uuugly
     mutable Mutex _lock;
 
-    String        _name;
-    Filesystem   *_mount     = nullptr;
+    Filesystem *_mount = nullptr;
+    Filesystem *_fs    = nullptr;
+
+    ino_t _ino;
+
+    // TODO: enable_shared_from_this or something prettier
     WeakPtr<Node> _self_weak = nullptr;
 };
 
 class NodeFile;
 
+struct DirEntry {
+    String name;
+    ino_t  inode;
+};
+
 class NodeDir : public Node {
 public:
-    virtual Vector<SharedPtr<Node>> children()                 = 0;
-    virtual SharedPtr<NodeDir>      mkdir(const String &name)  = 0;
-    virtual SharedPtr<NodeFile>     mkfile(const String &name) = 0;
-    virtual void                    set_mounted(Filesystem *mount);
+    virtual Vector<DirEntry>    children()                 = 0;
+    virtual ino_t               mkdir(const String &name)  = 0;
+    virtual ino_t               mkfile(const String &name) = 0;
+    virtual void                set_mounted(Filesystem *mount);
 
 protected:
-    NodeDir() : Node(Type::DIR) {}
+    NodeDir(Filesystem *fs, ino_t ino) : Node(Type::DIR, fs, ino) {}
 };
 
 class NodeFile : public Node {
@@ -66,7 +70,7 @@ public:
     virtual bool    is_tty()                                         = 0;
 
 protected:
-    NodeFile() : Node(Type::FILE) {}
+    NodeFile(Filesystem *fs, ino_t ino) : Node(Type::FILE, fs, ino) {}
 };
 
 

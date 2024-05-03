@@ -3,17 +3,17 @@
 //
 
 #include "VFSGlobals.hpp"
-Vector<SharedPtr<Node>> RootNode::children() {
+Vector<DirEntry> RootNode::children() {
     assert(false);
     return {};
 }
-SharedPtr<NodeDir> RootNode::mkdir(const String &name) {
+ino_t RootNode::mkdir(const String &name) {
     assert(false);
-    return nullptr;
+    return -1;
 }
-SharedPtr<NodeFile> RootNode::mkfile(const String &name) {
+ino_t RootNode::mkfile(const String &name) {
     assert(false);
-    return nullptr;
+    return -1;
 }
 
 

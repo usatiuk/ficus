@@ -43,6 +43,7 @@ void templates_tester() {
 void vfs_tester() {
     VFSTester vfsTester;
     vfsTester.test();
+    GlobalTtyManager.all_tty_putstr("Testing vfs OK\n");
 }
 
 void ktask_main() {
@@ -54,7 +55,7 @@ void ktask_main() {
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester2"))->start();
     VFSGlobals::mounts.add_mount(new MemFs(&VFSGlobals::root));
     (new Task(Task::TaskMode::TASKMODE_KERN, vfs_tester, "vfs_tester"))->start();
-
+    Task *init;
     for (int i = 0; i < saved_modules_size; i++) {
         auto &mod = saved_modules[i];
 
@@ -64,23 +65,20 @@ void ktask_main() {
         f->write(static_cast<const char *>(mod.address), mod.size);
 
         if (strcmp(saved_modules_names[i], "/init") == 0) {
-            GlobalTtyManager.all_tty_putstr("Starting ");
-            GlobalTtyManager.all_tty_putstr(saved_modules_names[i]);
-            GlobalTtyManager.all_tty_putchar('\n');
-
             Vector<char> read_data(mod.size);
             memcpy(read_data.begin(), mod.address, mod.size);
             ElfParser elfParser(std::move(read_data));
 
-            Task *utask = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), saved_modules_names[i]);
-            if (elfParser.copy_to(utask))
-                utask->start();
-            else
+            init = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), saved_modules_names[i]);
+            if (!elfParser.copy_to(init))
                 assert2(false, "Init couldn't be loaded!");
         }
 
         VFSApi::close(fd);
     }
+    GlobalTtyManager.all_tty_putstr("Setup finished \n");
+    GlobalTtyManager.all_tty_putstr("Starting init \n");
+    init->start();
 }
 
 void dummy_task() {

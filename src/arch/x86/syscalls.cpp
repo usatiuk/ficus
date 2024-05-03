@@ -269,11 +269,13 @@ int64_t syscall_getdents(int fd, struct dirent *dp, int count) {
     for (int i = 0; i < count; i++) {
         auto &child    = children[i + f->pos()];
         dp[i].d_fileno = i + f->pos() + 1;
-        strncpy(dp[i].d_name, child->name().c_str(), 255);
-        dp[i].d_name[child->name().length() + 1] = '\0';
-        dp[i].d_namlen                           = child->name().length();
-        dp[i].d_reclen                           = sizeof(dirent);
-        dp[i].d_type                             = child->type() == Node::DIR ? 4 : 8;
+        strncpy(dp[i].d_name, child.name.c_str(), 255);
+        dp[i].d_name[child.name.length() + 1] = '\0';
+        dp[i].d_namlen                        = child.name.length();
+        dp[i].d_reclen                        = sizeof(dirent);
+        // FIXME:
+        // dp[i].d_type                             = child.type() == Node::DIR ? 4 : 8;
+        dp[i].d_type = 4;
     }
     f->seek(count + f->pos());
     return count * sizeof(dirent);

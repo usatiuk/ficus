@@ -7,7 +7,7 @@
 
 #include "Filesystem.hpp"
 
-Node::~Node() = default;
+Node::~         Node() = default;
 SharedPtr<Node> Node::traverse(const Path &path) {
 
     Filesystem *mnt;
@@ -23,13 +23,12 @@ SharedPtr<Node> Node::traverse(const Path &path) {
         return *ret;
     }
 
-
     if (type() == DIR) {
         // Horribly inefficient
         auto children = static_cast<NodeDir *>(this)->children();
         for (size_t i = 0; i < children.size(); i++) {
-            if (children[i]->name() == path[0]) {
-                return children[i]->traverse(path.subvector(1, path.size()));
+            if (children[i].name == path[0]) {
+                return _fs->get_node(children[i].inode)->traverse(path.subvector(1, path.size()));
             }
         }
         return nullptr;
