@@ -32,6 +32,7 @@
 
 #include <FbTty.hpp>
 #include <LimineFramebuffer.hpp>
+#include <TarFs.hpp>
 
 void templates_tester() {
     // GlobalTtyManager.all_tty_putstr("Testing templates\n");
@@ -53,31 +54,33 @@ void ktask_main() {
 
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester"))->start();
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester2"))->start();
-    VFSGlobals::mounts.add_mount(new MemFs(&VFSGlobals::root));
-    (new Task(Task::TaskMode::TASKMODE_KERN, vfs_tester, "vfs_tester"))->start();
-    Task *init;
+    // (new Task(Task::TaskMode::TASKMODE_KERN, vfs_tester, "vfs_tester"))->start();
     for (int i = 0; i < saved_modules_size; i++) {
         auto &mod = saved_modules[i];
 
-        VFSApi::touch(StrToPath(saved_modules_names[i]));
-        FDT::FD fd = VFSApi::open(StrToPath(saved_modules_names[i]));
-        File   *f  = VFSApi::get(fd);
-        f->write(static_cast<const char *>(mod.address), mod.size);
-
-        if (strcmp(saved_modules_names[i], "/init") == 0) {
-            Vector<char> read_data(mod.size);
-            memcpy(read_data.begin(), mod.address, mod.size);
-            ElfParser elfParser(std::move(read_data));
-
-            init = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), saved_modules_names[i]);
-            if (!elfParser.copy_to(init))
-                assert2(false, "Init couldn't be loaded!");
+        if (strcmp(saved_modules_names[i], "/sysroot.tar") == 0) {
+            VFSGlobals::mounts.add_mount(new TarFs((char *) mod.address, mod.size, &VFSGlobals::root));
         }
-
-        VFSApi::close(fd);
     }
     GlobalTtyManager.all_tty_putstr("Setup finished \n");
     GlobalTtyManager.all_tty_putstr("Starting init \n");
+
+    Task   *init;
+    FDT::FD fd = VFSApi::open(StrToPath("/init"));
+    File   *f  = VFSApi::get(fd);
+
+    {
+        Vector<char> read_data(f->size());
+        f->read(read_data.data(), f->size());
+        ElfParser elfParser(std::move(read_data));
+
+        init = new Task(Task::TaskMode::TASKMODE_USER, (void (*)()) elfParser.get_entrypoint(), "/init");
+        if (!elfParser.copy_to(init))
+            assert2(false, "Init couldn't be loaded!");
+    }
+
+    VFSApi::close(fd);
+
     init->start();
 }
 

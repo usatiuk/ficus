@@ -60,6 +60,9 @@ void PS2Keyboard::this_pooler() {
                 case 0x34:
                     r = 'g';
                     break;
+                case 0x4A:
+                    r = '/';
+                    break;
                 case 0x3C:
                     r = 'u';
                     break;

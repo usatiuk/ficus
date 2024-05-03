@@ -13,4 +13,5 @@ target_sources(kernel.elf PRIVATE
         File.cpp
         PipeFs.cpp
         TtyPipe.cpp
+        TarFs.cpp
 )
