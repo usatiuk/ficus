@@ -37,7 +37,7 @@ uint64_t File::read(char *buf, uint64_t size) {
     }
 }
 uint64_t File::write(const char *buf, uint64_t size) {
-    if (_opts & O_RDONLY) return -1;
+    if (!(_opts & O_WRONLY) && !(_opts & O_RDWR)) return -1;
     if (file().get() != nullptr) {
         int64_t fret = file()->write(buf, _pos, size);
         _pos += fret;
