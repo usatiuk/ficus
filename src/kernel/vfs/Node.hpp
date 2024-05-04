@@ -53,10 +53,10 @@ struct DirEntry {
 
 class NodeDir : public Node {
 public:
-    virtual Vector<DirEntry>    children()                 = 0;
-    virtual ino_t               mkdir(const String &name)  = 0;
-    virtual ino_t               mkfile(const String &name) = 0;
-    virtual void                set_mounted(Filesystem *mount);
+    virtual Vector<DirEntry> children()                 = 0;
+    virtual ino_t            mkdir(const String &name)  = 0;
+    virtual ino_t            mkfile(const String &name) = 0;
+    virtual void             set_mounted(Filesystem *mount);
 
 protected:
     NodeDir(Filesystem *fs, ino_t ino) : Node(Type::DIR, fs, ino) {}

@@ -9,7 +9,7 @@
 
 class TarFs : public Filesystem {
 public:
-     TarFs(char *backing, size_t backing_size, NodeDir *mounted_on);
+    TarFs(char *backing, size_t backing_size, NodeDir *mounted_on);
     ~TarFs() override = default;
 
     SharedPtr<NodeDir> root() override;

@@ -4871,8 +4871,7 @@ static constexpr std::array<std::array<uint8_t, 16>, 256> fonts_Terminess_Powerl
                 0b00000000,
                 0b00000000,
                 0b00000000,
-        }
-};
+        }};
 
 
 #endif //FONTS_HPP

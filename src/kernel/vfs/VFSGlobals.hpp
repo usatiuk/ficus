@@ -21,7 +21,7 @@ public:
 namespace VFSGlobals {
     extern RootNode   root;
     extern MountTable mounts;
-};     // namespace VFSGlobals
+} // namespace VFSGlobals
 
 
 #endif //FICUS_VFSGLOBALS_HPP

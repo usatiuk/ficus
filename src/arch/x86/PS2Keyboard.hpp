@@ -24,7 +24,7 @@ class PS2Keyboard {
     CircularBuffer<char, 512> buf;
 
 public:
-         PS2Keyboard();
+    PS2Keyboard();
     char readchar();
 };
 

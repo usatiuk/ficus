@@ -33,8 +33,8 @@
  *	@(#)dirent.h	8.1 (Berkeley) 6/2/93
  */
 
-#ifndef    _SYS_DIRENT_H_
-#define    _SYS_DIRENT_H_
+#ifndef _SYS_DIRENT_H_
+#define _SYS_DIRENT_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,47 +55,47 @@ extern "C" {
  */
 
 struct dirent {
-    unsigned long d_fileno;    /* file number of entry */
-    unsigned short d_reclen;    /* length of this record */
-    unsigned char d_type;    /* file type, see below */
-    unsigned char d_namlen;    /* length of string in d_name */
-    char	d_name[NAME_MAX + 1];	/* name must be no longer than this */
+    unsigned long  d_fileno;             /* file number of entry */
+    unsigned short d_reclen;             /* length of this record */
+    unsigned char  d_type;               /* file type, see below */
+    unsigned char  d_namlen;             /* length of string in d_name */
+    char           d_name[NAME_MAX + 1]; /* name must be no longer than this */
 };
 
 /*
  * File types
  */
-#define    DT_UNKNOWN     0
-#define    DT_FIFO         1
-#define    DT_CHR         2
-#define    DT_DIR         4
-#define    DT_BLK         6
-#define    DT_REG         8
-#define    DT_LNK        10
-#define    DT_SOCK        12
+#define DT_UNKNOWN 0
+#define DT_FIFO    1
+#define DT_CHR     2
+#define DT_DIR     4
+#define DT_BLK     6
+#define DT_REG     8
+#define DT_LNK     10
+#define DT_SOCK    12
 
 /*
  * Convert between stat structure types and directory types.
  */
-#define    IFTODT(mode)    (((mode) & 0170000) >> 12)
-#define    DTTOIF(dirtype)    ((dirtype) << 12)
+#define IFTODT(mode)    (((mode) & 0170000) >> 12)
+#define DTTOIF(dirtype) ((dirtype) << 12)
 
 /*
  * The kernel defines the format of directory entries returned by
  * the getdirentries(2) system call.
  */
 
-#define    d_ino        d_fileno    /* backward compatibility */
+#define d_ino d_fileno /* backward compatibility */
 
 /* structure describing an open directory. */
 typedef struct _dirdesc {
-    int dd_fd;        /* file descriptor associated with directory */
-    long dd_loc;        /* offset in current buffer */
-    long dd_size;    /* amount of data returned by getdirentries */
+    int   dd_fd;     /* file descriptor associated with directory */
+    long  dd_loc;    /* offset in current buffer */
+    long  dd_size;   /* amount of data returned by getdirentries */
     char *dd_buf;    /* data buffer */
-    int dd_len;        /* size of data buffer */
-    long dd_seek;    /* magic cookie returned by getdirentries */
-    long dd_rewind;    /* magic cookie for rewinding */
+    int   dd_len;    /* size of data buffer */
+    long  dd_seek;   /* magic cookie returned by getdirentries */
+    long  dd_rewind; /* magic cookie for rewinding */
 } DIR;
 
 //#define    dirfd(dirp)    ((dirp)->dd_fd)

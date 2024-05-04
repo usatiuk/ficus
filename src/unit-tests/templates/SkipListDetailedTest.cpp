@@ -232,7 +232,7 @@ public:
         using pointer           = value_type *;
         using reference         = value_type &;
 
-        CRangeListIterator(CRangeListIterator const &it) : it(it.it){};
+        CRangeListIterator(CRangeListIterator const &it) : it(it.it) {};
 
         CRangeListIterator(decltype(data)::const_iterator it, decltype(data)::const_iterator end) : it(it), end(end) {
             if (it != end && !it->second.second)

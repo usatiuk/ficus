@@ -15,7 +15,7 @@
 
 class LimineFramebuffer : public Framebuffer {
 public:
-             LimineFramebuffer(limine_framebuffer *limine_framebuffer);
+    LimineFramebuffer(limine_framebuffer *limine_framebuffer);
     virtual ~LimineFramebuffer() = default;
 
     void set(size_t x, size_t y, uint32_t color) override;

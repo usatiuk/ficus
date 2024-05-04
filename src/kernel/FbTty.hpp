@@ -11,7 +11,7 @@
 class Framebuffer;
 class FbTty : public Tty {
 public:
-             FbTty(Framebuffer *fb);
+    FbTty(Framebuffer *fb);
     virtual ~FbTty() = default;
 
     void putchar(char c) override;

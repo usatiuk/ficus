@@ -11,7 +11,7 @@
 
 class Filesystem {
 public:
-             Filesystem(NodeDir *mounted_on);
+    Filesystem(NodeDir *mounted_on);
     virtual ~Filesystem() = 0;
 
     virtual SharedPtr<NodeDir> root()                = 0;

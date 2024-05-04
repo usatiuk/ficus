@@ -220,7 +220,7 @@ protected:
         using pointer           = value_type *;
         using reference         = value_type &;
 
-        explicit SkipListBaseIteratorBase(Node *n) : n(std::move(n)){};
+        explicit SkipListBaseIteratorBase(Node *n) : n(std::move(n)) {};
 
         reference operator*() const { return n->get(); }
 

@@ -7,7 +7,7 @@
 
 #include "Filesystem.hpp"
 
-Node::~         Node() = default;
+Node::~Node() = default;
 SharedPtr<Node> Node::traverse(const Path &path) {
 
     Filesystem *mnt;
