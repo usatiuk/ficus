@@ -9,8 +9,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-void ls() {
-    DIR           *rfd = opendir("/");
+void ls(char *dname) {
+    while (dname[0] == ' ' && dname[0] != '\0') dname++;
+    DIR           *rfd = opendir(dname);
     struct dirent *cur = readdir(rfd);
     while (cur) {
         printf("%s\n", cur->d_name);
@@ -37,8 +38,8 @@ int main() {
         printf("\n> ");
         char line[30];
         scanf(" %24[^\n]", line);
-        if (strcmp(line, "ls") == 0) {
-            ls();
+        if (strncmp(line, "ls", 2) == 0) {
+            ls(line + 2);
         } else if (strcmp(line, "mem") == 0) {
             print_mem();
         } else if (strcmp(line, "tasks") == 0) {
