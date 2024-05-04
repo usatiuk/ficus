@@ -86,8 +86,8 @@ void ktask_main() {
     FDT::FD fdh = VFSApi::open(StrToPath("/home"));
     File   *fh  = VFSApi::get(fdh);
 
-    assert2(fh != nullptr,"Home dir not found!");
-    assert2(fh->dir().get() != nullptr,"Home dir not dir!");
+    assert2(fh != nullptr, "Home dir not found!");
+    assert2(fh->dir().get() != nullptr, "Home dir not dir!");
 
     VFSGlobals::mounts.add_mount(new MemFs())->set_root(static_ptr_cast<NodeDir>(fh->node()));
     VFSApi::close(fdh);
