@@ -55,6 +55,7 @@ void ktask_main() {
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester"))->start();
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester2"))->start();
     // (new Task(Task::TaskMode::TASKMODE_KERN, vfs_tester, "vfs_tester"))->start();
+
     for (int i = 0; i < saved_modules_size; i++) {
         auto &mod = saved_modules[i];
 
