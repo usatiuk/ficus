@@ -3,6 +3,7 @@ add_custom_target(iso_limine)
 add_custom_target(iso
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/isodir/
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/initramfs/
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/initramfs/home
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/limine.cfg ${CMAKE_CURRENT_BINARY_DIR}/isodir/
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:kernel.elf> ${CMAKE_CURRENT_BINARY_DIR}/isodir/ficus.elf
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:init> ${CMAKE_CURRENT_BINARY_DIR}/initramfs/init

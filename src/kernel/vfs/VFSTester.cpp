@@ -8,15 +8,15 @@
 #include "VFSApi.hpp"
 
 void VFSTester::test() {
-    VFSApi::mkdir(StrToPath("/hello"));
-    VFSApi::mkdir(StrToPath("/hello/hellod2"));
-    VFSApi::touch(StrToPath("/hellof"));
-    VFSApi::touch(StrToPath("/hello/f2"));
+    VFSApi::mkdir(StrToPath("/home/hello"));
+    VFSApi::mkdir(StrToPath("/home/hello/hellod2"));
+    VFSApi::touch(StrToPath("/home/hellof"));
+    VFSApi::touch(StrToPath("/home/hello/f2"));
 
-    FDT::FD a = VFSApi::open(StrToPath("/hello"));
-    FDT::FD b = VFSApi::open(StrToPath("/hello/hellod2"));
-    FDT::FD c = VFSApi::open(StrToPath("/hellof"));
-    FDT::FD d = VFSApi::open(StrToPath("/hello/f2"));
+    FDT::FD a = VFSApi::open(StrToPath("/home/hello"));
+    FDT::FD b = VFSApi::open(StrToPath("/home/hello/hellod2"));
+    FDT::FD c = VFSApi::open(StrToPath("/home/hellof"));
+    FDT::FD d = VFSApi::open(StrToPath("/home/hello/f2"));
     {
         String t("hello wooooorld");
         File  *cf = VFSApi::get(c);
@@ -31,7 +31,7 @@ void VFSTester::test() {
     VFSApi::close(c);
     VFSApi::close(d);
 
-    c = VFSApi::open(StrToPath("/hellof"));
+    c = VFSApi::open(StrToPath("/home/hellof"));
     assert(c != -1);
     {
         String t("aaaaaaaaaaaaaaaaaaaa");

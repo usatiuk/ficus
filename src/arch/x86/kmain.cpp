@@ -54,7 +54,6 @@ void ktask_main() {
 
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester"))->start();
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester2"))->start();
-    // (new Task(Task::TaskMode::TASKMODE_KERN, vfs_tester, "vfs_tester"))->start();
 
     VFSGlobals::root = SharedPtr<RootNode>(new RootNode());
 
@@ -83,6 +82,16 @@ void ktask_main() {
     }
 
     VFSApi::close(fd);
+
+    FDT::FD fdh = VFSApi::open(StrToPath("/home"));
+    File   *fh  = VFSApi::get(fdh);
+
+    assert2(fh != nullptr,"Home dir not found!");
+    assert2(fh->dir().get() != nullptr,"Home dir not dir!");
+
+    VFSGlobals::mounts.add_mount(new MemFs())->set_root(static_ptr_cast<NodeDir>(fh->node()));
+    VFSApi::close(fdh);
+    (new Task(Task::TaskMode::TASKMODE_KERN, vfs_tester, "vfs_tester"))->start();
 
     init->start();
 }
