@@ -8,16 +8,29 @@
 #include "Node.hpp"
 
 #include "PointersCollection.hpp"
+#include "SkipList.hpp"
 
 class Filesystem {
 public:
-    Filesystem(NodeDir *mounted_on);
+    Filesystem()          = default;
     virtual ~Filesystem() = 0;
 
-    virtual SharedPtr<NodeDir> root()                = 0;
-    virtual SharedPtr<Node>    get_node(ino_t inode) = 0;
+    Filesystem(Filesystem const &other)            = delete;
+    Filesystem &operator=(Filesystem const &other) = delete;
 
-    NodeDir *_mounted_on;
+    virtual SharedPtr<NodeDir> root() = 0;
+    virtual SharedPtr<Node>    get_node(ino_t inode);
+
+    void set_root(SharedPtr<NodeDir> node_dir);
+
+protected:
+    virtual SharedPtr<Node> get_node_impl(ino_t inode) = 0;
+
+    SharedPtr<NodeDir> _mounted_on;
+
+private:
+    SkipListMap<ino_t, WeakPtr<Node>> _vnode_cache;
+    Mutex                             _vnode_cache_lock;
 };
 
 

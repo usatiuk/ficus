@@ -13,7 +13,7 @@
 
 class MountTable {
 public:
-    void add_mount(Filesystem *fs);
+    Filesystem *add_mount(Filesystem *fs);
 
 private:
     List<Filesystem *> _mounts;

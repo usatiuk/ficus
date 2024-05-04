@@ -19,8 +19,8 @@ public:
 };
 
 namespace VFSGlobals {
-    extern RootNode   root;
-    extern MountTable mounts;
+    extern SharedPtr<RootNode> root;
+    extern MountTable          mounts;
 } // namespace VFSGlobals
 
 

@@ -17,5 +17,5 @@ ino_t RootNode::mkfile(const String &name) {
 }
 
 
-RootNode   VFSGlobals::root;
-MountTable VFSGlobals::mounts;
+SharedPtr<RootNode> VFSGlobals::root;
+MountTable          VFSGlobals::mounts;

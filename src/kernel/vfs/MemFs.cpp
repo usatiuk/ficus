@@ -84,7 +84,7 @@ size_t MemFs::MemFsNodeFile::size() {
     LockGuard l2(_fs_node->lock);
     return _fs_node->data.size();
 }
-MemFs::MemFs(NodeDir *mounted_on) : Filesystem(mounted_on) {
+MemFs::MemFs() {
     _files.emplace(1, new DirInode{1});
     _top_inode = 2;
 }
@@ -100,7 +100,7 @@ SharedPtr<NodeDir> MemFs::root() {
         return static_ptr_cast<NodeDir>(MemFsNodeDir::create(this, static_ptr_cast<DirInode>(root)));
     }
 }
-SharedPtr<Node> MemFs::get_node(ino_t inode) {
+SharedPtr<Node> MemFs::get_node_impl(ino_t inode) {
     LockGuard l(_files_lock);
     auto      found = _files.find(inode);
     if (found == _files.end()) return nullptr;

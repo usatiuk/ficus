@@ -56,11 +56,13 @@ void ktask_main() {
     (new Task(Task::TaskMode::TASKMODE_KERN, templates_tester, "templates_tester2"))->start();
     // (new Task(Task::TaskMode::TASKMODE_KERN, vfs_tester, "vfs_tester"))->start();
 
+    VFSGlobals::root = SharedPtr<RootNode>(new RootNode());
+
     for (int i = 0; i < saved_modules_size; i++) {
         auto &mod = saved_modules[i];
 
         if (strcmp(saved_modules_names[i], "/sysroot.tar") == 0) {
-            VFSGlobals::mounts.add_mount(new TarFs((char *) mod.address, mod.size, &VFSGlobals::root));
+            VFSGlobals::mounts.add_mount(new TarFs((char *) mod.address, mod.size))->set_root(static_ptr_cast<NodeDir>(VFSGlobals::root));
         }
     }
     GlobalTtyManager.all_tty_putstr("Setup finished \n");

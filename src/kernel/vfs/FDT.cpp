@@ -14,7 +14,7 @@
 #include <sys/fcntl.h>
 
 FDT::FD FDT::open(const Path &p, int opts) {
-    if (auto n = VFSGlobals::root.traverse(p); n.get() != nullptr) {
+    if (auto n = VFSGlobals::root->traverse(p); n.get() != nullptr) {
         LockGuard l(_mtx);
         _files.emplace(_cur_fd++, UniquePtr<File>(new File(n, opts)));
         return _cur_fd - 1;

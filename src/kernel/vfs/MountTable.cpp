@@ -3,6 +3,7 @@
 //
 
 #include "MountTable.hpp"
-void MountTable::add_mount(Filesystem *fs) {
+Filesystem *MountTable::add_mount(Filesystem *fs) {
     _mounts.emplace_front(fs);
+    return fs;
 }

@@ -9,11 +9,11 @@
 
 class TarFs : public Filesystem {
 public:
-    TarFs(char *backing, size_t backing_size, NodeDir *mounted_on);
+    TarFs(char *backing, size_t backing_size);
     ~TarFs() override = default;
 
     SharedPtr<NodeDir> root() override;
-    SharedPtr<Node>    get_node(ino_t inode) override;
+    SharedPtr<Node>    get_node_impl(ino_t inode) override;
 
 
     struct TarFsNodeDir : public ::NodeDir {

@@ -7,7 +7,7 @@
 #include <TtyManager.hpp>
 
 
-TarFs::TarFs(char *backing, size_t backing_size, NodeDir *mounted_on) : Filesystem(mounted_on), _backing((tar_header *) backing), _backing_size(backing_size) {
+TarFs::TarFs(char *backing, size_t backing_size) : _backing((tar_header *) backing), _backing_size(backing_size) {
     int i = 2;
 
     const tar_header *header = _backing;
@@ -89,7 +89,7 @@ SharedPtr<NodeDir> TarFs::root() {
     return static_ptr_cast<NodeDir>(get_node(1));
 }
 
-SharedPtr<Node> TarFs::get_node(ino_t inode) {
+SharedPtr<Node> TarFs::get_node_impl(ino_t inode) {
     if (_dir_map.find(inode) != _dir_map.end()) {
         return static_ptr_cast<Node>(TarFsNodeDir::create(this, inode));
     } else {

@@ -91,10 +91,10 @@ private:
     };
 
 public:
-    MemFs(NodeDir *mounted_on);
+    MemFs();
 
     SharedPtr<NodeDir> root() override;
-    SharedPtr<Node>    get_node(ino_t inode) override;
+    SharedPtr<Node>    get_node_impl(ino_t inode) override;
 
 private:
     ino_t                                _top_inode;
