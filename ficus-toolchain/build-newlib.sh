@@ -1,20 +1,44 @@
 #!/bin/bash
 set -euxo pipefail
 
-if [ -z "$FICUS_ROOT" ]; then
-    echo "$FICUS_ROOT" is blank
+if [ -z "$SCRIPT_DIR" ]; then
+    echo "SCRIPT_DIR" is blank! Run this via build-all
 fi
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
-export PREFIX="$FICUS_ROOT/toolchain/gcc-x86_64-ficus-prefix/"
-export TARGET=x86_64-ficus
-export PATH="$PREFIX/bin:$PATH"
 cd "$SCRIPT_DIR"
+
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied"
+    exit 1
+fi
+
+case "$1" in
+  "conf")
+    ;;
+  "noconf")
+    ;;
+  *)
+    echo "Unknown option"
+    exit 1
+    ;;
+esac
+
 cd newlib
-# rm -rf build
+
+if [[ "$1" = "conf" ]]
+then
+  rm -rf build
+fi
+
 mkdir -p build
 cd build
-../newlib-4.4.0.20231231/configure --enable-newlib-supplied-syscalls --prefix=/usr --target=$TARGET
+
+if [[ "$1" = "conf" ]]
+then
+  ../newlib-4.4.0.20231231/configure --enable-newlib-supplied-syscalls --prefix=/usr --target=$TARGET
+fi
+
 make -j$BUILD_PARALLEL all
 make DESTDIR="$FICUS_ROOT/sysroot" install
 cp -r "$FICUS_ROOT/sysroot/usr"/x86_64-ficus/* "$FICUS_ROOT/sysroot/usr"
