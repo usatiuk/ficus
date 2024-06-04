@@ -30,7 +30,7 @@ popd
 ../gcc-13.2.0/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot="$PREFIX/../../sysroot" --disable-nls \
     --enable-languages=c,c++ --with-newlib --disable-fixincludes --disable-libstdcxx-threads \
     --enable-version-specific-runtime-libs
-make -j$BUILD_PARALLEL_GCC all-gcc
+make -j$BUILD_PARALLEL all-gcc
 make -j$BUILD_PARALLEL all-target-libgcc
 make -j$BUILD_PARALLEL all-target-libstdc++-v3
 make install-gcc

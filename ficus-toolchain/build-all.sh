@@ -22,9 +22,9 @@ if [ -z "${BUILD_PARALLEL}" ]
 then
   export BUILD_PARALLEL=$(nproc)
 fi
-if [ -z "${BUILD_PARALLEL_GCC}" ]
+if [ -z "${BUILD_PARALLEL}" ]
 then
-  export BUILD_PARALLEL_GCC=$BUILD_PARALLEL
+  export BUILD_PARALLEL=$BUILD_PARALLEL
 fi
 
 if [[ "$1" != "s2only" ]]

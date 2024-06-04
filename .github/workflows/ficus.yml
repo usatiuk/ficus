@@ -9,7 +9,6 @@ on:
 env:
   BUILD_TYPE: Debug
   BUILD_PARALLEL: 3
-  BUILD_PARALLEL_GCC: 3
 
 jobs:
   build-ficus-toolchain:
