@@ -34,11 +34,17 @@ fi
 mkdir -p build
 cd build
 
+MAKE_LAUNCHER=
+
 if [[ "$1" = "conf" ]]
 then
+  if [[ -z ${CI+x} ]]
+  then
+    MAKE_LAUNCHER="compiledb -o $FICUS_ROOT/ficus-toolchain/newlib/newlib-4.4.0.20231231/compile_commands.json"
+  fi
   ../newlib-4.4.0.20231231/configure --enable-newlib-supplied-syscalls --prefix=/usr --target=$TARGET
 fi
 
-make -j$BUILD_PARALLEL all
+$MAKE_LAUNCHER make -j$BUILD_PARALLEL all
 make DESTDIR="$FICUS_ROOT/sysroot" install
 cp -r "$FICUS_ROOT/sysroot/usr"/x86_64-ficus/* "$FICUS_ROOT/sysroot/usr"
