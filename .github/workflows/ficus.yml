@@ -2,13 +2,12 @@ name: Ficus build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   BUILD_TYPE: Debug
-  BUILD_PARALLEL: 3
 
 jobs:
   build-ficus-toolchain:
@@ -24,11 +23,93 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y cmake build-essential pax gcc g++ nasm bison bzip2 flex mtools texinfo libgmp-dev libmpfr-dev libmpc-dev xorriso
 
-      - name: Unpack prebuilt toolchain
-        run: cd ${{github.workspace}} && tar xf toolchain_scripts/toolchain-s1-linux-aarch64.tar.xz
+      - name: Cache generic toolchain
+        id: cache-toolchain
+        uses: actions/cache/restore@v4
+        env:
+          cache-name: cache-toolchain
+        with:
+          path: |
+            toolchain/gcc-i686-elf-prefix
+            toolchain/gcc-x86_64-elf-prefix
+            toolchain/grub
+            toolchain/limine
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('toolchain_scripts/*') }}
 
-      - name: Build ficus toolchain
+      - if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        name: Build generic toolchain
+        run: source env.sh && toolchain_scripts/build-all.sh
+
+      - if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
+        name: Strip toolchain
+        continue-on-error: true
+        run: find toolchain -type f | xargs strip
+
+      - name: Save generic toolchain
+        id: cache-toolchain-save
+        uses: actions/cache/save@v4
+        env:
+          cache-name: cache-toolchain
+        with:
+          path: |
+            toolchain/gcc-i686-elf-prefix
+            toolchain/gcc-x86_64-elf-prefix
+            toolchain/grub
+            toolchain/limine
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('toolchain_scripts/*') }}
+
+      - name: Cache s1 toolchain
+        id: cache-toolchain-s1
+        uses: actions/cache/restore@v4
+        env:
+          cache-name: cache-toolchain-s1
+        with:
+          path: |
+            toolchain/gcc-x86_64-ficus-prefix
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}
+
+      - if: ${{ steps.cache-toolchain-s1.outputs.cache-hit != 'true' }}
+        name: Build ficus toolchain s1
+        run: source ${{github.workspace}}/env.sh && ${{github.workspace}}/ficus-toolchain/build-all.sh s1only
+
+      - if: ${{ steps.cache-toolchain-s1.outputs.cache-hit != 'true' }}
+        name: Strip toolchain
+        continue-on-error: true
+        run: find toolchain -type f | xargs strip
+
+      - name: Save s1 toolchain
+        id: cache-toolchain-s1-save
+        uses: actions/cache/save@v4
+        env:
+          cache-name: cache-toolchain-s1
+        with:
+          path: |
+            toolchain/gcc-x86_64-ficus-prefix
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}
+
+      - name: Cache s2 toolchain
+        id: cache-toolchain-s2
+        uses: actions/cache/restore@v4
+        env:
+          cache-name: cache-toolchain-s2
+        with:
+          path: |
+            toolchain/gcc-x86_64-ficus-prefix
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/**/*') }}
+
+      - if: ${{ steps.cache-toolchain-s2.outputs.cache-hit != 'true' }}
+        name: Build ficus toolchain s2
         run: source ${{github.workspace}}/env.sh && ${{github.workspace}}/ficus-toolchain/build-all.sh s2only
+
+      - name: Save s2 toolchain
+        id: cache-toolchain-s2-save
+        uses: actions/cache/save@v4
+        env:
+          cache-name: cache-toolchain-s2
+        with:
+          path: |
+            toolchain/gcc-x86_64-ficus-prefix
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/**/*') }}
 
       - name: Tar the toolchain
         run: cd ${{github.workspace}} && tar -czvf toolchain-ficus.tar.xz toolchain sysroot
@@ -71,7 +152,7 @@ jobs:
 
       - name: Build iso
         # Build your program with the given configuration
-        run: source ${{github.workspace}}/env.sh && cmake --build ${{github.workspace}}/build --target iso --config ${{env.BUILD_TYPE}}  --parallel ${{env.BUILD_PARALLEL}}
+        run: source ${{github.workspace}}/env.sh && cmake --build ${{github.workspace}}/build --target iso --config ${{env.BUILD_TYPE}}  --parallel $(nproc)
 
       - name: Upload isos
         uses: actions/upload-artifact@v3
