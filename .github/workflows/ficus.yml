@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y cmake build-essential pax gcc g++ nasm bison bzip2 flex mtools texinfo libgmp-dev libmpfr-dev libmpc-dev xorriso ccache
 
+      - name: Create ccache dir
+        run: mkdir ~/ccache-cache
+
       - name: CCache cache
         id: cache-ccache
         uses: actions/cache@v4
@@ -33,9 +36,7 @@ jobs:
           key: ${{ runner.os }}-ccache
 
       - name: Add ccache to path
-        run: |
-          echo "/usr/lib/ccache" >> $GITHUB_PATH
-          echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+        run: echo "/usr/lib/ccache" >> $GITHUB_PATH
 
       - name: Print ccache info
         run: |
