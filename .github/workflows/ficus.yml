@@ -12,6 +12,8 @@ env:
 jobs:
   build-ficus-toolchain:
     runs-on: ubuntu-latest
+    env:
+      CCACHE_DIR: ~/ccache-cache
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -21,7 +23,22 @@ jobs:
         if: env.ACT=='true'
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y cmake build-essential pax gcc g++ nasm bison bzip2 flex mtools texinfo libgmp-dev libmpfr-dev libmpc-dev xorriso
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential pax gcc g++ nasm bison bzip2 flex mtools texinfo libgmp-dev libmpfr-dev libmpc-dev xorriso ccache
+
+      - name: CCache cache
+        id: cache-ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/ccache-cache
+          key: ${{ runner.os }}-ccache
+
+      - name: Add ccache to path
+        run: echo "/usr/lib/ccache" >> $GITHUB_PATH
+
+      - name: Print ccache info
+        run: |
+          ccache -p
+          which gcc
 
       - name: Cache generic toolchain
         id: cache-toolchain
@@ -38,7 +55,7 @@ jobs:
 
       - if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         name: Build generic toolchain
-        run: source env.sh && toolchain_scripts/build-all.sh
+        run: source env.sh && toolchain_scripts/build-all.sh && ccache -s
 
       - if: ${{ steps.cache-toolchain.outputs.cache-hit != 'true' }}
         name: Strip toolchain
@@ -70,7 +87,7 @@ jobs:
 
       - if: ${{ steps.cache-toolchain-s1.outputs.cache-hit != 'true' }}
         name: Build ficus toolchain s1
-        run: source ${{github.workspace}}/env.sh && ${{github.workspace}}/ficus-toolchain/build-all.sh s1only
+        run: source ${{github.workspace}}/env.sh && ${{github.workspace}}/ficus-toolchain/build-all.sh s1only && ccache -s
 
       - if: ${{ steps.cache-toolchain-s1.outputs.cache-hit != 'true' }}
         name: Strip toolchain
@@ -99,7 +116,7 @@ jobs:
 
       - if: ${{ steps.cache-toolchain-s2.outputs.cache-hit != 'true' }}
         name: Build ficus toolchain s2
-        run: source ${{github.workspace}}/env.sh && ${{github.workspace}}/ficus-toolchain/build-all.sh s2only
+        run: source ${{github.workspace}}/env.sh && ${{github.workspace}}/ficus-toolchain/build-all.sh s2only && ccache -s
 
       - name: Save s2 toolchain
         id: cache-toolchain-s2-save
