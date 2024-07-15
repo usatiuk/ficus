@@ -28,7 +28,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ccache
-          key: ${{ runner.os }}-ccache
+          key: ${{ runner.os }}-ccache-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-${{ github.run_id }}-${{ github.run_attempt }}
+            ${{ runner.os }}-ccache-
 
       - name: Add ccache to path
         run: echo "/usr/lib/ccache" >> $GITHUB_PATH
