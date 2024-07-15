@@ -39,7 +39,7 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       TERM_USED=true
-      # serial
+      # monitor
       QEMU_OPTS="$QEMU_OPTS -monitor stdio"
       shift
       ;;
