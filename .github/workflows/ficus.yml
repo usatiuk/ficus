@@ -95,7 +95,7 @@ jobs:
         with:
           path: |
             toolchain/gcc-x86_64-ficus-prefix
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/**') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/newlib-4.4.0.20231231/**') }}
 
       - if: ${{ steps.cache-toolchain-s2.outputs.cache-hit != 'true' }}
         name: Build ficus toolchain s2
@@ -109,7 +109,7 @@ jobs:
         with:
           path: |
             toolchain/gcc-x86_64-ficus-prefix
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/**') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/newlib-4.4.0.20231231/**') }}
 
       - name: Tar the toolchain
         run: cd ${{github.workspace}} && tar -czvf toolchain-ficus.tar.xz toolchain sysroot
