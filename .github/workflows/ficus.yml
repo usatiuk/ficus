@@ -111,10 +111,11 @@ jobs:
         id: cache-toolchain-s2
         uses: actions/cache/restore@v4
         env:
-          cache-name: cache-toolchain-s2
+          cache-name: cache-toolchain-s2-v2
         with:
           path: |
             toolchain/gcc-x86_64-ficus-prefix
+            sysroot
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/newlib-4.4.0.20231231/**') }}
 
       - if: ${{ steps.cache-toolchain-s2.outputs.cache-hit != 'true' }}
@@ -125,10 +126,11 @@ jobs:
         id: cache-toolchain-s2-save
         uses: actions/cache/save@v4
         env:
-          cache-name: cache-toolchain-s2
+          cache-name: cache-toolchain-s2-v2
         with:
           path: |
             toolchain/gcc-x86_64-ficus-prefix
+            sysroot
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/newlib-4.4.0.20231231/**') }}
 
       - name: Tar the toolchain
