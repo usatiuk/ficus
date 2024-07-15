@@ -1,6 +1,7 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <memory>
 #include <new>
 #include <utility>
 
@@ -144,6 +145,34 @@ public:
             out.emplace_back(_data[i]);
         }
         return out;
+    }
+
+    void resize(size_t size) {
+        if (size == _cur_size) return;
+
+        if (size < _cur_size) {
+            for (int i = size; i < _cur_size; i++) {
+                if constexpr (!std::is_trivially_destructible<T>::value)
+                    std::destroy_at(_data + i);
+            }
+            _cur_size = size;
+            compact();
+            return;
+        }
+
+        if (size > _cur_size) {
+            if (_capacity < size) {
+                _capacity = size;
+                _data     = (T *) krealloc(reinterpret_cast<char *>(_data), _capacity * sizeof(T));
+            }
+            for (int i = _cur_size; i < size; i++) {
+                if constexpr (!std::is_trivially_constructible<T>::value)
+                    new (_data + i) T();
+                else
+                    memset((char *) (_data + i), 0, sizeof(T));
+            }
+            _cur_size = size;
+        }
     }
 
     T       *data() { return _data; }
