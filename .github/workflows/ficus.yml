@@ -33,12 +33,14 @@ jobs:
           key: ${{ runner.os }}-ccache
 
       - name: Add ccache to path
-        run: echo "/usr/lib/ccache" >> $GITHUB_PATH
+        run: |
+          export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
 
       - name: Print ccache info
         run: |
           ccache -p
           which gcc
+          which g++
 
       - name: Cache generic toolchain
         id: cache-toolchain
