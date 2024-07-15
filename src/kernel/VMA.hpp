@@ -24,7 +24,6 @@ public:
     VMA &operator=(const VMA &) = delete;
     VMA &operator=(VMA &&)      = delete;
 
-
     /// Map all higher-half pages into the address space
     /// By linking them to same entries as kernel
     void  map_kern();
