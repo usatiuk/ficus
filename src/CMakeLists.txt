@@ -28,9 +28,8 @@ target_link_options(kernel.elf PUBLIC
         -mcmodel=large
         -fno-exceptions
         -fno-rtti)
-target_include_directories(kernel.elf PRIVATE ${tools}/limine/prefix/include)
 
-
+add_subdirectory(./limine/)
 add_subdirectory(./arch/)
 add_subdirectory(./kernel/)
 

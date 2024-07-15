@@ -5,7 +5,7 @@
 #ifndef FICUS_LIMINE_MODULES_HPP
 #define FICUS_LIMINE_MODULES_HPP
 
-#include "limine.hpp"
+#include "limine.h"
 
 extern volatile struct limine_module_request module_request;
 
