@@ -11,7 +11,11 @@
 
 void ls(char *dname) {
     while (dname[0] == ' ' && dname[0] != '\0') dname++;
-    DIR           *rfd = opendir(dname);
+    DIR *rfd = opendir(dname);
+    if (rfd == NULL) {
+        printf("Unknown directory: %s\n", dname);
+        return;
+    }
     struct dirent *cur = readdir(rfd);
     while (cur) {
         printf("%s\n", cur->d_name);
