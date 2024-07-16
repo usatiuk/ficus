@@ -49,9 +49,11 @@ int main() {
         } else if (strcmp(line, "tasks") == 0) {
             print_tasks();
         } else {
-            if (fork() == 0)
+            if (fork() == 0) {
                 execve(line, 0, 0);
-            else
+                printf("Failed to start: %s\n", line);
+                return 0;
+            } else
                 wait(NULL);
         }
     }
