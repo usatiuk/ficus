@@ -20,7 +20,8 @@ target_compile_options(kernel.elf PUBLIC $<$<COMPILE_LANGUAGE:C>:
         -ffreestanding
         -nostdlib
         -mno-red-zone
-        -mcmodel=large>)
+        -mcmodel=large
+        >)
 target_link_options(kernel.elf PUBLIC
         -ffreestanding
         -nostdlib
