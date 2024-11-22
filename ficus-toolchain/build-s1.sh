@@ -23,7 +23,7 @@ mkdir -p "$FICUS_ROOT/sysroot"
 cd binutils-x86_64-ficus
 mkdir -p build
 cd build
-../binutils-2.41/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot="$PREFIX/../../sysroot" --disable-nls --disable-werror
+../source/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot="$PREFIX/../../sysroot" --disable-nls --disable-werror
 make -j$(nproc)
 make install
 
@@ -34,11 +34,11 @@ rm -rf build
 mkdir -p build
 cd build
 
-pushd ../gcc-13.2.0/
+pushd ../source/
 ./contrib/download_prerequisites
 popd
 
-../gcc-13.2.0/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot="$PREFIX/../../sysroot" --disable-nls --enable-languages=c,c++ --with-newlib --without-headers --disable-fixincludes --enable-version-specific-runtime-libs
+../source/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot="$PREFIX/../../sysroot" --disable-nls --enable-languages=c,c++ --with-newlib --without-headers --disable-fixincludes --enable-version-specific-runtime-libs
 make -j$(nproc) all-gcc
 make -j$(nproc) all-target-libgcc
 make install-gcc

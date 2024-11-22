@@ -1,0 +1,169 @@
+From 2de76e5cc07af37dd2601985da0a4679bdbef4d0 Mon Sep 17 00:00:00 2001
+From: Stepan Usatiuk <stepan@usatiuk.com>
+Date: Fri, 22 Nov 2024 22:27:28 +0100
+Subject: [PATCH] gcc diff
+
+---
+ .../gcc-x86_64-ficus/gcc-13.2.0/config.sub    |  2 +-
+ .../gcc-13.2.0/fixincludes/mkfixinc.sh        |  1 +
+ .../gcc-13.2.0/gcc/config.gcc                 | 11 ++++++++
+ .../gcc-13.2.0/gcc/config/ficus.h             | 28 +++++++++++++++++++
+ .../gcc-13.2.0/gcc/config/i386/t-x86_64-elf   |  3 ++
+ .../gcc-13.2.0/gcc/config/i386/t-x86_64-ficus |  3 ++
+ .../gcc-13.2.0/libgcc/config.host             |  4 +++
+ .../gcc-13.2.0/libstdc++-v3/crossconfig.m4    |  7 ++++-
+ 8 files changed, 57 insertions(+), 2 deletions(-)
+ create mode 100644 ficus-toolchain/gcc-x86_64-ficus/gcc-13.2.0/gcc/config/ficus.h
+ create mode 100644 ficus-toolchain/gcc-x86_64-ficus/gcc-13.2.0/gcc/config/i386/t-x86_64-elf
+ create mode 100644 ficus-toolchain/gcc-x86_64-ficus/gcc-13.2.0/gcc/config/i386/t-x86_64-ficus
+
+diff --git a/config.sub b/config.sub
+index 38f3d037a..26b9a7d76 100755
+--- a/config.sub
++++ b/config.sub
+@@ -1749,7 +1749,7 @@ case $os in
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+ 	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
+-	     | fiwix* )
++	     | fiwix* | ficus* )
+ 		;;
+ 	# This one is extra strict with allowed versions
+ 	sco3.2v2 | sco3.2v[4-9]* | sco5v6*)
+diff --git a/fixincludes/mkfixinc.sh b/fixincludes/mkfixinc.sh
+index df90720b7..37cafe2b5 100755
+--- a/fixincludes/mkfixinc.sh
++++ b/fixincludes/mkfixinc.sh
+@@ -11,6 +11,7 @@ target=fixinc.sh
+ 
+ # Check for special fix rules for particular targets
+ case $machine in
++    *-ficus* | \
+     i?86-*-cygwin* | \
+     i?86-*-mingw32* | \
+     x86_64-*-mingw32* | \
+diff --git a/gcc/config.gcc b/gcc/config.gcc
+index 648b3dc21..c3271d11a 100644
+--- a/gcc/config.gcc
++++ b/gcc/config.gcc
+@@ -690,6 +690,12 @@ x86_cpus="generic intel"
+ 
+ # Common parts for widely ported systems.
+ case ${target} in
++*-*-ficus*)
++  gas=yes
++  gnu_ld=yes
++  default_use_cxa_atexit=yes
++  use_gcc_stdint=provide
++  ;;
+ *-*-darwin*)
+   tmake_file="t-darwin "
+   tm_file="${tm_file} darwin.h"
+@@ -1126,6 +1132,10 @@ case ${target} in
+ esac
+ 
+ case ${target} in
++x86_64-*-ficus*)
++	tmake_file="${tmake_file} i386/t-x86_64-ficus"
++	tm_file="${tm_file} i386/unix.h i386/att.h elfos.h glibc-stdint.h i386/i386elf.h i386/x86-64.h ficus.h"
++	;;
+ aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems*)
+ 	tm_file="${tm_file} elfos.h newlib-stdint.h"
+ 	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-errata.h aarch64/aarch64-elf-raw.h"
+@@ -1865,6 +1875,7 @@ i[34567]86-*-elf*)
+ 	tm_file="${tm_file} i386/unix.h i386/att.h elfos.h newlib-stdint.h i386/i386elf.h"
+ 	;;
+ x86_64-*-elf*)
++	tmake_file="${tmake_file} i386/t-x86_64-elf"
+ 	tm_file="${tm_file} i386/unix.h i386/att.h elfos.h newlib-stdint.h i386/i386elf.h i386/x86-64.h"
+ 	;;
+ x86_64-*-rtems*)
+diff --git a/gcc/config/ficus.h b/gcc/config/ficus.h
+new file mode 100644
+index 000000000..db2c57910
+--- /dev/null
++++ b/gcc/config/ficus.h
+@@ -0,0 +1,28 @@
++/* Useful if you wish to make target-specific GCC changes. */
++#undef TARGET_FICUS
++#define TARGET_FICUS 1
++ 
++/* Default arguments you want when running your
++   i686-ficus-gcc/x86_64-ficus-gcc toolchain */
++#undef LIB_SPEC
++#define LIB_SPEC "-lc -lg -lm" /* link against C standard library */
++ 
++/* Files that are linked before user code.
++   The %s tells GCC to look for these files in the library directory. */
++#undef STARTFILE_SPEC
++#define STARTFILE_SPEC "crt0.o%s crti.o%s crtbegin.o%s"
++ 
++/* Files that are linked after user code. */
++#undef ENDFILE_SPEC
++#define ENDFILE_SPEC "crtend.o%s crtn.o%s"
++ 
++/* Additional predefined macros. */
++#undef TARGET_OS_CPP_BUILTINS
++#define TARGET_OS_CPP_BUILTINS()      \
++  do {                                \
++    builtin_define ("__ficus__");      \
++    builtin_define ("__unix__");      \
++    builtin_assert ("system=ficus");   \
++    builtin_assert ("system=unix");   \
++    builtin_assert ("system=posix");   \
++  } while(0);
+diff --git a/gcc/config/i386/t-x86_64-elf b/gcc/config/i386/t-x86_64-elf
+new file mode 100644
+index 000000000..88d9b97eb
+--- /dev/null
++++ b/gcc/config/i386/t-x86_64-elf
+@@ -0,0 +1,3 @@
++# Add libgcc multilib variant without red-zone requirement
++ 
++MULTILIB_OPTIONS += mno-red-zone
+diff --git a/gcc/config/i386/t-x86_64-ficus b/gcc/config/i386/t-x86_64-ficus
+new file mode 100644
+index 000000000..3d647ee46
+--- /dev/null
++++ b/gcc/config/i386/t-x86_64-ficus
+@@ -0,0 +1,3 @@
++# Add libgcc multilib variant without red-zone requirement
++ 
++MULTILIB_OPTIONS += mno-red-zone mcmodel=large
+\ No newline at end of file
+diff --git a/libgcc/config.host b/libgcc/config.host
+index 9d7212028..46bfccd9a 100644
+--- a/libgcc/config.host
++++ b/libgcc/config.host
+@@ -1525,6 +1525,10 @@ nvptx-*)
+ 	tmake_file="$tmake_file nvptx/t-nvptx"
+ 	extra_parts="crt0.o"
+ 	;;
++x86_64-*-ficus*)
++	extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"
++	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++	;;
+ *)
+ 	echo "*** Configuration ${host} not supported" 1>&2
+ 	exit 1
+diff --git a/libstdc++-v3/crossconfig.m4 b/libstdc++-v3/crossconfig.m4
+index b3269cb88..1caf20b49 100644
+--- a/libstdc++-v3/crossconfig.m4
++++ b/libstdc++-v3/crossconfig.m4
+@@ -8,7 +8,12 @@ case "${host}" in
+   arm*-*-symbianelf*)
+     # This is a freestanding configuration; there is nothing to do here.
+     ;;
+-
++  *-ficus*)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    ;;
+   avr*-*-*)
+     AC_DEFINE(HAVE_ACOSF)
+     AC_DEFINE(HAVE_ASINF)
+-- 
+2.39.5 (Apple Git-154)
+

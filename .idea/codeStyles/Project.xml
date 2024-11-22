@@ -1,5 +1,10 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
+    <option name="OTHER_INDENT_OPTIONS">
+      <value>
+        <option name="TAB_SIZE" value="8" />
+      </value>
+    </option>
     <option name="DO_NOT_FORMAT">
       <list>
         <fileSet type="globPattern" pattern="newlib/*" />
@@ -121,5 +126,10 @@
         <pair source="c++m" header="" fileNamingConvention="NONE" />
       </extensions>
     </files>
+    <codeStyleSettings language="Shell Script">
+      <indentOptions>
+        <option name="TAB_SIZE" value="8" />
+      </indentOptions>
+    </codeStyleSettings>
   </code_scheme>
 </component>

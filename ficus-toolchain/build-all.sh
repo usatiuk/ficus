@@ -14,6 +14,9 @@ fi
 mkdir -p "$FICUS_ROOT/sysroot"
 
 case "$1" in
+  "sources")
+    "$SCRIPT_DIR"/get-sources.sh
+  ;;
   "newlib")
     "$SCRIPT_DIR"/build-newlib.sh noconf
     ;;

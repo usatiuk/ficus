@@ -6,8 +6,11 @@
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
     <excludeRoots>
+      <file path="$PROJECT_DIR$/ficus-toolchain/automake" />
       <file path="$PROJECT_DIR$/ficus-toolchain/binutils-x86_64-ficus/build" />
+      <file path="$PROJECT_DIR$/ficus-toolchain/binutils-x86_64-ficus/source" />
       <file path="$PROJECT_DIR$/ficus-toolchain/gcc-x86_64-ficus/build" />
+      <file path="$PROJECT_DIR$/ficus-toolchain/gcc-x86_64-ficus/source" />
       <file path="$PROJECT_DIR$/ficus-toolchain/newlib/build" />
       <file path="$PROJECT_DIR$/toolchain" />
     </excludeRoots>

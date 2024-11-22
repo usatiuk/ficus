@@ -36,7 +36,7 @@ cd build
 
 if [[ "$1" = "conf" ]]
 then
-  ../newlib-4.4.0.20231231/configure --enable-newlib-supplied-syscalls --prefix=/usr --target=$TARGET
+  ../source/configure --enable-newlib-supplied-syscalls --prefix=/usr --target=$TARGET
 fi
 
 make -j$BUILD_PARALLEL all

@@ -72,6 +72,32 @@ jobs:
             toolchain/limine
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('toolchain_scripts/*') }}
 
+      - name: Cache toolchain sources
+        id: cache-toolchain-sources
+        uses: actions/cache/restore@v4
+        env:
+          cache-name: cache-toolchain-sources
+        with:
+          path: |
+            ficus-toolchain/binutils-x86_64-ficus/source
+            ficus-toolchain/gcc-x86_64-ficus/source
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/binutils-x86_64-ficus/*.patch') }}-${{ hashFiles('ficus-toolchain/gcc-x86_64-ficus/*.patch') }}
+
+      - if: ${{ steps.cache-toolchain-sources.outputs.cache-hit != 'true' }}
+        name: Download toolchain sources
+        run: source ${{github.workspace}}/env.sh && ${{github.workspace}}/ficus-toolchain/build-all.sh sources
+
+      - name: Save toolchain sources
+        id: cache-toolchain-sources-save
+        uses: actions/cache/save@v4
+        env:
+          cache-name: cache-toolchain-sources
+        with:
+          path: |
+            ficus-toolchain/binutils-x86_64-ficus/source
+            ficus-toolchain/gcc-x86_64-ficus/source
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/binutils-x86_64-ficus/*.patch') }}-${{ hashFiles('ficus-toolchain/gcc-x86_64-ficus/*.patch') }}
+
       - name: Cache s1 toolchain
         id: cache-toolchain-s1
         uses: actions/cache/restore@v4
@@ -80,7 +106,7 @@ jobs:
         with:
           path: |
             toolchain/gcc-x86_64-ficus-prefix
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/binutils-x86_64-ficus/*.patch') }}-${{ hashFiles('ficus-toolchain/gcc-x86_64-ficus/*.patch') }}
 
       - if: ${{ steps.cache-toolchain-s1.outputs.cache-hit != 'true' }}
         name: Build ficus toolchain s1
@@ -94,7 +120,7 @@ jobs:
         with:
           path: |
             toolchain/gcc-x86_64-ficus-prefix
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/binutils-x86_64-ficus/*.patch') }}-${{ hashFiles('ficus-toolchain/gcc-x86_64-ficus/*.patch') }}
 
       - name: Cache s2 toolchain
         id: cache-toolchain-s2
@@ -105,7 +131,7 @@ jobs:
           path: |
             toolchain/gcc-x86_64-ficus-prefix
             sysroot
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/newlib-4.4.0.20231231/**') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/source/**') }}-${{ hashFiles('ficus-toolchain/binutils-x86_64-ficus/*.patch') }}-${{ hashFiles('ficus-toolchain/gcc-x86_64-ficus/*.patch') }}
 
       - if: ${{ steps.cache-toolchain-s2.outputs.cache-hit != 'true' }}
         name: Build ficus toolchain s2
@@ -120,7 +146,7 @@ jobs:
           path: |
             toolchain/gcc-x86_64-ficus-prefix
             sysroot
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/newlib-4.4.0.20231231/**') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('ficus-toolchain/*.sh') }}-${{ hashFiles('ficus-toolchain/newlib/source/**') }}-${{ hashFiles('ficus-toolchain/binutils-x86_64-ficus/*.patch') }}-${{ hashFiles('ficus-toolchain/gcc-x86_64-ficus/*.patch') }}
 
       - name: Tar the toolchain
         run: cd ${{github.workspace}} && tar -czvf toolchain-ficus.tar.xz toolchain sysroot

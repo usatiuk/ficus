@@ -23,11 +23,11 @@ rm -rf build
 mkdir -p build
 cd build
 
-pushd ../gcc-13.2.0/
+pushd ../source/
 ./contrib/download_prerequisites
 popd
 
-../gcc-13.2.0/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot="$PREFIX/../../sysroot" --disable-nls \
+../source/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot="$PREFIX/../../sysroot" --disable-nls \
     --enable-languages=c,c++ --with-newlib --disable-fixincludes --disable-libstdcxx-threads \
     --enable-version-specific-runtime-libs
 make -j$BUILD_PARALLEL all-gcc
